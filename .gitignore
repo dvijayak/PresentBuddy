@@ -1,0 +1,13 @@
+Makefile
+PresentBuddy.pro
+arm/*
+config.pri
+icon.png
+Precompiled.h
+translations/*
+x86/*
+.settings/*
+.device
+.project
+
+.cproject

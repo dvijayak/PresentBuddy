@@ -1,0 +1,126 @@
+[
+	{
+		"name" : "An Introduction to the Cloud",
+		"dateModified" : "2013-01-28T22:25:00" ,
+		"totalTime" : 
+			{
+				"minutes" : "10" ,
+				"seconds" : "0"
+			} ,
+		"slides": 
+			[
+				{					
+					"title" : "Cloud Computing",
+					"time":
+						{
+							"minutes" : "2" ,
+							"seconds" : "0"
+						}
+				} ,
+				{					
+					"title" : "Amazon Web Services",
+					"time":
+						{
+							"minutes" : "4" ,
+							"seconds" : "30"
+						}					
+				} ,
+				{					
+					"title" : "Success Story",
+					"time":
+						{
+							"minutes" : "2" ,
+							"seconds" : "30"
+						}
+				} ,
+				{					
+					"title" : "Conclusion",
+					"time":
+						{
+							"minutes" : "1" ,
+							"seconds" : "0"
+						}
+				}
+			]
+	} ,
+	{
+		"name" : "Extended Euclidean Algorithm",
+		"dateModified" : "2012-02-28T12:01:00" ,
+		"totalTime" : 
+			{
+				"minutes" : "12" ,
+				"seconds" : "0"
+			} ,		
+		"slides": 
+			[
+				{					
+					"title" : "Background",
+					"time":
+						{
+							"minutes" : "3" ,
+							"seconds" : "0"
+						}
+				} ,
+				{					
+					"title" : "Extended Euclidean Algorithm",
+					"time":
+						{
+							"minutes" : "5" ,
+							"seconds" : "0"
+						}					
+				} ,
+				{					
+					"title" : "Applications",
+					"time":
+						{
+							"minutes" : "4" ,
+							"seconds" : "0"
+						}
+				}
+			]
+	} ,
+	{
+		"name" : "Off-Loading Mobile Applications to the Cloud",
+		"dateModified" : "2013-04-01T12:00:45" ,
+		"totalTime" : 
+			{
+				"minutes" : "20" ,
+				"seconds" : "0"
+			} ,		
+		"slides": 
+			[
+				{					
+					"title" : "Introduction",
+					"time":
+						{
+							"minutes" : "4" ,
+							"seconds" : "0"
+						}
+				} ,
+				{					
+					"title" : "Code Off-Loading",
+					"time":
+						{
+							"minutes" : "7" ,
+							"seconds" : "30"
+						}					
+				} ,
+				{					
+					"title" : "Spectra",
+					"time":
+						{
+							"minutes" : "6" ,
+							"seconds" : "30"
+						}
+				} ,
+				{					
+					"title" : "Conclusion",
+					"time":
+						{
+							"minutes" : "2" ,
+							"seconds" : "0"
+						}
+				}
+			]
+	}
+]
