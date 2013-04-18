@@ -28,7 +28,7 @@ Page {
         // Custom back button
         backButton: ActionItem {
             title: "Back"
-            imageSource: "asset:///icons/ic_back.png"
+            imageSource: "asset:///icons/ic_previous.png"
             onTriggered: {
                 discardedChangesToast.show();
                 Qt.navigationPane.pop();
@@ -62,12 +62,7 @@ Page {
                     id: nameText
                     text: ""
                     hintText: "Presentation Name"
-                    verticalAlignment: VerticalAlignment.Center
-                    
-                    onCreationCompleted: {
-                        nameText.text = Qt.appUI.presentations[Qt.chosenPresentationIndex].name;
-                        console.log("HAHAH: " + Qt.chosenPresentationIndex);
-                    }
+                    verticalAlignment: VerticalAlignment.Center                    
                 }
             }
             
@@ -104,9 +99,9 @@ Page {
 
 		// Slide list visuals
 		Container {
-            attachedObjects: [
-                // TODO Should I have a data model here?
-            ]
+//            attachedObjects: [
+//                // TODO Should I have a data model here?
+//            ]
 
             ListView {
                 id: slideListView
@@ -117,6 +112,7 @@ Page {
                     ListItemComponent {
                         type: "item"
                         Container {
+                            id: listItemRoot
                             layout: StackLayout {
                                 orientation: LayoutOrientation.LeftToRight
                             }
