@@ -47,8 +47,8 @@ ApplicationUI::ApplicationUI(Application *app) : QObject(app)
     AbstractPane *root = qml->createRootObject<AbstractPane>();
     _root = root;
 
-    // Store a reference to the default data model defined in QML
-    _dataModel = root->findChild<GroupDataModel*>("groupDataModel");
+    // Store a reference to the main page Presentations data model defined in QML
+    _dataModel = root->findChild<GroupDataModel*>("mainDataModel");
 
 	// Create initial list of Presentation objects from the data file
     QString filePath(QDir::currentPath() + "/app/native/assets/presentations.json");
@@ -107,9 +107,9 @@ QVariantList ApplicationUI::presentationsQML() {
 /* Member Functions */
 
 /* Retrieves a list of Presentation objects from a QVariantList wrapper */
-PresentationList* ApplicationUI::unWrapListFromQVarList(QVariantList* qVarList) {
-	PresentationList* list = new PresentationList();
-	foreach (QVariant wrappedEntry, *qVarList) {
+PresentationList ApplicationUI::unWrapListFromQVarList(QVariantList qVarList) {
+	PresentationList list;
+	foreach (QVariant wrappedEntry, qVarList) {
 		QVariantMap entry = wrappedEntry.value<QVariantMap>();
 
 		// Name of the presentation
@@ -120,13 +120,11 @@ PresentationList* ApplicationUI::unWrapListFromQVarList(QVariantList* qVarList) 
 
 		// Total time required for the presentation
 		QVariantMap time = entry["totalTime"].value<QVariant>().value<QVariantMap>();
-		int* totalTime = new int[2];
-		totalTime[0] = time["minutes"].value<int>();
-		totalTime[1] = time["seconds"].value<int>();
+		int totalTime = (60*time["minutes"].value<int>()) + time["seconds"].value<int>();
 
 		// Slides of the presentation
 		QVariantList qVarSlideList = entry["slides"].value<QVariant>().value<QVariantList>();
-		SlideList* slideList = new SlideList();
+		SlideList slideList;
 		foreach (QVariant wrappedSlide, qVarSlideList) {
 			QVariantMap slideEntry = wrappedSlide.value<QVariantMap>();
 
@@ -135,17 +133,15 @@ PresentationList* ApplicationUI::unWrapListFromQVarList(QVariantList* qVarList) 
 
 			// Time allotted for the slide
 			QVariantMap time = slideEntry["time"].value<QVariant>().value<QVariantMap>();
-			int* slideTime = new int[2];
-			slideTime[0] = time["minutes"].value<int>();
-			slideTime[1] = time["seconds"].value<int>();
+			int slideTime = (60*time["minutes"].value<int>()) + time["seconds"].value<int>();
 
 			Slide* slide = new Slide(title, slideTime);
-			slideList->append(slide);
+			slideList.append(slide);
 		}
 
 		Presentation* presentation = new Presentation(name, totalTime, lastModified, slideList);
-//		presentation->print();
-		list->append(presentation);
+		presentation->print();
+		list.append(presentation);
 	}
 
 	return list;

@@ -7,8 +7,6 @@
 #include <bb/cascades/Application>
 #include <bb/cascades/AbstractPane>
 #include <bb/cascades/DataModel>
-
-#include <QDeclarativeListProperty>
 #include "Presentation.h"
 
 using namespace bb::cascades;
@@ -26,13 +24,12 @@ typedef QList< Presentation* > PresentationList;
 class ApplicationUI : public QObject
 {
     Q_OBJECT
-    Q_PROPERTY(DataModel* dataModel READ dataModel)
-    Q_PROPERTY(QVariantList presentations READ presentationsQML)
 private:
     Application* _app;
     AbstractPane* _root;
-    DataModel* _dataModel;
-    PresentationList* _presentations;
+    DataModel* _dataModel; // the current data model of the application
+    PresentationList _presentations;
+    Presentation* _activePresentation; // reference to the presentation currently being worked on
 
 public:
     /* Static Members */
@@ -48,23 +45,27 @@ public:
     Application* app();
     AbstractPane* root();
     DataModel* dataModel();
-    PresentationList* presentations();
+    PresentationList presentations();
+    Presentation* activePresentation();
 
     /* QVariant[List] wrappers for exposing to QML */
     QVariantList presentationsQML();
 
     /* Mutators */
-    // TODO
+    void setActivePresentation(Presentation* presentation);
 
     /* Member Functions */
-    PresentationList* unWrapListFromQVarList(QVariantList* qVarList);
-    PresentationList* getListFromJSON(QString filePath);
-    QVariantList* wrapListToQVarList(PresentationList* list);
-    QVariantList* wrapListToQVarList(SlideList* list);
-    void saveListToJSON(PresentationList* list, QString filePath);
+
+    Q_SLOT void goToPreparePage(); // TODO: Tie to signal of button clicked
+
+    PresentationList unWrapListFromQVarList(QVariantList qVarList);
+    PresentationList getListFromJSON(QString filePath);
+    QVariantList wrapListToQVarList(PresentationList list);
+    QVariantList wrapListToQVarList(SlideList list);
+    void saveListToJSON(PresentationList list, QString filePath);
     void updateDataModel();
-    void updateDataModel(PresentationList* list, DataModel* dataModel);
-    void updateDataModel(SlideList* list, DataModel* dataModel);
+    void updateDataModel(PresentationList list, DataModel* dataModel);
+    void updateDataModel(SlideList list, DataModel* dataModel);
 };
 
 Q_DECLARE_METATYPE(PresentationList);

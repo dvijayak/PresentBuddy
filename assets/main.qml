@@ -20,10 +20,7 @@ NavigationPane {
         Qt.pageDefinition = pageDefinition;
         Qt.preparePageDefinition = preparePageDefinition;
         Qt.navigationPane = navigationPane;        
-        Qt.DISPLAY_DATE_TIME_FORMAT = applicationUIPropertyMap.DISPLAY_DATE_TIME_FORMAT;
-        Qt.appUI = appUI;
-        
-        Qt.getMatchedPresentationIndex = navigationPane.getMatchedPresentationIndex;
+        Qt.DISPLAY_DATE_TIME_FORMAT = applicationUIPropertyMap.DISPLAY_DATE_TIME_FORMAT;        
 
 		// TODO Also, these QML components are created BEFORE the presentations list are read from JSON. Interesting!        
     }
@@ -33,11 +30,7 @@ NavigationPane {
     // Main Page (list of presentations)
     Page {
         id: mainPage
-        
-        // Initialize this page, including its data model
-        onCreationCompleted: {
-            // TODO Apparently a page is created BEFORE the navigationPane completes creation
-        }
+        objectName: "mainPage"        
         
         actions: [
             ActionItem {
@@ -53,13 +46,11 @@ NavigationPane {
                 // to specify a value for the objectName property,
                 // which is used to access the model from C++.
                 GroupDataModel {
-                    id: groupDataModel
-                    objectName: "groupDataModel"
+                    id: mainDataModel
+                    objectName: "mainDataModel"
                     grouping: ItemGrouping.None
-                    sortedAscending: false // Latest objects to appear first
-
-                    // Sort the data first by last name, then by first
-                    // name
+                    sortedAscending: false // Latest modified presentations to appear first
+                    
                     sortingKeys: [ "dateModified" ]
                 }
             ]			
@@ -70,7 +61,7 @@ NavigationPane {
 
                 // Associate the GroupDataModel from the attached objects
                 // list with this ListView
-                dataModel: groupDataModel
+                dataModel: mainDataModel
 
                 listItemComponents: [
                     // Use a ListItemComponent to define the appearance of
@@ -98,22 +89,7 @@ NavigationPane {
                                 }                                
                                 Button {
                                     id: performButton                                    
-//                                    text: "Perform"                                    
-                                    //                                imageSource: "asset:///icons/ic_delete.png"
-                                    
-                                    onCreationCompleted: {
-                                        var presentations = Qt.appUI.presentations;
-//                                        var index = 0;
-//                                        for (var i = 0; i < presentations.length; i++) {
-//                                            if (presentations[i].name == listItemRoot.ListItem.data.name) {
-//                                                index = i;
-//                                                break;
-//                                            }
-//                                        }
-//                                        performButton.text = presentations[index].name;
-                                        var name = listItemRoot.ListItem.data.name;
-                                        performButton.text = presentations[Qt.getMatchedPresentationIndex(name)].name;                                        
-                                    }
+                                    text: "Perform"
                                     
                                     onClicked: {
                                         var page = Qt.pageDefinition.createObject();
@@ -122,23 +98,7 @@ NavigationPane {
                                 }
                                 Button {
                                     id: practiseButton
-                                    text: "Practise"
-                                    //                                imageSource: "asset:///icons/ic_delete.png"
-                                    onClicked: {
-                                        var presentations = Qt.appUI.presentations;
-                                        for (var i = 0; i < presentations.length; i++) {
-                                            var output = "Name: " + presentations[i].name + ", Total Time: " + presentations[i].totalTime.minutes + " mins "  
-                                            + presentations[i].totalTime.seconds + " secs " + ", Last Modified: " + presentations[i].dateModified;
-                                            var slides = presentations[i].slides;
-                                            output += " Slides: [";
-                                            for (var j = 0; j < slides.length; j++) {
-                                                output += "Title: " + slides[j].title + ", Time: " + slides[j].time.minutes + " mins " + slides[j].time.seconds + " secs ";
-                                                output += " | ";
-                                            }
-                                            output += "]";
-                                            console.log(output);
-                                        }
-                                    }
+                                    text: "Practise"                                                                    
                                 }
                                 Button {
                                     id: previewButton
@@ -150,9 +110,7 @@ NavigationPane {
                                     imageSource: "asset:///icons/ic_edit.png"
                                     
                                     onClicked: {                                        
-                                        var page = Qt.preparePageDefinition.createObject();
-                                        var name = listItemRoot.ListItem.data.name;
-                                        Qt.chosenPresentationIndex = Qt.getMatchedPresentationIndex(name);
+                                        var page = Qt.preparePageDefinition.createObject();                                        
                                         Qt.navigationPane.push(page);                                        
                                     }
                                 }
@@ -166,38 +124,12 @@ NavigationPane {
                         }
                     }
                 ]
-
-//                // Override the itemType() function to return the proper type
-//                // for each item in the list. Because a GroupDataModel has only
-//                // two levels, use the index path to determine whether the item
-//                // is a header item or a list item.
-//                function itemType(data, indexPath) {
-//                    if (indexPath.length == 1) {
-//                        // If the index path contains a single integer, the item
-//                        // is a "header" type item
-//                        return "header";
-//                    } else {
-//                        // If the index path contains more than one integer, the
-//                        // item is a "listItem" type item
-//                        return "listItem";
-//                    }
-//                }
             } // end of ListView
         } // end of Container            
     }    // end of Main Page
+    
+    // Destroy page after leaving it in order to avoid memory leaks
     onPopTransitionEnded: { 
         page.destroy(); 
-    }
-    
-    function getMatchedPresentationIndex(name) {
-        var presentations = Qt.appUI.presentations;
-        for (var i = 0; i < presentations.length; i++) {
-            if (presentations[i].name == name) {
-                console.log("HAHAHAHA " + i);
-                return i;
-            }
-        }
-        console.log("HAHAHAHA " + i);
-        return -1;
-    }
+    }    
 }

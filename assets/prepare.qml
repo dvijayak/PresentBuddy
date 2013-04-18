@@ -2,8 +2,7 @@ import bb.cascades 1.0
 import bb.system 1.0
 
 Page {
-    id: preparePage
-    
+    id: preparePage    
     objectName: "preparePage"
     
     actions: [
@@ -11,19 +10,7 @@ Page {
             title: "Done"
             imageSource: "asset:///icons/ic_done.png"
             ActionBar.placement: ActionBarPlacement.OnBar            
-            onTriggered: {
-                var presentations = Qt.appUI.presentations;
-                for (var i = 0; i < presentations.length; i ++) {
-                    var output = "Name: " + presentations[i].name + ", Total Time: " + presentations[i].totalTime.minutes + " mins " + presentations[i].totalTime.seconds + " secs " + ", Last Modified: " + presentations[i].dateModified;
-                    var slides = presentations[i].slides;
-                    output += " Slides: [";
-                    for (var j = 0; j < slides.length; j ++) {
-                        output += "Title: " + slides[j].title + ", Time: " + slides[j].time.minutes + " mins " + slides[j].time.seconds + " secs ";
-                        output += " | ";
-                    }
-                    output += "]";
-                    console.log(output);
-                }
+            onTriggered: {                
                 // TODO Save all changes to the respective presentation object
                 savedChangesToast.show();
                 Qt.navigationPane.pop();                                
@@ -55,14 +42,7 @@ Page {
         }
     }
 
-    content: Container {
-        attachedObjects: [
-            GroupDataModel {
-                id: slideDataModel
-                objectName: "slideDataModel"
-                grouping: ItemGrouping.None
-            }
-        ]
+    content: Container {        
         
         // Presentation MetaData
         Container {
@@ -122,78 +102,86 @@ Page {
 
         Divider {}
 
-        ListView {
-            id: slideListView
-            objectName: "slideListView"
-            dataModel: slideDataModel
+		// Slide list visuals
+		Container {
+            attachedObjects: [
+                // TODO Should I have a data model here?
+            ]
 
-            listItemComponents: [
-                ListItemComponent {
-                    type: "item"
-                    Container {
-                        layout: StackLayout {
-                            orientation: LayoutOrientation.LeftToRight                        
-                        }
-                        // Image View/Slide Number
-                        Container {
-                            ImageView {
-                                imageSource: "asset:///images/sun.png"
-                                verticalAlignment: VerticalAlignment.Fill
-                                horizontalAlignment: HorizontalAlignment.Fill
-                            }
-                        }
-                        // Slide Data
+            ListView {
+                id: slideListView
+                objectName: "slideListView"
+                // TODO Might have to manually declare data model
+
+                listItemComponents: [
+                    ListItemComponent {
+                        type: "item"
                         Container {
                             layout: StackLayout {
-                                orientation: LayoutOrientation.TopToBottom
+                                orientation: LayoutOrientation.LeftToRight
                             }
-                            // Slide title
+                            // Image View/Slide Number
                             Container {
-                                layout: StackLayout {
-                                    orientation: LayoutOrientation.LeftToRight
-                                }
-                                Label {
-                                    text: "Title"
-                                    verticalAlignment: VerticalAlignment.Center
-                                }
-                                TextField {
-                                    hintText: "Slide title/heading"
-                                    verticalAlignment: VerticalAlignment.Center
-                                }
-                            }
-                            // Slide time allocation
-                            Container {
-                                layout: StackLayout {
-                                    orientation: LayoutOrientation.LeftToRight
-                                }
-                                Label {
-                                    text: "Title"
-                                    verticalAlignment: VerticalAlignment.Center
-                                }
-                                Slider {
-                                    id: slideTimeSlider	            
+                                ImageView {
+                                    imageSource: "asset:///images/sun.png"
+                                    verticalAlignment: VerticalAlignment.Fill
                                     horizontalAlignment: HorizontalAlignment.Fill
-                                    layoutProperties: StackLayoutProperties {
-                                        spaceQuota: 1.0
+                                }
+                            }
+                            // Slide Data
+                            Container {
+                                layout: StackLayout {
+                                    orientation: LayoutOrientation.TopToBottom
+                                }
+                                // Slide title
+                                Container {
+                                    layout: StackLayout {
+                                        orientation: LayoutOrientation.LeftToRight
                                     }
-                                    value: 600.0
-
-                                    fromValue: 0.0
-                                    toValue: 7200.0
-                                    
-                                    onCreationCompleted: {
-                                        var maxValue = totalTimeSlider.value;                                        
+                                    Label {
+                                        text: "Title"
+                                        verticalAlignment: VerticalAlignment.Center
                                     }
+                                    TextField {
+                                        hintText: "Slide title/heading"
+                                        verticalAlignment: VerticalAlignment.Center
+                                    }
+                                }
+                                // Slide time allocation
+                                Container {
+                                    layout: StackLayout {
+                                        orientation: LayoutOrientation.LeftToRight
+                                    }
+                                    Label {
+                                        text: "Title"
+                                        verticalAlignment: VerticalAlignment.Center
+                                    }
+                                    Slider {
+                                        id: slideTimeSlider
+                                        horizontalAlignment: HorizontalAlignment.Fill
+                                        layoutProperties: StackLayoutProperties {
+                                            spaceQuota: 1.0
+                                        }
+                                        value: 600.0
 
-                                    onImmediateValueChanged: {}
+                                        fromValue: 0.0
+                                        toValue: 7200.0
 
+                                        onCreationCompleted: {
+                                            var maxValue = totalTimeSlider.value;
+                                        }
+
+                                        onImmediateValueChanged: {
+                                        }
+
+                                    }
                                 }
                             }
                         }
-                    }
-                } // end of ListItemComponent
-            ] // end of listItemComponents
-        } // end of ListView
-        
-    }
+                    } // end of ListItemComponent
+                ] // end of listItemComponents
+            } // end of ListView
+        }        
+		
+    } // End of content Container
 }
