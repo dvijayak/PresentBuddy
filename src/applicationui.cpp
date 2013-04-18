@@ -125,13 +125,17 @@ void ApplicationUI::goToPage(bb::cascades::Page* page) {
 		qDebug() << "Going to prepare page...";
 
 		// TODO Set the presentation that needs to be prepared
-		_activePresentation = _presentations[0];
+		_activePresentation = _presentations[1];
 
 		// Create a new QListDataModel, fill it with the slides and set it to the list view in the page
-		QListDataModel<Slide*>* dataModel = new QListDataModel<Slide*>();
-		dataModel->append(_activePresentation->slides());
+//		QListDataModel<Slide*>* dataModel = new QListDataModel<Slide*>();
+		QVariantListDataModel* dataModel = new QVariantListDataModel();
+		QVariantList qVarList = this->wrapListToQVarList(_activePresentation->slides());
+		dataModel->append(qVarList);
+//		dataModel->append(_activePresentation->slides());
 		ListView* listView = page->findChild<ListView*>("slideListView");
 		listView->setDataModel(dataModel);
+		dataModel->setParent(page); // Attaching this to the Page allows smooth destruction, i.e. when the page is destroyed, the model is also destroyed
 	}
 	else if (pageName == "performPage") {
 		qDebug() << "Going to perform page...";
@@ -140,11 +144,11 @@ void ApplicationUI::goToPage(bb::cascades::Page* page) {
 	else if (pageName == "mainPage") {
 		qDebug() << "Returning to main page...";
 
-		// If required, clear all slide data models and restore back to original data model
-		if (dynamic_cast<QListDataModel<Slide*> *>(_dataModel) != 0) {
-			delete _dataModel;
-			_dataModel = this->getMainDataModel();
-		}
+//		// TODO If required, clear all slide data models and restore back to original data model
+//		if (dynamic_cast<QListDataModel<Slide*> *>(_dataModel) != 0) {
+//			delete _dataModel;
+//			_dataModel = this->getMainDataModel();
+//		}
 
 		qDebug() << _dataModel;
 	}

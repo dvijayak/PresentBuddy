@@ -108,9 +108,9 @@ Page {
                 objectName: "slideListView"
                 // TODO Might have to manually declare data model
 
-                listItemComponents: [
+                listItemComponents: [                    
                     ListItemComponent {
-                        type: "item"
+                        type: ""
                         Container {
                             id: listItemRoot
                             layout: StackLayout {
@@ -139,6 +139,7 @@ Page {
                                         verticalAlignment: VerticalAlignment.Center
                                     }
                                     TextField {
+                                        text: ListItemData.title
                                         hintText: "Slide title/heading"
                                         verticalAlignment: VerticalAlignment.Center
                                     }
@@ -149,8 +150,21 @@ Page {
                                         orientation: LayoutOrientation.LeftToRight
                                     }
                                     Label {
-                                        text: "Title"
+                                        text: "Time"
                                         verticalAlignment: VerticalAlignment.Center
+                                    }
+                                    Label {
+                                        id: timeValueLabel
+                                        preferredWidth: 140
+                                        maxWidth: 140
+                                        textStyle.color: Color.Cyan
+                                        textStyle.textAlign: TextAlign.Left
+
+                                        onCreationCompleted: {
+                                            var minute = Math.floor(slideTimeSlider.immediateValue/60);
+                                            var second = Math.floor(slideTimeSlider.immediateValue%60);
+                                            timeValueLabel.text = minute + ":" + second;                                            
+                                        }                                        
                                     }
                                     Slider {
                                         id: slideTimeSlider
@@ -158,20 +172,17 @@ Page {
                                         layoutProperties: StackLayoutProperties {
                                             spaceQuota: 1.0
                                         }
-                                        value: 600.0
-
-                                        fromValue: 0.0
-                                        toValue: 7200.0
-
-                                        onCreationCompleted: {
-                                            var maxValue = totalTimeSlider.value;
-                                        }
-
+                                        value: (60*ListItemData.time.minutes) + ListItemData.time.seconds
+                                        fromValue: 1.0
+                                        toValue: 7200.0                                        
                                         onImmediateValueChanged: {
+                                            var minute = Math.floor(immediateValue/60);                                                                                    
+                                            var second = Math.floor(immediateValue%60);                                            
+                                            timeValueLabel.text = minute + ":" + second;
                                         }
 
                                     }
-                                }
+                                }                                
                             }
                         }
                     } // end of ListItemComponent
