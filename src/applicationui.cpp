@@ -124,8 +124,13 @@ void ApplicationUI::goToPage(bb::cascades::Page* page) {
 	if (pageName == "preparePage") {
 		qDebug() << "Going to prepare page...";
 
-		// TODO Set the presentation that needs to be prepared
-		_activePresentation = _presentations[1];
+		// Set the presentation that needs to be prepared
+		foreach (Presentation* presentation, _presentations) {
+			if (presentation->name() == _root->property("activePresentation").value<QString>()) {
+				_activePresentation = presentation;
+				break;
+			}
+		}
 
 		// Create a new QVariantListDataModel, fill it with the slides (wrapped as QVariant objects) and set it to the list view in the page
 		QVariantListDataModel* dataModel = new QVariantListDataModel();

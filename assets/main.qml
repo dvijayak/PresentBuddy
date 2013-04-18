@@ -2,6 +2,7 @@ import bb.cascades 1.0
 
 NavigationPane {    
     id: navigationPane
+    property string activePresentation // Expose the active presentation to C++
 
     attachedObjects: [
         // Attach additional pages of the application dynamically
@@ -20,7 +21,8 @@ NavigationPane {
         Qt.pageDefinition = pageDefinition;
         Qt.preparePageDefinition = preparePageDefinition;
         Qt.navigationPane = navigationPane;        
-        Qt.DISPLAY_DATE_TIME_FORMAT = applicationUIPropertyMap.DISPLAY_DATE_TIME_FORMAT;        
+        Qt.DISPLAY_DATE_TIME_FORMAT = applicationUIPropertyMap.DISPLAY_DATE_TIME_FORMAT;
+//        Qt.activePresentation = navigationPane.activePresentation 
 
 		// TODO Also, these QML components are created BEFORE the presentations list are read from JSON. Interesting!        
     }
@@ -109,7 +111,11 @@ NavigationPane {
                                     objectName: "editButton"                                    
                                     imageSource: "asset:///icons/ic_edit.png"
                                     
-                                    onClicked: {                                        
+                                    onClicked: {
+                                        // Set the active presentation to be the one that was selected                                        
+                                        Qt.navigationPane.activePresentation = listItemRoot.ListItem.data.name;
+
+                                        // Push the prepare page on to the stack (go to the prepare page)
                                         var page = Qt.preparePageDefinition.createObject();                                        
                                         Qt.navigationPane.push(page);                                        
                                     }
