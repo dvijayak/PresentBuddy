@@ -63,10 +63,6 @@ public:
 
 	/* Member Functions */
 
-//	// Replace the slide at the specified index with the new slide
-//	void setSlide(int index, Slide* slide);
-//	// Insert (append) the newly created slide into the presentation
-//	Q_INVOKABLE void appendSlide (Slide* slide);
 	Q_INVOKABLE void print();
 
 signals:

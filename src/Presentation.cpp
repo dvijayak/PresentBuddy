@@ -112,16 +112,6 @@ void Presentation::updateLastModified() {
 
 /* Member Functions */
 
-///* Replace the slide at the specified index with the new slide */
-//void Presentation::setSlide(int index, Slide* slide) {
-//
-//}
-//
-///* Insert (append) the newly created slide into the presentation */
-//void Presentation::appendSlide(Slide* slide) {
-//	_slides.append(slide);
-//}
-
 /* Print the presentation to stdout */
 void Presentation::print() {
 	qDebug() << "---xx---";
