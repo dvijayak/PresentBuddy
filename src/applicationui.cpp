@@ -15,8 +15,6 @@
 #include <QVector>
 #include <QDebug>
 
-#include "PrepareUI.h"
-
 using namespace bb::cascades;
 using namespace bb::data;
 using namespace bb::javelind;
