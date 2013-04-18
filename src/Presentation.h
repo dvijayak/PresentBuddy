@@ -9,6 +9,8 @@
 #define PRESENTATION_H_
 
 #include <QObject>
+#include <QList>
+#include <QVariant>
 #include <QDateTime>
 #include <QMetaType>
 #include "Slide.h"

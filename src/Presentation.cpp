@@ -7,6 +7,7 @@
 
 #include <QDebug>
 #include <QDateTime>
+#include "applicationui.hpp"
 #include "Presentation.h"
 #include "Slide.h"
 
@@ -35,7 +36,7 @@ Presentation::Presentation() {
 Presentation::Presentation(QString name, int totalTime) {
 	_name = name;
 	_totalTime = totalTime;
-	_lastModified = lastModified;
+	_lastModified = QDateTime::currentDateTime();
 
 	this->initialize();
 }
@@ -43,7 +44,7 @@ Presentation::Presentation(QString name, int totalTime) {
 Presentation::Presentation(QString name, int totalTime, SlideList slides) {
 	_name = name;
 	_totalTime = totalTime;
-	_lastModified = lastModified;
+	_lastModified = QDateTime::currentDateTime();
 	_slides = slides;
 
 	this->initialize();
@@ -77,7 +78,7 @@ SlideList Presentation::slides() {
 QVariantList Presentation::slidesQML() {
 	QVariantList qVarList;
 	foreach (Slide* slide, _slides) {
-		qVarList.append(QVariant(slide));
+		qVarList.append(QVariant::fromValue(slide));
 	}
 	return qVarList;
 }
@@ -106,7 +107,7 @@ void Presentation::setSlides(SlideList slides) {
 
 void Presentation::updateLastModified() {
 	_lastModified = QDateTime::currentDateTime();
-	emit lastModifiedChanged(); // TODO Seems like an unnecessary signal
+	emit lastModifiedChanged(_lastModified); // TODO Seems like an unnecessary signal
 }
 
 /* Member Functions */
@@ -128,7 +129,7 @@ void Presentation::print() {
 	qDebug() << "--------";
 	qDebug() << "Name = " << _name;
 	qDebug() << "Total Time = " << (int)(_totalTime/60) << ":" << _totalTime%60; // Display a time in seconds as minutes:seconds
-	qDebug() << "Last Modified = " << _lastModified.toString(Qt::ISODate);
+	qDebug() << "Last Modified = " << _lastModified.toString(ApplicationUI::DISPLAY_DATE_TIME_FORMAT);
 	qDebug() << "Slides = ";
 	foreach (Slide* slide, _slides) {
 		slide->print();

@@ -41,7 +41,7 @@ ApplicationUI::ApplicationUI(Application *app) : QObject(app)
     applicationUIPropertyMap->insert("WRITE_DATE_TIME_FORMAT", QVariant(WRITE_DATE_TIME_FORMAT));
     applicationUIPropertyMap->insert("DISPLAY_DATE_TIME_FORMAT", QVariant(DISPLAY_DATE_TIME_FORMAT));
     qml->setContextProperty("applicationUIPropertyMap", applicationUIPropertyMap);
-    qml->setContextProperty("appUI", this);
+//    qml->setContextProperty("appUI", this);
 
     // Create root object for the UI
     AbstractPane *root = qml->createRootObject<AbstractPane>();
@@ -96,14 +96,47 @@ PresentationList ApplicationUI::presentations() {
 	return _presentations;
 }
 
-QVariantList ApplicationUI::presentationsQML() {
-	return this->wrapListToQVarList(_presentations);
-}
+//QVariantList ApplicationUI::presentationsQML() {
+//	return this->wrapListToQVarList(_presentations);
+//}
 
 /* Mutators */
 // TODO
 
 /* Member Functions */
+
+/* Application Logic */
+
+/* Slots */
+
+void ApplicationUI::goBackToMainPage() {
+	// TODO Change the root object back to the main page
+
+	// TODO Clear all slide data models
+}
+
+void ApplicationUI::goToPreparePage(bb::cascades::Page* page) {
+	// Change the root object to the new page
+	_root = page;
+
+	// TODO Set the presentation that needs to be prepared
+
+	// Create a new QListDataModel and set it to the list view in the page
+	QListDataModel<Presentation*>* dataModel = new QListDataModel<Presentation*>();
+	ListView* listView = _root->findChild<ListView*>("slideListView");
+	listView->setDataModel(dataModel);
+	// TODO Remember to delete the model on page destroy
+}
+
+
+
+
+
+
+
+
+
+/* Working with data */
 
 /* Retrieves a list of Presentation objects from a QVariantList wrapper */
 PresentationList ApplicationUI::unWrapListFromQVarList(QVariantList qVarList) {
@@ -138,7 +171,7 @@ PresentationList ApplicationUI::unWrapListFromQVarList(QVariantList qVarList) {
 			slideList.append(slide);
 		}
 
-		Presentation* presentation = new Presentation(name, totalTime, lastModified, slideList);
+		Presentation* presentation = new Presentation(name, totalTime, slideList);
 		presentation->print();
 		list.append(presentation);
 	}

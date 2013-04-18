@@ -6,6 +6,7 @@
 #include <QList>
 #include <bb/cascades/Application>
 #include <bb/cascades/AbstractPane>
+#include <bb/cascades/Page>
 #include <bb/cascades/DataModel>
 #include "Presentation.h"
 
@@ -49,14 +50,15 @@ public:
     Presentation* activePresentation();
 
     /* QVariant[List] wrappers for exposing to QML */
-    QVariantList presentationsQML();
+//    QVariantList presentationsQML();
 
     /* Mutators */
     void setActivePresentation(Presentation* presentation);
 
     /* Member Functions */
 
-    Q_SLOT void goToPreparePage(); // TODO: Tie to signal of button clicked
+    Q_SLOT void goBackToMainPage(); // TODO: Tie to signal of navigation pane pop OR to page destroy (perhaps create separate functions for cleaning the specific pages
+    Q_SLOT void goToPreparePage(bb::cascades::Page* page); // TODO: Tie to signal of navigation pane push // Cascades data types need to be fully qualified
 
     PresentationList unWrapListFromQVarList(QVariantList qVarList);
     PresentationList getListFromJSON(QString filePath);
