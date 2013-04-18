@@ -6,6 +6,7 @@ import my.library 1.0
 // Performing page
 Page {
     id: performPage
+    objectName: "performPage"
     
 //    property alias containerBackground: container.background
 	onCreationCompleted: {

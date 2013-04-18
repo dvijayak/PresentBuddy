@@ -63,9 +63,9 @@ ApplicationUI::ApplicationUI(Application *app) : QObject(app)
 	// Connect signals with slots
 	bool res;
 	NavigationPane* mRoot = (NavigationPane*)_root; // Need to create this separately in order to properly connect
-	res = QObject::connect(mRoot, SIGNAL(popTransitionEnded(bb::cascades::Page*)), this, SLOT(returnToMainPage(bb::cascades::Page*)));
-	Q_ASSERT(res);
-	res = QObject::connect(mRoot, SIGNAL(pushTransitionEnded(bb::cascades::Page*)), this, SLOT(goToPreparePage(bb::cascades::Page*)));
+//	res = QObject::connect(mRoot, SIGNAL(popTransitionEnded(bb::cascades::Page*)), this, SLOT(returnToMainPage(bb::cascades::Page*)));
+//	Q_ASSERT(res);
+	res = QObject::connect(mRoot, SIGNAL(topChanged(bb::cascades::Page*)), this, SLOT(goToPage(bb::cascades::Page*)));
 	Q_ASSERT(res);
 
 	// Set created root object as a scene
@@ -117,29 +117,36 @@ DataModel* ApplicationUI::getMainDataModel() {
 
 /* Slots */
 
-void ApplicationUI::returnToMainPage(bb::cascades::Page* page) {
-	qDebug() << "Returning to main page...";
-	// TODO Change the root object back to the main page // Might not need this (see goToPreparePage)
+void ApplicationUI::goToPage(bb::cascades::Page* page) {
+	Q_ASSERT(page != 0);
+	QString pageName = page->objectName();
 
-	// Clear all slide data models and restore back to original data model
-	delete _dataModel;
-	_dataModel = this->getMainDataModel();
-
-	qDebug() << _dataModel;
-}
-
-void ApplicationUI::goToPreparePage(bb::cascades::Page* page) {
-	if (page->objectName() == "preparePage") {
+	if (pageName == "preparePage") {
 		qDebug() << "Going to prepare page...";
-		// TODO Change the root object to the new page // Might not need this
 
 		// TODO Set the presentation that needs to be prepared
+		_activePresentation = _presentations[0];
 
-		// TODO Create a new QListDataModel and set it to the list view in the page
-		QListDataModel<Presentation*>* dataModel = new QListDataModel<Presentation*>();
+		// Create a new QListDataModel, fill it with the slides and set it to the list view in the page
+		QListDataModel<Slide*>* dataModel = new QListDataModel<Slide*>();
+		dataModel->append(_activePresentation->slides());
 		ListView* listView = page->findChild<ListView*>("slideListView");
 		listView->setDataModel(dataModel);
-		_dataModel = dataModel;
+	}
+	else if (pageName == "performPage") {
+		qDebug() << "Going to perform page...";
+	}
+	// Returning to the main page
+	else if (pageName == "mainPage") {
+		qDebug() << "Returning to main page...";
+
+		// If required, clear all slide data models and restore back to original data model
+		if (dynamic_cast<QListDataModel<Slide*> *>(_dataModel) != 0) {
+			delete _dataModel;
+			_dataModel = this->getMainDataModel();
+		}
+
+		qDebug() << _dataModel;
 	}
 }
 

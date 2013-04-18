@@ -63,9 +63,6 @@ public:
 
     DataModel* getMainDataModel();
 
-    Q_SLOT void returnToMainPage(bb::cascades::Page* page); // TODO: Tie to signal of navigation pane pop OR to page destroy (perhaps create separate functions for cleaning the specific pages
-    Q_SLOT void goToPreparePage(bb::cascades::Page* page); // Cascades data types need to be fully qualified
-
     PresentationList unWrapListFromQVarList(QVariantList qVarList);
     PresentationList getListFromJSON(QString filePath);
     QVariantList wrapListToQVarList(PresentationList list);
@@ -74,6 +71,9 @@ public:
     void updateDataModel();
     void updateDataModel(PresentationList list, DataModel* dataModel);
     void updateDataModel(SlideList list, DataModel* dataModel);
+
+public slots:
+	void goToPage(bb::cascades::Page* page); // Cascades data types need to be fully qualified
 };
 
 Q_DECLARE_METATYPE(PresentationList);
