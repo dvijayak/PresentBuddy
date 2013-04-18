@@ -77,18 +77,36 @@ Page {
                     text: "Total Time"
                     verticalAlignment: VerticalAlignment.Center
                 }
+                Label {
+                    id: totalTimeValueLabel
+                    preferredWidth: 120
+                    maxWidth: 120
+                    textStyle.color: Color.Cyan
+                    textStyle.textAlign: TextAlign.Left
+
+                    onCreationCompleted: {
+                        var value = Math.floor(totalTimeSlider.immediateValue);
+                        var minute = Math.floor(value / 60);
+                        var second = Math.floor(value % 60);
+                        totalTimeValueLabel.text = minute + ":" + second;
+                    }
+                }
                 Slider {
                     id: totalTimeSlider
                     property double maxTimeRemaining; // The maximum amount of time remaining that can be allocated to a slide
                     value: 600.0
-                    fromValue: 0.0
-                    toValue: 7200.0
+                    fromValue: 1.0
+                    toValue: 3600.0
                     horizontalAlignment: HorizontalAlignment.Fill
                     layoutProperties: StackLayoutProperties {
                         spaceQuota: 1.0
                     }
                     
-                    onImmediateValueChanged: {                     
+                    onImmediateValueChanged: {
+                        var value = Math.floor(immediateValue);
+                        var minute = Math.floor(value / 60);
+                        var second = Math.floor(value % 60);
+                        totalTimeValueLabel.text = minute + ":" + second;
                     }
 
                 }
@@ -161,9 +179,10 @@ Page {
                                         textStyle.textAlign: TextAlign.Left
 
                                         onCreationCompleted: {
-                                            var minute = Math.floor(slideTimeSlider.immediateValue/60);
-                                            var second = Math.floor(slideTimeSlider.immediateValue%60);
-                                            timeValueLabel.text = minute + ":" + second;                                            
+                                            var value = Math.floor(slideTimeSlider.immediateValue);                                            
+                                            var minute = Math.floor(value / 60);
+                                            var second = Math.floor(value % 60);
+                                            timeValueLabel.text = minute + ":" + second;
                                         }                                        
                                     }
                                     Slider {
@@ -174,10 +193,11 @@ Page {
                                         }
                                         value: (60*ListItemData.time.minutes) + ListItemData.time.seconds
                                         fromValue: 1.0
-                                        toValue: 7200.0                                        
+                                        toValue: 3600.0                                        
                                         onImmediateValueChanged: {
-                                            var minute = Math.floor(immediateValue/60);                                                                                    
-                                            var second = Math.floor(immediateValue%60);                                            
+                                            var value = Math.floor(immediateValue);
+                                            var minute = Math.floor(value/60);                                                                                    
+                                            var second = Math.floor(value%60);                                            
                                             timeValueLabel.text = minute + ":" + second;
                                         }
 
