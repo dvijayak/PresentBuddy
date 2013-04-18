@@ -33,18 +33,18 @@ Presentation::Presentation() {
 	this->initialize();
 }
 
-Presentation::Presentation(QString name, int totalTime) {
+Presentation::Presentation(QString name, int totalTime, QDateTime lastModified) {
 	_name = name;
 	_totalTime = totalTime;
-	_lastModified = QDateTime::currentDateTime();
+	_lastModified = lastModified;
 
 	this->initialize();
 }
 
-Presentation::Presentation(QString name, int totalTime, SlideList slides) {
+Presentation::Presentation(QString name, int totalTime, QDateTime lastModified, SlideList slides) {
 	_name = name;
 	_totalTime = totalTime;
-	_lastModified = QDateTime::currentDateTime();
+	_lastModified = lastModified;
 	_slides = slides;
 
 	this->initialize();

@@ -40,8 +40,8 @@ public:
 	/* Constructors/Destructors */
 
 	Presentation();
-	Presentation(QString name, int totalTime);
-	Presentation(QString name, int totalTime, SlideList slides);
+	Presentation(QString name, int totalTime, QDateTime lastModified);
+	Presentation(QString name, int totalTime, QDateTime lastModified, SlideList slides);
 	virtual ~Presentation();
 
 	/* Accessors */

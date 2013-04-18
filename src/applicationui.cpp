@@ -171,7 +171,7 @@ PresentationList ApplicationUI::unWrapListFromQVarList(QVariantList qVarList) {
 			slideList.append(slide);
 		}
 
-		Presentation* presentation = new Presentation(name, totalTime, slideList);
+		Presentation* presentation = new Presentation(name, totalTime, lastModified, slideList);
 		presentation->print();
 		list.append(presentation);
 	}
