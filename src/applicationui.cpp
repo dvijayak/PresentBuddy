@@ -2,6 +2,7 @@
 #include "applicationui.hpp"
 
 #include <bb/cascades/QmlDocument>
+#include <bb/cascades/NavigationPane>
 #include <bb/cascades/Page>
 #include <bb/cascades/ListView>
 #include <bb/cascades/DataModel>
@@ -48,7 +49,7 @@ ApplicationUI::ApplicationUI(Application *app) : QObject(app)
     _root = root;
 
     // Store a reference to the main page Presentations data model defined in QML
-    _dataModel = root->findChild<GroupDataModel*>("mainDataModel");
+    _dataModel = this->getMainDataModel();
 
 	// Create initial list of Presentation objects from the data file
     QString filePath(QDir::currentPath() + "/app/native/assets/presentations.json");
@@ -60,9 +61,12 @@ ApplicationUI::ApplicationUI(Application *app) : QObject(app)
 	this->updateDataModel();
 
 	// Connect signals with slots
-//	bool res = QObject::connect(preparePage, SIGNAL(creationCompleted()), this, SLOT(loadPreparePage()));
-//	Q_ASSERT(res);
-//	Q_UNUSED(res);
+	bool res;
+	NavigationPane* mRoot = (NavigationPane*)_root; // Need to create this separately in order to properly connect
+	res = QObject::connect(mRoot, SIGNAL(popTransitionEnded(bb::cascades::Page*)), this, SLOT(returnToMainPage(bb::cascades::Page*)));
+	Q_ASSERT(res);
+	res = QObject::connect(mRoot, SIGNAL(pushTransitionEnded(bb::cascades::Page*)), this, SLOT(goToPreparePage(bb::cascades::Page*)));
+	Q_ASSERT(res);
 
 	// Set created root object as a scene
     app->setScene(root);
@@ -107,25 +111,36 @@ PresentationList ApplicationUI::presentations() {
 
 /* Application Logic */
 
+DataModel* ApplicationUI::getMainDataModel() {
+	return _root->findChild<GroupDataModel*>("mainDataModel");
+}
+
 /* Slots */
 
-void ApplicationUI::goBackToMainPage() {
-	// TODO Change the root object back to the main page
+void ApplicationUI::returnToMainPage(bb::cascades::Page* page) {
+	qDebug() << "Returning to main page...";
+	// TODO Change the root object back to the main page // Might not need this (see goToPreparePage)
 
-	// TODO Clear all slide data models
+	// Clear all slide data models and restore back to original data model
+	delete _dataModel;
+	_dataModel = this->getMainDataModel();
+
+	qDebug() << _dataModel;
 }
 
 void ApplicationUI::goToPreparePage(bb::cascades::Page* page) {
-	// Change the root object to the new page
-	_root = page;
+	if (page->objectName() == "preparePage") {
+		qDebug() << "Going to prepare page...";
+		// TODO Change the root object to the new page // Might not need this
 
-	// TODO Set the presentation that needs to be prepared
+		// TODO Set the presentation that needs to be prepared
 
-	// Create a new QListDataModel and set it to the list view in the page
-	QListDataModel<Presentation*>* dataModel = new QListDataModel<Presentation*>();
-	ListView* listView = _root->findChild<ListView*>("slideListView");
-	listView->setDataModel(dataModel);
-	// TODO Remember to delete the model on page destroy
+		// TODO Create a new QListDataModel and set it to the list view in the page
+		QListDataModel<Presentation*>* dataModel = new QListDataModel<Presentation*>();
+		ListView* listView = page->findChild<ListView*>("slideListView");
+		listView->setDataModel(dataModel);
+		_dataModel = dataModel;
+	}
 }
 
 

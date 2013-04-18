@@ -34,15 +34,18 @@ private:
 
 public:
     /* Static Members */
+
     static const QString READ_DATE_TIME_FORMAT;
     static const QString WRITE_DATE_TIME_FORMAT;
     static const QString DISPLAY_DATE_TIME_FORMAT;
 
     /* Constructors/Destructors */
+
     ApplicationUI(bb::cascades::Application *app);
     virtual ~ApplicationUI();
 
     /* Accessors */
+
     Application* app();
     AbstractPane* root();
     DataModel* dataModel();
@@ -53,12 +56,15 @@ public:
 //    QVariantList presentationsQML();
 
     /* Mutators */
+
     void setActivePresentation(Presentation* presentation);
 
     /* Member Functions */
 
-    Q_SLOT void goBackToMainPage(); // TODO: Tie to signal of navigation pane pop OR to page destroy (perhaps create separate functions for cleaning the specific pages
-    Q_SLOT void goToPreparePage(bb::cascades::Page* page); // TODO: Tie to signal of navigation pane push // Cascades data types need to be fully qualified
+    DataModel* getMainDataModel();
+
+    Q_SLOT void returnToMainPage(bb::cascades::Page* page); // TODO: Tie to signal of navigation pane pop OR to page destroy (perhaps create separate functions for cleaning the specific pages
+    Q_SLOT void goToPreparePage(bb::cascades::Page* page); // Cascades data types need to be fully qualified
 
     PresentationList unWrapListFromQVarList(QVariantList qVarList);
     PresentationList getListFromJSON(QString filePath);
