@@ -204,23 +204,23 @@ QVariantList ApplicationUI::wrapListToQVarList(PresentationList list) {
 }
 
 /* Wraps a list of Slide objects around a list of QVariant objects */
-QVariantList* ApplicationUI::wrapListToQVarList(SlideList* list) {
-	QVariantList* qVarList = new QVariantList();
+QVariantList ApplicationUI::wrapListToQVarList(SlideList list) {
+	QVariantList qVarList;
 	// Create a QVariant for each slide object that wraps its members as QVariantMap objects
-	foreach (Slide* slide, *list) {
+	foreach (Slide* slide, list) {
 		QVariantMap qVarMap;
 		qVarMap["title"] = QVariant(slide->title());
 
 		// A nested map must be wrapped within its own QVariant object
 		QVariantMap timeMap;
-		int* slideTime = slide->time();
-		timeMap["minutes"] = QVariant(slideTime[0]);
-		timeMap["seconds"] = QVariant(slideTime[1]);
+		int slideTime = slide->time();
+		timeMap["minutes"] = QVariant((int)(slideTime/60));
+		timeMap["seconds"] = QVariant(slideTime%60);
 		qVarMap["time"] = QVariant(timeMap);
 //		qVarMap["dateModified"] = QVariant(slide->lastModified());
 
 		// Push each QVariant object to qVarList
-		qVarList->append(QVariant(qVarMap));
+		qVarList.append(QVariant(qVarMap));
 	}
 
 	return qVarList;
