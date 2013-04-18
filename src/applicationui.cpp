@@ -163,32 +163,32 @@ PresentationList ApplicationUI::getListFromJSON(QString filePath) {
 }
 
 /* Wraps a list of Presentation objects around a list of QVariant objects */
-QVariantList* ApplicationUI::wrapListToQVarList(PresentationList* list) {
-	QVariantList* qVarList = new QVariantList();
+QVariantList ApplicationUI::wrapListToQVarList(PresentationList list) {
+	QVariantList qVarList;
 	// Create a QVariant for each presentation object that wraps its members as QVariantMap objects
-	foreach (Presentation* presentation, *list) {
+	foreach (Presentation* presentation, list) {
 		QVariantMap qVarMap;
 		qVarMap["name"] = QVariant(presentation->name());
 
 		// A nested map must be wrapped within its own QVariant object
 		QVariantMap timeMap;
-		int* totalTime = presentation->totalTime();
-		timeMap["minutes"] = QVariant(totalTime[0]);
-		timeMap["seconds"] = QVariant(totalTime[1]);
+		int totalTime = presentation->totalTime();
+		timeMap["minutes"] = QVariant((int)(totalTime/60));
+		timeMap["seconds"] = QVariant(totalTime%60);
 		qVarMap["totalTime"] = QVariant(timeMap);
 		qVarMap["dateModified"] = QVariant(presentation->lastModified());
 
 		// Create a QVariant in turn for each slide object belonging to the presentation, also wrapping as QVariantMap objects
-		SlideList* slideList = presentation->slides();
+		SlideList slideList = presentation->slides();
 		QVariantList slideQVarList;
-		foreach(Slide* slide, *slideList) {
+		foreach(Slide* slide, slideList) {
 			QVariantMap qVarMap;
 			qVarMap["title"] = QVariant(slide->title());
 
 			QVariantMap timeMap;
-			int* slideTime = slide->time();
-			timeMap["minutes"] = QVariant(slideTime[0]);
-			timeMap["seconds"] = QVariant(slideTime[1]);
+			int slideTime = slide->time();
+			timeMap["minutes"] = QVariant((int)(slideTime/60));
+			timeMap["seconds"] = QVariant(slideTime%60);
 			qVarMap["time"] = QVariant(timeMap);
 
 			slideQVarList.append(QVariant(qVarMap));
@@ -197,7 +197,7 @@ QVariantList* ApplicationUI::wrapListToQVarList(PresentationList* list) {
 		qVarMap["slides"] = QVariant(slideQVarList);
 
 		// Push each QVariant object to qVarList
-		qVarList->append(QVariant(qVarMap));
+		qVarList.append(QVariant(qVarMap));
 	}
 
 	return qVarList;
