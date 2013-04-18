@@ -90,26 +90,28 @@ Page {
                     textStyle.color: Color.Cyan
                     textStyle.textAlign: TextAlign.Left                    
                 }
-                Slider {
-                    id: totalTimeSlider
-                    objectName: "totalTimeSlider"
-                    property double maxTimeRemaining; // The maximum amount of time remaining that can be allocated to a slide                    
-                    fromValue: 1.0
-                    toValue: 3600.0
-                    horizontalAlignment: HorizontalAlignment.Fill
-                    layoutProperties: StackLayoutProperties {
-                        spaceQuota: 1.0
-                    }
-                    
-                    onImmediateValueChanged: {
-                        var value = Math.floor(immediateValue);
-                        var minute = Math.floor(value / 60);
-                        var second = Math.floor(value % 60);
-                        totalTimeValueLabel.text = minute + ":" + second;
-                    }
-
+            }    
+            
+            // Presentation Total Time Slider
+            Slider {
+                id: totalTimeSlider
+                objectName: "totalTimeSlider"
+                property double maxTimeRemaining; // The maximum amount of time remaining that can be allocated to a slide
+                fromValue: 1.0
+                toValue: 3600.0
+                horizontalAlignment: HorizontalAlignment.Fill
+                layoutProperties: StackLayoutProperties {
+                    spaceQuota: 1.0
                 }
-            }                                            
+
+                onImmediateValueChanged: {
+                    var value = Math.floor(immediateValue);
+                    var minute = Math.floor(value / 60);
+                    var second = Math.floor(value % 60);
+                    totalTimeValueLabel.text = minute + ":" + second;
+                }
+
+            }
         } // end of MetaData
 
         Divider {}
@@ -133,7 +135,6 @@ Page {
                                 // Image View/Slide Number
                                 Container {                                                                    
                                     Label {
-                                        preferredHeight: 200
                                         preferredWidth: 150
                                         text: listItemRoot.ListItem.indexInSection + 1
                                         verticalAlignment: VerticalAlignment.Fill
@@ -142,7 +143,8 @@ Page {
                                             base: SystemDefaults.TextStyles.BigText
                                             textAlign: TextAlign.Center
                                             fontWeight: FontWeight.Bold
-                                            fontSize: 30.0
+                                            fontSize: FontSize.PointValue
+                                            fontSizeValue: 35
                                         }
 
                                     }
@@ -167,7 +169,7 @@ Page {
                                             verticalAlignment: VerticalAlignment.Center
                                         }
                                     }
-                                    // Slide time allocation
+                                    // Slide time allocation labels
                                     Container {
                                         layout: StackLayout {
                                             orientation: LayoutOrientation.LeftToRight
@@ -177,9 +179,7 @@ Page {
                                             verticalAlignment: VerticalAlignment.Center
                                         }
                                         Label {
-                                            id: timeValueLabel
-                                            preferredWidth: 140
-                                            maxWidth: 140
+                                            id: timeValueLabel                                            
                                             textStyle.color: Color.Cyan
                                             textStyle.textAlign: TextAlign.Left
 
@@ -190,6 +190,9 @@ Page {
                                                 timeValueLabel.text = minute + ":" + second;
                                             }
                                         }
+                                    }
+                                    // Slide time allocation slider
+                                    Container {
                                         Slider {
                                             id: slideTimeSlider
                                             horizontalAlignment: HorizontalAlignment.Fill
