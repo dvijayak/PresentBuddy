@@ -12,10 +12,11 @@ namespace bb {
 namespace javelind {
 
 Slide::Slide() {
-	// TODO Auto-generated constructor stub
+	_title = "Untitled";
+	_time = 60;
 }
 
-Slide::Slide(QString title, int* time) {
+Slide::Slide(QString title, int time) {
 	_title = title;
 	_time = time;
 }
@@ -30,7 +31,7 @@ QString Slide::title() {
 	return _title;
 }
 
-int* Slide::time() {
+int Slide::time() {
 	return _time;
 }
 
@@ -38,10 +39,12 @@ int* Slide::time() {
 
 void Slide::setTitle(QString title) {
 	_title = title;
+	emit titleChanged(title);
 }
 
-void Slide::setTime(int* time) {
+void Slide::setTime(int time) {
 	_time = time;
+	emit timeChanged(time);
 }
 
 /* Member Functions */
@@ -52,7 +55,7 @@ void Slide::print() {
 	qDebug() << "\tSlide";
 	qDebug() << "\t--------";
 	qDebug() << "\tTitle = " << _title;
-	qDebug() << "\tTime = " << _time[0] << ":" << _time[1];
+	qDebug() << "\tTime = " << (int)(_time/60) << ":" << _time%60; // Display a time in seconds as minutes:seconds
 //	qDebug() << "\tLast Modified = " << _lastModified.toString();
 	qDebug() << "\t---xx---";
 }
