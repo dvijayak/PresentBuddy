@@ -93,12 +93,12 @@ DataModel* ApplicationUI::dataModel() {
 	return _dataModel;
 }
 
-PresentationList* ApplicationUI::presentations() {
+PresentationList ApplicationUI::presentations() {
 	return _presentations;
 }
 
 QVariantList ApplicationUI::presentationsQML() {
-	return *(this->wrapListToQVarList(_presentations));
+	return this->wrapListToQVarList(_presentations);
 }
 
 /* Mutators */
