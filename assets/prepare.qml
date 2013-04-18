@@ -7,6 +7,11 @@ Page {
     
     actions: [
         ActionItem {
+            title: "New Slide"
+            imageSource: "asset:///icons/ic_add.png"
+            ActionBar.placement: ActionBarPlacement.OnBar
+        } ,
+        ActionItem {
             title: "Done"
             imageSource: "asset:///icons/ic_done.png"
             ActionBar.placement: ActionBarPlacement.OnBar            
@@ -21,7 +26,7 @@ Page {
                     body: "Successfully saved changes."
                 }
             ]
-        }
+        }        
     ]
 	
     paneProperties: NavigationPaneProperties {
@@ -60,7 +65,7 @@ Page {
                 }
                 TextField {
                     id: nameText
-                    text: ""
+                    objectName: "nameText"                    
                     hintText: "Presentation Name"
                     verticalAlignment: VerticalAlignment.Center                    
                 }
@@ -79,22 +84,16 @@ Page {
                 }
                 Label {
                     id: totalTimeValueLabel
+                    objectName: "totalTimeValueLabel"
                     preferredWidth: 120
                     maxWidth: 120
                     textStyle.color: Color.Cyan
-                    textStyle.textAlign: TextAlign.Left
-
-                    onCreationCompleted: {
-                        var value = Math.floor(totalTimeSlider.immediateValue);
-                        var minute = Math.floor(value / 60);
-                        var second = Math.floor(value % 60);
-                        totalTimeValueLabel.text = minute + ":" + second;
-                    }
+                    textStyle.textAlign: TextAlign.Left                    
                 }
                 Slider {
                     id: totalTimeSlider
-                    property double maxTimeRemaining; // The maximum amount of time remaining that can be allocated to a slide
-                    value: 600.0
+                    objectName: "totalTimeSlider"
+                    property double maxTimeRemaining; // The maximum amount of time remaining that can be allocated to a slide                    
                     fromValue: 1.0
                     toValue: 3600.0
                     horizontalAlignment: HorizontalAlignment.Fill
@@ -117,10 +116,6 @@ Page {
 
 		// Slide list visuals
 		Container {
-//            attachedObjects: [
-//                // TODO Should I have a data model here?
-//            ]
-
             ListView {
                 id: slideListView
                 objectName: "slideListView"
@@ -131,79 +126,92 @@ Page {
                         type: ""
                         Container {
                             id: listItemRoot
-                            layout: StackLayout {
-                                orientation: LayoutOrientation.LeftToRight
-                            }
-                            // Image View/Slide Number
-                            Container {
-                                ImageView {
-                                    imageSource: "asset:///images/sun.png"
-                                    verticalAlignment: VerticalAlignment.Fill
-                                    horizontalAlignment: HorizontalAlignment.Fill
-                                }
-                            }
-                            // Slide Data
-                            Container {
+                            Container {                                
                                 layout: StackLayout {
-                                    orientation: LayoutOrientation.TopToBottom
+                                    orientation: LayoutOrientation.LeftToRight
                                 }
-                                // Slide title
-                                Container {
-                                    layout: StackLayout {
-                                        orientation: LayoutOrientation.LeftToRight
-                                    }
+                                // Image View/Slide Number
+                                Container {                                                                    
                                     Label {
-                                        text: "Title"
-                                        verticalAlignment: VerticalAlignment.Center
-                                    }
-                                    TextField {
-                                        text: ListItemData.title
-                                        hintText: "Slide title/heading"
-                                        verticalAlignment: VerticalAlignment.Center
-                                    }
-                                }
-                                // Slide time allocation
-                                Container {
-                                    layout: StackLayout {
-                                        orientation: LayoutOrientation.LeftToRight
-                                    }
-                                    Label {
-                                        text: "Time"
-                                        verticalAlignment: VerticalAlignment.Center
-                                    }
-                                    Label {
-                                        id: timeValueLabel
-                                        preferredWidth: 140
-                                        maxWidth: 140
-                                        textStyle.color: Color.Cyan
-                                        textStyle.textAlign: TextAlign.Left
-
-                                        onCreationCompleted: {
-                                            var value = Math.floor(slideTimeSlider.immediateValue);                                            
-                                            var minute = Math.floor(value / 60);
-                                            var second = Math.floor(value % 60);
-                                            timeValueLabel.text = minute + ":" + second;
-                                        }                                        
-                                    }
-                                    Slider {
-                                        id: slideTimeSlider
+                                        preferredHeight: 200
+                                        preferredWidth: 150
+                                        text: listItemRoot.ListItem.indexInSection + 1
+                                        verticalAlignment: VerticalAlignment.Fill
                                         horizontalAlignment: HorizontalAlignment.Fill
-                                        layoutProperties: StackLayoutProperties {
-                                            spaceQuota: 1.0
-                                        }
-                                        value: (60*ListItemData.time.minutes) + ListItemData.time.seconds
-                                        fromValue: 1.0
-                                        toValue: 3600.0                                        
-                                        onImmediateValueChanged: {
-                                            var value = Math.floor(immediateValue);
-                                            var minute = Math.floor(value/60);                                                                                    
-                                            var second = Math.floor(value%60);                                            
-                                            timeValueLabel.text = minute + ":" + second;
+                                        textStyle {
+                                            base: SystemDefaults.TextStyles.BigText
+                                            textAlign: TextAlign.Center
+                                            fontWeight: FontWeight.Bold
+                                            fontSize: 30.0
                                         }
 
+                                    }
+                                }
+                                // Slide Data
+                                Container {
+                                    layout: StackLayout {
+                                        orientation: LayoutOrientation.TopToBottom
+                                    }
+                                    // Slide title
+                                    Container {
+                                        layout: StackLayout {
+                                            orientation: LayoutOrientation.LeftToRight
+                                        }
+                                        Label {
+                                            text: "Title"
+                                            verticalAlignment: VerticalAlignment.Center
+                                        }
+                                        TextField {
+                                            text: ListItemData.title
+                                            hintText: "Slide title/heading"
+                                            verticalAlignment: VerticalAlignment.Center
+                                        }
+                                    }
+                                    // Slide time allocation
+                                    Container {
+                                        layout: StackLayout {
+                                            orientation: LayoutOrientation.LeftToRight
+                                        }
+                                        Label {
+                                            text: "Time"
+                                            verticalAlignment: VerticalAlignment.Center
+                                        }
+                                        Label {
+                                            id: timeValueLabel
+                                            preferredWidth: 140
+                                            maxWidth: 140
+                                            textStyle.color: Color.Cyan
+                                            textStyle.textAlign: TextAlign.Left
+
+                                            onCreationCompleted: {
+                                                var value = Math.floor(slideTimeSlider.immediateValue);
+                                                var minute = Math.floor(value / 60);
+                                                var second = Math.floor(value % 60);
+                                                timeValueLabel.text = minute + ":" + second;
+                                            }
+                                        }
+                                        Slider {
+                                            id: slideTimeSlider
+                                            horizontalAlignment: HorizontalAlignment.Fill
+                                            layoutProperties: StackLayoutProperties {
+                                                spaceQuota: 1.0
+                                            }
+                                            value: (60 * ListItemData.time.minutes) + ListItemData.time.seconds
+                                            fromValue: 1.0
+                                            toValue: 3600.0
+                                            onImmediateValueChanged: {
+                                                var value = Math.floor(immediateValue);
+                                                var minute = Math.floor(value / 60);
+                                                var second = Math.floor(value % 60);
+                                                timeValueLabel.text = minute + ":" + second;
+                                            }
+
+                                        }
                                     }
                                 }                                
                             }
+                            
+                            Divider {}
                         }
                     } // end of ListItemComponent
                 ] // end of listItemComponents

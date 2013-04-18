@@ -22,7 +22,6 @@ NavigationPane {
         Qt.preparePageDefinition = preparePageDefinition;
         Qt.navigationPane = navigationPane;        
         Qt.DISPLAY_DATE_TIME_FORMAT = applicationUIPropertyMap.DISPLAY_DATE_TIME_FORMAT;
-//        Qt.activePresentation = navigationPane.activePresentation 
 
 		// TODO Also, these QML components are created BEFORE the presentations list are read from JSON. Interesting!        
     }

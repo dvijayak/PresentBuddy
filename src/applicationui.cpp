@@ -5,6 +5,9 @@
 #include <bb/cascades/NavigationPane>
 #include <bb/cascades/Page>
 #include <bb/cascades/ListView>
+#include <bb/cascades/TextField>
+#include <bb/cascades/Label>
+#include <bb/cascades/Slider>
 #include <bb/cascades/DataModel>
 #include <bb/cascades/GroupDataModel>
 #include <bb/cascades/QListDataModel>
@@ -131,6 +134,15 @@ void ApplicationUI::goToPage(bb::cascades::Page* page) {
 				break;
 			}
 		}
+
+		// Fill in the Presentation name and total time fields and slider
+		TextField* nameText = page->findChild<TextField*>("nameText");
+		nameText->setText(_activePresentation->name());
+		Slider* totalTimeSlider = page->findChild<Slider*>("totalTimeSlider");
+		int totalTime = _activePresentation->totalTime();
+		totalTimeSlider->setValue(totalTime);
+		Label* totalTimeLabel = page->findChild<Label*>("totalTimeValueLabel");
+		totalTimeLabel->setText(QString("%1:%2").arg((int)(totalTime/60)).arg(totalTime%60));
 
 		// Create a new QVariantListDataModel, fill it with the slides (wrapped as QVariant objects) and set it to the list view in the page
 		QVariantListDataModel* dataModel = new QVariantListDataModel();
