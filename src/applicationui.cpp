@@ -149,7 +149,7 @@ PresentationList ApplicationUI::unWrapListFromQVarList(QVariantList qVarList) {
 
 /* Parse a JSON file, store the data in appropriate structures and return a list of this data.
  * Note: dateModified field must be of the ISO 8601 date/time standard format. */
-PresentationList* ApplicationUI::getListFromJSON(QString filePath) {
+PresentationList ApplicationUI::getListFromJSON(QString filePath) {
 	// Create a JDA object and read the JSON file
 	JsonDataAccess jda;
 	QVariant wrapList = jda.load(filePath);
@@ -158,8 +158,7 @@ PresentationList* ApplicationUI::getListFromJSON(QString filePath) {
 	// TODO Error checking - ensuring all required fields are present, and if not, how to deal with them swiftly
 
 	// Create the list of Presentation objects
-	PresentationList* list = this->unWrapListFromQVarList(&fileEntries);
-
+	PresentationList list = this->unWrapListFromQVarList(fileEntries);
 	return list;
 }
 
