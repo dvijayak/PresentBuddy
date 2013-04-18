@@ -73,11 +73,10 @@ ApplicationUI::~ApplicationUI() {
 	this->saveListToJSON(_presentations, QDir::homePath() + "/presentations_save.json");
 
 	// Free all memory that we are responsible for
-	foreach(Presentation* presentation, *_presentations) {
+	foreach(Presentation* presentation, _presentations) {
 		// TODO free all slides
 		delete presentation;
 	}
-	delete _presentations;
 }
 
 /* Accessors */
