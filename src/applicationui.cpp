@@ -255,17 +255,15 @@ void ApplicationUI::updateDataModel(PresentationList list, DataModel* model) {
 }
 
 /* Update the specified data model with the specified list of slides */
-void ApplicationUI::updateDataModel(SlideList* list, DataModel* model) {
+void ApplicationUI::updateDataModel(SlideList list, DataModel* model) {
 	// Retrieve the list as a QVariantList
-	QVariantList* qVarList = this->wrapListToQVarList(list);
+	QVariantList qVarList = this->wrapListToQVarList(list);
 
 	// Update the data model with the new list
 	if (((GroupDataModel*) model)->size() > 0) {
 		((GroupDataModel*) model)->clear();
 	}
-	((GroupDataModel*) model)->insertList(*qVarList);
-
-	delete qVarList;
+	((GroupDataModel*) model)->insertList(qVarList);
 }
 
 /* Slots */
