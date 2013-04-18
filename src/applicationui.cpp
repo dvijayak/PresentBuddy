@@ -228,13 +228,13 @@ QVariantList ApplicationUI::wrapListToQVarList(SlideList list) {
 
 /* Serialize the specified list of presentations to the specified JSON file.
  * Note: dateModified field is saved using the ISO 8601 date/time standard format. */
-void ApplicationUI::saveListToJSON(PresentationList* list, QString filePath) {
+void ApplicationUI::saveListToJSON(PresentationList list, QString filePath) {
 	// Retrieve the list as a QVariantList
-	QVariantList* qVarList = this->wrapListToQVarList(list);
+	QVariantList qVarList = this->wrapListToQVarList(list);
 
 	// Create a JDA object and save to the JSON file
 	JsonDataAccess jda;
-	jda.save(QVariant(*qVarList), filePath);
+	jda.save(QVariant(qVarList), filePath);
 }
 
 /* Update the default data model with the current list of presentations */
