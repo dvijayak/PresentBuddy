@@ -25,6 +25,10 @@ private:
 	QString _title;
 	int _time; // in seconds
 
+	/* House Keeping */
+
+	void initialize();
+
 public:
 	/* Constructors/Destructors */
 
@@ -42,6 +46,10 @@ public:
 	void setTitle(QString title);
 	void setTime(int time);
 
+	/* Operator Overloads */
+
+	bool operator ==(const Slide*& other) const;
+
 	/* Member Functions */
 
 	Q_INVOKABLE void print();
@@ -49,6 +57,11 @@ public:
 signals:
 	void titleChanged(QString newTitle);
 	void timeChanged(int newTime);
+
+	void slideChanged(Slide* slide); // Indicates that at least one member of the slide object was modified
+
+public slots:
+	void setSlide();
 };
 
 } /* namespace javelind */

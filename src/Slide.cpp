@@ -11,14 +11,28 @@
 namespace bb {
 namespace javelind {
 
+/* House Keeping */
+
+void Slide::initialize() {
+	bool res;
+	res = QObject::connect(this, SIGNAL(titleChanged(QString)), this, SLOT(setSlide()));
+	Q_ASSERT(res);
+	res = QObject::connect(this, SIGNAL(timeChanged(int)), this, SLOT(setSlide()));
+	Q_ASSERT(res);
+}
+
 Slide::Slide() {
 	_title = "Untitled";
 	_time = 60;
+
+	this->initialize();
 }
 
 Slide::Slide(QString title, int time) {
 	_title = title;
 	_time = time;
+
+	this->initialize();
 }
 
 Slide::~Slide() {
@@ -38,14 +52,35 @@ int Slide::time() {
 /* Mutators */
 
 void Slide::setTitle(QString title) {
-	_title = title;
-	emit titleChanged(title);
+	if (_title != title) {
+		qDebug() << QString("%1 != %2, updating slide title").arg(_title).arg(title);
+		_title = title;
+		emit titleChanged(title);
+	}
+	else qDebug() << QString("%1 == %2, no change in slide title").arg(_title).arg(title);
 }
 
 void Slide::setTime(int time) {
-	_time = time;
-	emit timeChanged(time);
+	if (_time != time) {
+		qDebug() << QString("%1 != %2, updating slide time").arg(_time).arg(time);
+		_time = time;
+		emit timeChanged(time);
+	}
+	else qDebug() << QString("%1 == %2, no change in slide time").arg(_time).arg(time);
 }
+
+/* Operator Overloads */
+
+bool Slide::operator ==(const Slide*& other) const {
+	if (_title == other->_title
+			&& _time == other->_time) {
+		return true;
+	}
+	else {
+		return false;
+	}
+}
+
 
 /* Member Functions */
 
@@ -58,6 +93,12 @@ void Slide::print() {
 	qDebug() << "\tTime = " << (int)(_time/60) << ":" << _time%60; // Display a time in seconds as minutes:seconds
 //	qDebug() << "\tLast Modified = " << _lastModified.toString();
 	qDebug() << "\t---xx---";
+}
+
+/* Slots */
+
+void Slide::setSlide() {
+	emit slideChanged(this);
 }
 
 } /* namespace javelind */

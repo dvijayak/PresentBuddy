@@ -13,6 +13,8 @@ Page {
         } ,
         ActionItem {
             title: "Done"
+            objectName: "doneButton"
+            
             imageSource: "asset:///icons/ic_done.png"
             ActionBar.placement: ActionBarPlacement.OnBar            
             onTriggered: {                
@@ -128,6 +130,8 @@ Page {
                         type: ""
                         Container {
                             id: listItemRoot
+                            objectName: "slideListItem" // Allows to findChildren<Container*>("slideListItem") and work with each individual form object
+                            
                             Container {                                
                                 layout: StackLayout {
                                     orientation: LayoutOrientation.LeftToRight
@@ -164,6 +168,7 @@ Page {
                                             verticalAlignment: VerticalAlignment.Center
                                         }
                                         TextField {
+                                            objectName: "slideTitleText"
                                             text: ListItemData.title
                                             hintText: "Slide title/heading"
                                             verticalAlignment: VerticalAlignment.Center
@@ -179,7 +184,9 @@ Page {
                                             verticalAlignment: VerticalAlignment.Center
                                         }
                                         Label {
-                                            id: timeValueLabel                                            
+                                            id: timeValueLabel
+                                            objectName: "slideTimeValue"
+                                            
                                             textStyle.color: Color.Cyan
                                             textStyle.textAlign: TextAlign.Left
 
@@ -195,6 +202,8 @@ Page {
                                     Container {
                                         Slider {
                                             id: slideTimeSlider
+                                            objectName: "slideTimeSlider"
+                                            
                                             horizontalAlignment: HorizontalAlignment.Fill
                                             layoutProperties: StackLayoutProperties {
                                                 spaceQuota: 1.0

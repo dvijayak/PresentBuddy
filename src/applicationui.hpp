@@ -62,6 +62,9 @@ public:
     /* Member Functions */
 
     DataModel* getMainDataModel();
+    void initializePreparePage(Page* page);
+    void initializePerformPage(Page* page);
+    void reinitializeMainPage(Page* page);
 
     PresentationList unWrapListFromQVarList(QVariantList qVarList);
     PresentationList getListFromJSON(QString filePath);
@@ -74,6 +77,7 @@ public:
 
 public slots:
 	void goToPage(bb::cascades::Page* page); // Cascades data types need to be fully qualified
+	void savePreparedChanges();
 };
 
 Q_DECLARE_METATYPE(PresentationList);

@@ -19,7 +19,20 @@ namespace javelind {
 void Presentation::initialize() {
 	// Connect signals with slots
 	bool res;
-	res = QObject::connect(this, SIGNAL(presentationModified()), this, SLOT(updateLastModified()));
+	res = QObject::connect(this, SIGNAL(nameChanged(QString)), this, SLOT(updateLastModified()));
+	Q_ASSERT(res);
+	res = QObject::connect(this, SIGNAL(totalTimeChanged(int)), this, SLOT(updateLastModified()));
+	Q_ASSERT(res);
+	res = QObject::connect(this, SIGNAL(slidesChanged(SlideList)), this, SLOT(updateLastModified()));
+	Q_ASSERT(res);
+
+	// Connect the presentation with each of its slides
+	foreach (Slide* slide, _slides) {
+		res = QObject::connect(slide, SIGNAL(slideChanged(Slide*)), this, SLOT(updateLastModified())); // TODO Perhaps this should emit slidesChanged
+		Q_ASSERT(res);
+	}
+
+	res = QObject::connect(this, SIGNAL(lastModifiedChanged(QDateTime)), this, SLOT(setPresentation()));
 	Q_ASSERT(res);
 }
 
@@ -86,28 +99,30 @@ QVariantList Presentation::slidesQML() {
 /* Mutators */
 
 void Presentation::setName(QString name) {
-	_name = name;
-	emit nameChanged(name);
-	emit presentationModified();
+	if (_name != name) {
+		qDebug() << QString("%1 != %2, updating presentation name").arg(_name).arg(name);
+		_name = name;
+		emit nameChanged(name);
+	}
+	else qDebug() << QString("%1 == %2, no change in presentation name").arg(_name).arg(name);
 }
 
 void Presentation::setTotalTime(int time) {
-	_totalTime = time;
-	emit totalTimeChanged(time);
-	emit presentationModified();
+	if (_totalTime != time) {
+		qDebug() << QString("%1 != %2, updating presentation total time").arg(_totalTime).arg(time);
+		_totalTime = time;
+		emit totalTimeChanged(time);
+	}
+	else qDebug() << QString("%1 == %2, no change in presentation total time").arg(_totalTime).arg(time);
 }
 
 void Presentation::setSlides(SlideList slides) {
-	_slides = slides;
-	emit slidesChanged(slides);
-	emit presentationModified();
-}
-
-/* Slots */
-
-void Presentation::updateLastModified() {
-	_lastModified = QDateTime::currentDateTime();
-	emit lastModifiedChanged(_lastModified); // TODO Seems like an unnecessary signal
+	if (_slides != slides) {
+		qDebug() << QString("%1 != %2, updating presentation slide list").arg("old slide list").arg("new slide list");
+		_slides = slides;
+		emit slidesChanged(slides);
+	}
+	else qDebug() << QString("%1 == %2, no change in presentation slide list").arg("old slide list").arg("new slide list");
 }
 
 /* Member Functions */
@@ -125,6 +140,18 @@ void Presentation::print() {
 		slide->print();
 	}
 	qDebug() << "---xx---";
+}
+
+/* Slots */
+
+/* Update the time stamp of this presentation whenever a member has been modified */
+void Presentation::updateLastModified() {
+	_lastModified = QDateTime::currentDateTime();
+	emit lastModifiedChanged(_lastModified);
+}
+
+void Presentation::setPresentation() {
+	emit presentationChanged(this);
 }
 
 } /* namespace javelind */

@@ -34,6 +34,7 @@ private:
 	SlideList _slides;
 
 	/* House Keeping */
+
 	void initialize();
 
 public:
@@ -71,10 +72,11 @@ signals:
 	void lastModifiedChanged(QDateTime newTimeStamp); // TODO Seems like an unnecessary signal
 	void slidesChanged(SlideList newSlides);
 
-	void presentationModified(); // Indicates that at least one member of the presentation object was modified
+	void presentationChanged(Presentation* presentation); // Indicates that at least one member of the presentation object was modified
 
 public slots:
 	void updateLastModified();
+	void setPresentation();
 };
 
 } /* namespace javelind */

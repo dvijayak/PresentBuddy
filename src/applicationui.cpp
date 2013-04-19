@@ -9,8 +9,10 @@
 #include <bb/cascades/Label>
 #include <bb/cascades/Slider>
 #include <bb/cascades/DataModel>
+#include <bb/cascades/Container>
 #include <bb/cascades/GroupDataModel>
 #include <bb/cascades/QListDataModel>
+#include <bb/cascades/ActionItem>
 #include <bb/data/JsonDataAccess>
 
 #include <QTimer>
@@ -37,7 +39,9 @@ ApplicationUI::ApplicationUI(Application *app) : QObject(app)
 
     // Register new meta types
     qRegisterMetaType<Presentation*>();
+    qRegisterMetaType<PresentationList>();
     qRegisterMetaType<Slide*>();
+    qRegisterMetaType<SlideList>();
 
     // Attach class values to the QML document
     QDeclarativePropertyMap* applicationUIPropertyMap = new QDeclarativePropertyMap;
@@ -55,8 +59,8 @@ ApplicationUI::ApplicationUI(Application *app) : QObject(app)
     _dataModel = this->getMainDataModel();
 
 	// Create initial list of Presentation objects from the data file
-    QString filePath(QDir::currentPath() + "/app/native/assets/presentations.json");
-//    QString filePath(QDir::homePath() + "/presentations_save.json");
+//    QString filePath(QDir::currentPath() + "/app/native/assets/presentations.json");
+    QString filePath(QDir::homePath() + "/presentations_save.json");
     // TODO Check if file exists. If not, or if file is empty, then show no presentations
     _presentations = this->getListFromJSON(filePath);
 
@@ -66,8 +70,6 @@ ApplicationUI::ApplicationUI(Application *app) : QObject(app)
 	// Connect signals with slots
 	bool res;
 	NavigationPane* mRoot = (NavigationPane*)_root; // Need to create this separately in order to properly connect
-//	res = QObject::connect(mRoot, SIGNAL(popTransitionEnded(bb::cascades::Page*)), this, SLOT(returnToMainPage(bb::cascades::Page*)));
-//	Q_ASSERT(res);
 	res = QObject::connect(mRoot, SIGNAL(topChanged(bb::cascades::Page*)), this, SLOT(goToPage(bb::cascades::Page*)));
 	Q_ASSERT(res);
 
@@ -118,46 +120,48 @@ DataModel* ApplicationUI::getMainDataModel() {
 	return _root->findChild<GroupDataModel*>("mainDataModel");
 }
 
-/* Slots */
+void ApplicationUI::initializePreparePage(Page* page) {
+	qDebug() << "Going to prepare page...";
 
-void ApplicationUI::goToPage(bb::cascades::Page* page) {
-	Q_ASSERT(page != 0);
-	QString pageName = page->objectName();
-
-	if (pageName == "preparePage") {
-		qDebug() << "Going to prepare page...";
-
-		// Set the presentation that needs to be prepared
-		foreach (Presentation* presentation, _presentations) {
-			if (presentation->name() == _root->property("activePresentation").value<QString>()) {
-				_activePresentation = presentation;
-				break;
-			}
+	// Set the presentation that needs to be prepared
+	foreach (Presentation* presentation, _presentations) {
+		if (presentation->name() == _root->property("activePresentation").value<QString>()) {
+			_activePresentation = presentation;
+			break;
 		}
-
-		// Fill in the Presentation name and total time fields and slider
-		TextField* nameText = page->findChild<TextField*>("nameText");
-		nameText->setText(_activePresentation->name());
-		Slider* totalTimeSlider = page->findChild<Slider*>("totalTimeSlider");
-		int totalTime = _activePresentation->totalTime();
-		totalTimeSlider->setValue(totalTime);
-		Label* totalTimeLabel = page->findChild<Label*>("totalTimeValueLabel");
-		totalTimeLabel->setText(QString("%1:%2").arg((int)(totalTime/60)).arg(totalTime%60));
-
-		// Create a new QVariantListDataModel, fill it with the slides (wrapped as QVariant objects) and set it to the list view in the page
-		QVariantListDataModel* dataModel = new QVariantListDataModel();
-		QVariantList qVarList = this->wrapListToQVarList(_activePresentation->slides());
-		dataModel->append(qVarList);
-		ListView* listView = page->findChild<ListView*>("slideListView");
-		listView->setDataModel(dataModel);
-		dataModel->setParent(page); // Attaching this to the Page allows smooth destruction, i.e. when the page is destroyed, the model is also destroyed
 	}
-	else if (pageName == "performPage") {
-		qDebug() << "Going to perform page...";
-	}
-	// Returning to the main page
-	else if (pageName == "mainPage") {
-		qDebug() << "Returning to main page...";
+
+	// Fill in the Presentation name and total time fields and slider
+	TextField* nameText = page->findChild<TextField*>("nameText");
+	nameText->setText(_activePresentation->name());
+	Slider* totalTimeSlider = page->findChild<Slider*>("totalTimeSlider");
+	int totalTime = _activePresentation->totalTime();
+	totalTimeSlider->setValue(totalTime);
+	Label* totalTimeLabel = page->findChild<Label*>("totalTimeValueLabel");
+	totalTimeLabel->setText(QString("%1:%2").arg((int)(totalTime/60)).arg(totalTime%60));
+
+	// Create a new QVariantListDataModel, fill it with the slides (wrapped as QVariant objects) and set it to the list view in the page
+	QVariantListDataModel* dataModel = new QVariantListDataModel();
+	QVariantList qVarList = this->wrapListToQVarList(_activePresentation->slides());
+	dataModel->append(qVarList);
+	ListView* listView = page->findChild<ListView*>("slideListView");
+	listView->setDataModel(dataModel);
+	dataModel->setParent(page); // Attaching this to the Page allows smooth destruction, i.e. when the page is destroyed, the model is also destroyed
+
+	// Connect the onTriggered signal of the done button in order to save any changes made
+	ActionItem* done = page->findChild<ActionItem*>("doneButton");
+	bool res;
+	res = QObject::connect(done, SIGNAL(triggered()), this, SLOT(savePreparedChanges()));
+	Q_UNUSED(res);
+}
+
+void ApplicationUI::initializePerformPage(Page* page) {
+	qDebug() << "Going to perform page...";
+	Q_UNUSED(page)
+}
+
+void ApplicationUI::reinitializeMainPage(Page* page) {
+	qDebug() << "Returning to main page...";
 
 //		// TODO If required, clear all slide data models and restore back to original data model
 //		if (dynamic_cast<QListDataModel<Slide*> *>(_dataModel) != 0) {
@@ -165,17 +169,10 @@ void ApplicationUI::goToPage(bb::cascades::Page* page) {
 //			_dataModel = this->getMainDataModel();
 //		}
 
-		qDebug() << _dataModel;
-	}
+	qDebug() << _dataModel;
+
+	Q_UNUSED(page);
 }
-
-
-
-
-
-
-
-
 
 /* Working with data */
 
@@ -341,3 +338,60 @@ void ApplicationUI::updateDataModel(SlideList list, DataModel* model) {
 
 /* Slots */
 
+void ApplicationUI::goToPage(bb::cascades::Page* page) {
+	Q_ASSERT(page != 0);
+	QString pageName = page->objectName();
+
+	if (pageName == "preparePage") {
+		this->initializePreparePage(page);
+	}
+	else if (pageName == "performPage") {
+		this->initializePerformPage(page);
+	}
+	// Returning to the main page
+	else if (pageName == "mainPage") {
+		this->reinitializeMainPage(page);
+	}
+}
+
+void ApplicationUI::savePreparedChanges() {
+	qDebug() << "Saving the prepared changes...";
+
+	// Get references to required UI objects
+	Page* page = _root->findChild<Page*>("preparePage");
+	TextField* nameText = page->findChild<TextField*>("nameText");
+	Slider* totalTimeSlider = page->findChild<Slider*>("totalTimeSlider");
+	QList<Container*> slideUIList = page->findChildren<Container*>("slideListItem");
+
+	// Save the new presentation name
+	_activePresentation->setName(nameText->text());
+
+	// Save the new presentation total time
+	_activePresentation->setTotalTime((int)(totalTimeSlider->value()));
+
+	// Save all new slide changes
+	SlideList slides = _activePresentation->slides();
+	for (int i = 0; i < slideUIList.size(); ++i) {
+		// Get references to required UI objects
+		TextField* slideTitleText = slideUIList[i]->findChild<TextField*>("slideTitleText");
+		Slider* slideTimeSlider = slideUIList[i]->findChild<Slider*>("slideTimeSlider");
+
+		// Save the new slide name
+		slides[i]->setTitle(slideTitleText->text());
+
+		// Save the new slide time
+		slides[i]->setTime((int)(slideTimeSlider->value()));
+	}
+//	_activePresentation->setSlides(slides); // Seems like I don't need this one. Saves a lot of memory/read-write ops
+
+	// Update the main presentations data model
+	this->updateDataModel();
+
+	qDebug() << "Saved prepared changes.";
+}
+
+// Memo: One problem with debugging errors is moc errors, since they are not in your code. Usually, you get these errors when not including certain classes explicitly
+
+
+// TODO Need a reset button and functionality for prepare page
+// TODO Need a restore defaults button in setting to restore all data to initial load state
