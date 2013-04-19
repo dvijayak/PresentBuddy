@@ -66,16 +66,17 @@ public:
     void initializePerformPage(Page* page);
     void reinitializeMainPage(Page* page);
 
-    PresentationList unWrapListFromQVarList(QVariantList qVarList);
-    PresentationList getListFromJSON(QString filePath);
+    QVariantMap createTimeQVarMap(int time);
+    QVariantMap wrapToQVarMap(Presentation* slide);
+    QVariantMap wrapToQVarMap(Slide* slide);
     QVariantList wrapListToQVarList(PresentationList list);
     QVariantList wrapListToQVarList(SlideList list);
+    PresentationList unWrapListFromQVarList(QVariantList qVarList);
+    PresentationList getListFromJSON(QString filePath);
     void saveListToJSON(PresentationList list, QString filePath);
-    Q_SLOT void updateDataModel(); // Can be invoked in response to certain actions, like page transitions (returning to the main page)
-    void updateDataModel(PresentationList list, DataModel* dataModel);
-    void updateDataModel(SlideList list, DataModel* dataModel);
 
 public slots:
+	void updatePresentationDataModel(Presentation* presentation); // Can be invoked in response to certain actions, like page transitions (returning to the main page)
 	void goToPage(bb::cascades::Page* page); // Cascades data types need to be fully qualified
 	void addNewSlide(); // Add a new slide to the active presentation
 	void savePreparedChanges();

@@ -65,15 +65,21 @@ ApplicationUI::ApplicationUI(Application *app) : QObject(app)
     _presentations = this->getListFromJSON(filePath);
 
 	// Insert the list of presentations into the data model
-	this->updateDataModel();
+    QVariantList presentationList = this->wrapListToQVarList(_presentations);
+    ((GroupDataModel*)_dataModel)->insertList(presentationList);
 
 	// Connect signals with slots
 	bool res;
 	NavigationPane* mRoot = (NavigationPane*)_root; // Need to create this separately in order to properly connect
 	res = QObject::connect(mRoot, SIGNAL(topChanged(bb::cascades::Page*)), this, SLOT(goToPage(bb::cascades::Page*)));
 	Q_ASSERT(res);
-	res = QObject::connect(mRoot, SIGNAL(popTransitionEnded(bb::cascades::Page*)), this, SLOT(updateDataModel()));
-	Q_ASSERT(res);
+
+	// The data model must be aware of potential changes to each of its corresponding presentations
+	foreach (Presentation* presentation, _presentations) {
+		QObject::connect(presentation, SIGNAL(presentationChanged(Presentation*)), this, SLOT(updatePresentationDataModel(Presentation*)));
+		Q_ASSERT(res);
+	}
+	Q_UNUSED(res);
 
 	// Set created root object as a scene
     app->setScene(root);
@@ -238,45 +244,36 @@ PresentationList ApplicationUI::getListFromJSON(QString filePath) {
 	return list;
 }
 
-/* Wraps a list of Presentation objects around a list of QVariant objects */
-QVariantList ApplicationUI::wrapListToQVarList(PresentationList list) {
-	QVariantList qVarList;
-	// Create a QVariant for each presentation object that wraps its members as QVariantMap objects
-	foreach (Presentation* presentation, list) {
-		QVariantMap qVarMap;
-		qVarMap["name"] = QVariant(presentation->name());
+/* Create a QVariantMap representation of a time object */
+QVariantMap ApplicationUI::createTimeQVarMap(int time) {
+	QVariantMap timeMap;
+	timeMap["minutes"] = QVariant((int)(time/60));
+	timeMap["seconds"] = QVariant(time%60);
+	return timeMap;
+}
 
-		// A nested map must be wrapped within its own QVariant object
-		QVariantMap timeMap;
-		int totalTime = presentation->totalTime();
-		timeMap["minutes"] = QVariant((int)(totalTime/60));
-		timeMap["seconds"] = QVariant(totalTime%60);
-		qVarMap["totalTime"] = QVariant(timeMap);
-		qVarMap["dateModified"] = QVariant(presentation->lastModified());
+/* Wraps a slide around a QVariantMap */
+QVariantMap ApplicationUI::wrapToQVarMap(Slide* slide) {
+	QVariantMap qVarMap;
+	qVarMap["title"] = QVariant(slide->title());
+	qVarMap["time"] = this->createTimeQVarMap(slide->time());
+//	qVarMap["dateModified"] = QVariant(slide->lastModified());
+	return qVarMap;
+}
 
-		// Create a QVariant in turn for each slide object belonging to the presentation, also wrapping as QVariantMap objects
-		SlideList slideList = presentation->slides();
-		QVariantList slideQVarList;
-		foreach(Slide* slide, slideList) {
-			QVariantMap qVarMap;
-			qVarMap["title"] = QVariant(slide->title());
 
-			QVariantMap timeMap;
-			int slideTime = slide->time();
-			timeMap["minutes"] = QVariant((int)(slideTime/60));
-			timeMap["seconds"] = QVariant(slideTime%60);
-			qVarMap["time"] = QVariant(timeMap);
+/* Wraps a presentation around a QVariantMap */
+QVariantMap ApplicationUI::wrapToQVarMap(Presentation* presentation) {
+	QVariantMap qVarMap;
+	qVarMap["name"] = QVariant(presentation->name());
+	qVarMap["totalTime"] = this->createTimeQVarMap(presentation->totalTime());
+	qVarMap["dateModified"] = QVariant(presentation->lastModified());
 
-			slideQVarList.append(QVariant(qVarMap));
-		}
+	// Create a QVariant in turn for each slide object belonging to the presentation, also wrapping as QVariantMap objects
+	QVariantList slideQVarList = this->wrapListToQVarList(presentation->slides());
+	qVarMap["slides"] = QVariant(slideQVarList);
 
-		qVarMap["slides"] = QVariant(slideQVarList);
-
-		// Push each QVariant object to qVarList
-		qVarList.append(QVariant(qVarMap));
-	}
-
-	return qVarList;
+	return qVarMap;
 }
 
 /* Wraps a list of Slide objects around a list of QVariant objects */
@@ -284,18 +281,23 @@ QVariantList ApplicationUI::wrapListToQVarList(SlideList list) {
 	QVariantList qVarList;
 	// Create a QVariant for each slide object that wraps its members as QVariantMap objects
 	foreach (Slide* slide, list) {
-		QVariantMap qVarMap;
-		qVarMap["title"] = QVariant(slide->title());
+		QVariantMap qVarMap = this->wrapToQVarMap(slide);
 
-		// A nested map must be wrapped within its own QVariant object
-		QVariantMap timeMap;
-		int slideTime = slide->time();
-		timeMap["minutes"] = QVariant((int)(slideTime/60));
-		timeMap["seconds"] = QVariant(slideTime%60);
-		qVarMap["time"] = QVariant(timeMap);
-//		qVarMap["dateModified"] = QVariant(slide->lastModified());
+		// Push each Slide QVariantMap object to qVarList
+		qVarList.append(QVariant(qVarMap));
+	}
 
-		// Push each QVariant object to qVarList
+	return qVarList;
+}
+
+/* Wraps a list of Presentation objects around a list of QVariant objects */
+QVariantList ApplicationUI::wrapListToQVarList(PresentationList list) {
+	QVariantList qVarList;
+	// Create a QVariant for each presentation object that wraps its members as QVariantMap objects
+	foreach (Presentation* presentation, list) {
+		QVariantMap qVarMap = this->wrapToQVarMap(presentation);
+
+		// Push each Presentation QVariantMap object to qVarList
 		qVarList.append(QVariant(qVarMap));
 	}
 
@@ -313,34 +315,36 @@ void ApplicationUI::saveListToJSON(PresentationList list, QString filePath) {
 	jda.save(QVariant(qVarList), filePath);
 }
 
-/* Update the default data model with the current list of presentations */
-void ApplicationUI::updateDataModel() {
-	this->updateDataModel(_presentations, _dataModel);
-}
+/* Update the presentations data model with the specified presentation */
+void ApplicationUI::updatePresentationDataModel(Presentation* presentation) {
+	GroupDataModel* model = (GroupDataModel*)_dataModel;
 
-/* Update the specified data model with the specified list of presentations */
-void ApplicationUI::updateDataModel(PresentationList list, DataModel* model) {
-	// Retrieve the list as a QVariantList
-	QVariantList qVarList = this->wrapListToQVarList(list);
+	// Find the index path of the presentation in the data model (this is needed because the sorted order is different from the raw list order)
+	QVariantMap presentationMap = this->wrapToQVarMap(presentation);
+	QVariantList indexPath = model->find(presentationMap);
 
-	// Update the data model with the new list
-	if (((GroupDataModel*) model)->size() > 0) {
-		((GroupDataModel*) model)->clear();
+	qDebug() << "PRESENTATION MAP IS ";
+	qDebug() << presentationMap;
+	qDebug() << "INDEX PATH IS: ";
+	qDebug() <<	 indexPath;
+
+	qDebug() << "Here are the existing stuff";
+	QVariant v;
+	QVariantList debugList;
+	debugList.append(QVariant::fromValue(0));
+	qDebug() << model->data(debugList);
+	debugList.clear();
+	debugList.append(QVariant::fromValue(1));
+	qDebug() << model->data(debugList);
+	debugList.clear();
+	debugList.append(QVariant::fromValue(2));
+	qDebug() << model->data(debugList);
+
+	// Update the presentation at the computed index (if the presentation exists in the model)
+	if (!indexPath.isEmpty()) {
+		// Note: we do not need to check if the new value is different from the old value, since this is handled in the class mutators themselves
+		model->updateItem(indexPath, presentationMap);
 	}
-	((GroupDataModel*) model)->insertList(qVarList);
-	qDebug() << model->data(qVarList);
-}
-
-/* Update the specified data model with the specified list of slides */
-void ApplicationUI::updateDataModel(SlideList list, DataModel* model) {
-	// Retrieve the list as a QVariantList
-	QVariantList qVarList = this->wrapListToQVarList(list);
-
-	// Update the data model with the new list
-	if (((GroupDataModel*) model)->size() > 0) {
-		((GroupDataModel*) model)->clear();
-	}
-	((GroupDataModel*) model)->insertList(qVarList);
 }
 
 /* Slots */
@@ -374,13 +378,7 @@ void ApplicationUI::addNewSlide() {
 	ListView* listView = page->findChild<ListView*>("slideListView");
 	QVariantListDataModel* dataModel = (QVariantListDataModel*)listView->dataModel();
 	// Wrap around a QVariantMap in order for QML to recognize object members
-	QVariantMap qVarMap;
-	qVarMap["title"] = QVariant(slide->title());
-	QVariantMap timeMap;
-	int slideTime = slide->time();
-	timeMap["minutes"] = QVariant((int)(slideTime/60));
-	timeMap["seconds"] = QVariant(slideTime%60);
-	qVarMap["time"] = QVariant(timeMap);
+	QVariantMap qVarMap = this->wrapToQVarMap(slide);
 	dataModel->append(QVariant(qVarMap));
 
 	qDebug() << "Added new slide.";
