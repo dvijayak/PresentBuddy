@@ -23,7 +23,7 @@ Page {
             attachedObjects: [
                 SystemToast {
                     id: savedChangesToast
-                    body: "Successfully saved changes."
+                    body: "Successfully saved changes."                    
                 }
             ]
         }        

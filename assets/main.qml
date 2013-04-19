@@ -89,8 +89,8 @@ NavigationPane {
                                     orientation: LayoutOrientation.LeftToRight
                                 }                                
                                 Button {
-                                    id: performButton                                    
-                                    text: "Perform"
+                                    id: performButton                                                                        
+                                    imageSource: "asset:///icons/9-av-play81.png"
                                     
                                     onClicked: {
                                         var page = Qt.pageDefinition.createObject();
