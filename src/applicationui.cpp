@@ -72,6 +72,8 @@ ApplicationUI::ApplicationUI(Application *app) : QObject(app)
 	NavigationPane* mRoot = (NavigationPane*)_root; // Need to create this separately in order to properly connect
 	res = QObject::connect(mRoot, SIGNAL(topChanged(bb::cascades::Page*)), this, SLOT(goToPage(bb::cascades::Page*)));
 	Q_ASSERT(res);
+	res = QObject::connect(mRoot, SIGNAL(popTransitionEnded(bb::cascades::Page*)), this, SLOT(updateDataModel()));
+	Q_ASSERT(res);
 
 	// Set created root object as a scene
     app->setScene(root);
@@ -326,6 +328,7 @@ void ApplicationUI::updateDataModel(PresentationList list, DataModel* model) {
 		((GroupDataModel*) model)->clear();
 	}
 	((GroupDataModel*) model)->insertList(qVarList);
+	qDebug() << model->data(qVarList);
 }
 
 /* Update the specified data model with the specified list of slides */
@@ -383,6 +386,8 @@ void ApplicationUI::addNewSlide() {
 	qDebug() << "Added new slide.";
 }
 
+
+/* Save any changes made in the prepare page (including adding/deleting slides */
 void ApplicationUI::savePreparedChanges() {
 	qDebug() << "Saving the prepared changes...";
 
@@ -412,14 +417,15 @@ void ApplicationUI::savePreparedChanges() {
 		slides[i]->setTime((int)(slideTimeSlider->value()));
 	}
 
-	// Update the main presentations data model
-	this->updateDataModel();
-
 	qDebug() << "Saved prepared changes.";
 }
 
 // Memo: One problem with debugging errors is moc errors, since they are not in your code. Usually, you get these errors when not including certain classes explicitly
 
 
+// TODO Need a slide delete button for prepare page
+// TODO Need to convert main page UI to plain list with no buttons. Buttons should be provided at the action bar (same for prepare page)
 // TODO Need a reset button and functionality for prepare page
+// TODO Implement the perform functionality!
+// TODO Implement the practise functionality!
 // TODO Need a restore defaults button in setting to restore all data to initial load state

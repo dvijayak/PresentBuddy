@@ -71,7 +71,7 @@ public:
     QVariantList wrapListToQVarList(PresentationList list);
     QVariantList wrapListToQVarList(SlideList list);
     void saveListToJSON(PresentationList list, QString filePath);
-    void updateDataModel();
+    Q_SLOT void updateDataModel(); // Can be invoked in response to certain actions, like page transitions (returning to the main page)
     void updateDataModel(PresentationList list, DataModel* dataModel);
     void updateDataModel(SlideList list, DataModel* dataModel);
 
