@@ -148,10 +148,14 @@ void ApplicationUI::initializePreparePage(Page* page) {
 	listView->setDataModel(dataModel);
 	dataModel->setParent(page); // Attaching this to the Page allows smooth destruction, i.e. when the page is destroyed, the model is also destroyed
 
-	// Connect the onTriggered signal of the done button in order to save any changes made
-	ActionItem* done = page->findChild<ActionItem*>("doneButton");
+	// Connect the onTriggered signal of the action buttons to respective slot functions
+	ActionItem* doneButton = page->findChild<ActionItem*>("doneButton");
+	ActionItem* newButton = page->findChild<ActionItem*>("newButton");
 	bool res;
-	res = QObject::connect(done, SIGNAL(triggered()), this, SLOT(savePreparedChanges()));
+	res = QObject::connect(doneButton, SIGNAL(triggered()), this, SLOT(savePreparedChanges()));
+	Q_ASSERT(res);
+	res = QObject::connect(newButton, SIGNAL(triggered()), this, SLOT(addNewSlide()));
+	Q_ASSERT(res);
 	Q_UNUSED(res);
 }
 
@@ -354,6 +358,31 @@ void ApplicationUI::goToPage(bb::cascades::Page* page) {
 	}
 }
 
+void ApplicationUI::addNewSlide() {
+	qDebug() << "Adding a new slide to the active presentation...";
+
+	// Create new empty slide and add it to the active presentation
+	Slide* slide = new Slide();
+	slide->print();
+	_activePresentation->addSlide(slide);
+
+	// Append the new slide to the slides data model
+	Page* page = _root->findChild<Page*>("preparePage");
+	ListView* listView = page->findChild<ListView*>("slideListView");
+	QVariantListDataModel* dataModel = (QVariantListDataModel*)listView->dataModel();
+	// Wrap around a QVariantMap in order for QML to recognize object members
+	QVariantMap qVarMap;
+	qVarMap["title"] = QVariant(slide->title());
+	QVariantMap timeMap;
+	int slideTime = slide->time();
+	timeMap["minutes"] = QVariant((int)(slideTime/60));
+	timeMap["seconds"] = QVariant(slideTime%60);
+	qVarMap["time"] = QVariant(timeMap);
+	dataModel->append(QVariant(qVarMap));
+
+	qDebug() << "Added new slide.";
+}
+
 void ApplicationUI::savePreparedChanges() {
 	qDebug() << "Saving the prepared changes...";
 
@@ -370,7 +399,7 @@ void ApplicationUI::savePreparedChanges() {
 	_activePresentation->setTotalTime((int)(totalTimeSlider->value()));
 
 	// Save all new slide changes
-	SlideList slides = _activePresentation->slides();
+	SlideList& slides = _activePresentation->slidesRef();
 	for (int i = 0; i < slideUIList.size(); ++i) {
 		// Get references to required UI objects
 		TextField* slideTitleText = slideUIList[i]->findChild<TextField*>("slideTitleText");
@@ -382,7 +411,6 @@ void ApplicationUI::savePreparedChanges() {
 		// Save the new slide time
 		slides[i]->setTime((int)(slideTimeSlider->value()));
 	}
-//	_activePresentation->setSlides(slides); // Seems like I don't need this one. Saves a lot of memory/read-write ops
 
 	// Update the main presentations data model
 	this->updateDataModel();

@@ -77,6 +77,7 @@ public:
 
 public slots:
 	void goToPage(bb::cascades::Page* page); // Cascades data types need to be fully qualified
+	void addNewSlide(); // Add a new slide to the active presentation
 	void savePreparedChanges();
 };
 

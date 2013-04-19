@@ -28,7 +28,7 @@ void Presentation::initialize() {
 
 	// Connect the presentation with each of its slides
 	foreach (Slide* slide, _slides) {
-		res = QObject::connect(slide, SIGNAL(slideChanged(Slide*)), this, SLOT(updateLastModified())); // TODO Perhaps this should emit slidesChanged
+		res = QObject::connect(slide, SIGNAL(slideChanged(Slide*)), this, SLOT(updateLastModified()));
 		Q_ASSERT(res);
 	}
 
@@ -85,6 +85,10 @@ SlideList Presentation::slides() {
 	return _slides;
 }
 
+SlideList& Presentation::slidesRef() {
+	return _slides;
+}
+
 /* QML Accessors */
 
 /* QVariant[List] wrappers for exposing to QML */
@@ -126,6 +130,13 @@ void Presentation::setSlides(SlideList slides) {
 }
 
 /* Member Functions */
+
+/* Add a slide (append at the end) to the presentation list of slides */
+void Presentation::addSlide(Slide* slide) {
+	_slides.append(slide);
+	slide->print();
+	emit slidesChanged(_slides);
+}
 
 /* Print the presentation to stdout */
 void Presentation::print() {

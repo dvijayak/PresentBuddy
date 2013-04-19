@@ -8,6 +8,8 @@ Page {
     actions: [
         ActionItem {
             title: "New Slide"
+            objectName: "newButton"
+            
             imageSource: "asset:///icons/ic_add.png"
             ActionBar.placement: ActionBarPlacement.OnBar
         } ,

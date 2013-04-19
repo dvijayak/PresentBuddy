@@ -51,6 +51,7 @@ public:
 	int totalTime();
 	QDateTime lastModified();
 	SlideList slides();
+	SlideList& slidesRef(); // get reference to the slide list for manipulation directly (efficiency purposes)
 
 	/* QML Accessors */
 
@@ -64,12 +65,13 @@ public:
 
 	/* Member Functions */
 
+	void addSlide(Slide* slide);
 	Q_INVOKABLE void print();
 
 signals:
 	void nameChanged(QString newName);
 	void totalTimeChanged(int newTotalTime);
-	void lastModifiedChanged(QDateTime newTimeStamp); // TODO Seems like an unnecessary signal
+	void lastModifiedChanged(QDateTime newTimeStamp);
 	void slidesChanged(SlideList newSlides);
 
 	void presentationChanged(Presentation* presentation); // Indicates that at least one member of the presentation object was modified
@@ -86,3 +88,5 @@ Q_DECLARE_METATYPE(bb::javelind::Presentation*);
 Q_DECLARE_METATYPE(bb::javelind::SlideList);
 
 #endif /* PRESENTATION_H_ */
+
+// TODO be able to add a slide in between another slide (i.e., prepend/append to an existing slide)
