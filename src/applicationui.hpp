@@ -32,6 +32,7 @@ private:
     PresentationList _presentations;
     Presentation* _activePresentation; // reference to the presentation currently being worked on
     Presentation* _activePresentationBeforeChange; // A copy of the above, used for identifying its correspondent in the data model
+    Presentation* _bufferPresentation; // A buffer to store any changes made to the active presentation before actually committing them
 
 public:
     /* Static Members */
@@ -53,6 +54,7 @@ public:
     PresentationList presentations();
     Presentation* activePresentation();
     Presentation* activePresentationBeforeChange();
+    Presentation* bufferPresentation();
 
     /* QVariant[List] wrappers for exposing to QML */
 //    QVariantList presentationsQML();
@@ -83,6 +85,7 @@ public slots:
 	void goToPage(bb::cascades::Page* page); // Cascades data types need to be fully qualified
 	void addNewSlide(); // Add a new slide to the active presentation
 	void savePreparedChanges();
+	void commitPreparedChanges(); // Commit all buffered changes to the active presentation made in the prepare page.
 };
 
 Q_DECLARE_METATYPE(PresentationList);
