@@ -112,17 +112,38 @@ NavigationPane {
                                     imageSource: "asset:///icons/ic_edit.png"
                                     
                                     onClicked: {
-                                        // Set the active presentation to be the one that was selected                                        
-                                        Qt.navigationPane.activePresentation = listItemRoot.ListItem.data.name;
+                                        // Set the active presentation to be the one that was selected                                              
+                                        Qt.navigationPane.activePresentation = listItemRoot.ListItem.data.id;
 
                                         // Push the prepare page on to the stack (go to the prepare page)
                                         var page = Qt.preparePageDefinition.createObject();                                        
-                                        Qt.navigationPane.push(page);                                        
+                                        Qt.navigationPane.push(page);
                                     }
                                 }
                                 Button {
                                     id: deleteButton
                                     imageSource: "asset:///icons/ic_delete.png"
+                                    
+                                    attachedObjects: [
+                                        SystemDialog {
+                                            id: deletePresentationDialog
+                                            title: "Confirm delete"
+                                            body: "Are you sure?"
+                                            onFinished: {
+                                                if (deletePresentationDialog.result
+                                                    == SystemUiResult.ConfirmButtonSelection) {
+                                                    // Set the active presentation to be the one that was selected
+                                                    Qt.navigationPane.activePresentation = listItemRoot.ListItem.data.id;
+                                                    
+                                                    Qt.appUI.deletePresentation();
+                                                }
+                                            }
+                                        }
+                                    ]
+                                    
+                                    onClicked: {                                    
+                                        deletePresentationDialog.show();                                        
+                                    }
                                 }
                             }
                             

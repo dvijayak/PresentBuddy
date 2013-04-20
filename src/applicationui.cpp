@@ -57,7 +57,7 @@ ApplicationUI::ApplicationUI(Application *app) : QObject(app)
     _root = root;
 
     // Store a reference to the main page Presentations data model defined in QML
-    _dataModel = this->getMainDataModel();
+    _dataModel = this->mainDataModel();
 
 	// Create initial list of Presentation objects from the data file
     QString filePath(QDir::currentPath() + "/app/native/assets/presentations.json");
@@ -119,20 +119,51 @@ PresentationList ApplicationUI::presentations() {
 
 /* Application Logic */
 
-DataModel* ApplicationUI::getMainDataModel() {
+DataModel* ApplicationUI::mainDataModel() {
 	return _root->findChild<GroupDataModel*>("mainDataModel");
+}
+
+/* Retrieve the active presentation that is currently being worked on */
+Presentation* ApplicationUI::activePresentation() {
+	foreach (Presentation* presentation, _presentations) {
+		// The active presentation is 'selected' in the QML via the "activePresentation" property of the root navigation pane
+		if (presentation->id() == _root->property("activePresentation").value<qint64>()) {
+			return presentation;
+		}
+	}
+	return 0; // Return NULL if not found
+}
+
+void ApplicationUI::deletePresentation() {
+	this->deletePresentation(this->activePresentation());
+}
+
+void ApplicationUI::deletePresentation(Presentation* presentation) {
+	qDebug() << QString("Deleting presentation %1...").arg(presentation->name());
+
+	// Find the respective index in the data model
+	GroupDataModel* model = (GroupDataModel*)_dataModel;
+	QVariantList indexPath = this->findInDataModel(presentation, model);
+
+	// Delete the presentation from the presentations list
+	_presentations.removeOne(presentation);
+	delete presentation; // Free the memory TODO Probably should do this in the destructor? Or am I even responsible for it
+
+	qDebug() << "Deleted presentation.";
+
+	// Remove from the data model
+	model->removeAt(indexPath);
+
+	qDebug() << "Removed from data model.";
+
+
 }
 
 void ApplicationUI::initializePreparePage(Page* page) {
 	qDebug() << "Going to prepare page...";
 
 	// Set the presentation that needs to be prepared
-	foreach (Presentation* presentation, _presentations) {
-		if (presentation->name() == _root->property("activePresentation").value<QString>()) {
-			_activePresentation = presentation;
-			break;
-		}
-	}
+	_activePresentation = this->activePresentation();
 
 	// Create a buffer of the active presentation to store changes cumulatively
 	_bufferPresentation = _activePresentation->copy();
@@ -319,13 +350,11 @@ void ApplicationUI::saveListToJSON(PresentationList list, QString filePath) {
 	jda.save(QVariant(qVarList), filePath);
 }
 
-/* Update the target presentation in the presentations data model. */
-void ApplicationUI::updatePresentationDataModel(Presentation* presentation) {
-	GroupDataModel* model = (GroupDataModel*)_dataModel;
-qDebug() << "ASDASDASD";
-	// Find the index path of the presentation in the data model (this is needed because the sorted order is different from the raw list order)
+/* Find the index path of the specified presentation in the specified data model according to id
+ * (This is needed because the sorted order is different from the raw list order) */
+QVariantList ApplicationUI::findInDataModel(Presentation* presentation, DataModel* model) {
 	QVariantList indexPath;
-	QList<QVariantMap> modelContents = model->toListOfMaps();
+	QList<QVariantMap> modelContents = ((GroupDataModel*)model)->toListOfMaps();
 	for (int i = 0; i < modelContents.size(); ++i) {
 		QVariantMap map = modelContents[i];
 		qint64 mapId = map["id"].value<qint64>();
@@ -333,7 +362,15 @@ qDebug() << "ASDASDASD";
 			indexPath << i;
 		}
 	}
-	qDebug() << indexPath;
+	return indexPath;
+}
+
+/* Update the target presentation in the presentations data model. */
+void ApplicationUI::updatePresentationDataModel(Presentation* presentation) {
+	// Find the index of the presentation
+	GroupDataModel* model = (GroupDataModel*)_dataModel;
+	QVariantList indexPath = this->findInDataModel(presentation, model);
+
 	// Update the presentation at the computed index (if the presentation exists in the model)
 	if (!indexPath.isEmpty()) {
 		// Note: we do not need to check if the new value is different from the old value, since this is handled in the class mutators themselves

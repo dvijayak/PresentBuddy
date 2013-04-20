@@ -31,7 +31,6 @@ private:
     DataModel* _dataModel; // the current data model of the application
     PresentationList _presentations;
     Presentation* _activePresentation; // reference to the presentation currently being worked on
-    Presentation* _activePresentationBeforeChange; // A copy of the above, used for identifying its correspondent in the data model
     Presentation* _bufferPresentation; // A buffer to store any changes made to the active presentation before actually committing them
 
 public:
@@ -52,21 +51,22 @@ public:
     AbstractPane* root();
     DataModel* dataModel();
     PresentationList presentations();
-    Presentation* activePresentation();
-    Presentation* activePresentationBeforeChange();
     Presentation* bufferPresentation();
+
+    Presentation* activePresentation();
+    DataModel* mainDataModel();
 
     /* QVariant[List] wrappers for exposing to QML */
 //    QVariantList presentationsQML();
 
     /* Mutators */
-    void makeCopyActivePresentation();
 
     void setActivePresentation(Presentation* presentation);
 
     /* Member Functions */
 
-    DataModel* getMainDataModel();
+    QVariantList findInDataModel(Presentation* presentation, DataModel* model);
+
     void initializePreparePage(Page* page);
     void initializePerformPage(Page* page);
     void reinitializeMainPage(Page* page);
@@ -87,6 +87,12 @@ public slots:
 	void addNewSlide(); // Add a new slide to the active presentation
 	void commitPreparedChanges(); // Commit all buffered changes to the active presentation made in the prepare page.
 	void testSlot();
+
+	Q_INVOKABLE void deletePresentation();
+	Q_INVOKABLE void deletePresentation(Presentation* presentation);
+
+	/* Buffer functions for prepare page */
+
 	void bufferNameChange(QString name);
 	void bufferTotalTimeChange(float value);
 	Q_INVOKABLE void bufferSlideTitleChange(int index, QString title);

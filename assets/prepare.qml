@@ -149,7 +149,7 @@ Page {
                                 // Image View/Slide Number
                                 Container {                                                                    
                                     Label {
-                                        preferredWidth: 150
+//                                        preferredWidth: 150
                                         text: listItemRoot.ListItem.indexInSection + 1
                                         verticalAlignment: VerticalAlignment.Fill
                                         horizontalAlignment: HorizontalAlignment.Fill
