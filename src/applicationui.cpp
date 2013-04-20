@@ -631,8 +631,8 @@ void ApplicationUI::bufferSlideTimeChange(int index, float value) {
 // Memo: One problem with debugging errors is moc errors, since they are not in your code. Usually, you get these errors when not including certain classes explicitly
 
 
-// TODO Need a slide delete button for prepare page
-// TODO Need to convert main page UI to plain list with no buttons. Buttons should be provided at the action bar (same for prepare page)
+// TODO Implement time slider auto-correction logic for prepare page
+// TODO Maybe convert main page UI to plain list with no buttons. Buttons should be provided at the action bar (same for prepare page)
 // TODO Need a reset button and functionality for prepare page
 // TODO Implement the perform functionality!
 // TODO Implement the practise functionality!
