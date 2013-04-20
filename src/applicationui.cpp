@@ -50,7 +50,7 @@ ApplicationUI::ApplicationUI(Application *app) : QObject(app)
     applicationUIPropertyMap->insert("WRITE_DATE_TIME_FORMAT", QVariant(WRITE_DATE_TIME_FORMAT));
     applicationUIPropertyMap->insert("DISPLAY_DATE_TIME_FORMAT", QVariant(DISPLAY_DATE_TIME_FORMAT));
     qml->setContextProperty("applicationUIPropertyMap", applicationUIPropertyMap);
-//    qml->setContextProperty("appUI", this);
+    qml->setContextProperty("appUI", this);
 
     // Create root object for the UI
     AbstractPane *root = qml->createRootObject<AbstractPane>();
@@ -79,10 +79,10 @@ ApplicationUI::ApplicationUI(Application *app) : QObject(app)
 //	Q_ASSERT(res);
 
 	// The data model must be aware of potential changes to each of its corresponding presentations
-	foreach (Presentation* presentation, _presentations) {
-		QObject::connect(presentation, SIGNAL(presentationChanged(Presentation*)), this, SLOT(updatePresentationDataModel(Presentation*)));
-		Q_ASSERT(res);
-	}
+//	foreach (Presentation* presentation, _presentations) {
+//		QObject::connect(presentation, SIGNAL(presentationChanged(Presentation*)), this, SLOT(updatePresentationDataModel(Presentation*)));
+//		Q_ASSERT(res);
+//	}
 	Q_UNUSED(res);
 
 	// Set created root object as a scene
@@ -156,6 +156,7 @@ void ApplicationUI::initializePreparePage(Page* page) {
 		}
 	}
 
+	_activePresentation->print();
 	// Create a buffer of the active presentation to store changes
 	_bufferPresentation = _activePresentation->copy();
 
@@ -168,6 +169,13 @@ void ApplicationUI::initializePreparePage(Page* page) {
 	Label* totalTimeLabel = page->findChild<Label*>("totalTimeValueLabel");
 	totalTimeLabel->setText(QString("%1:%2").arg((int)(totalTime/60)).arg(totalTime%60));
 
+	// Connect these objects with their respective buffer slots
+	bool res;
+//	res = QObject::connect(nameText, SIGNAL(textChanged(QString)), this, SLOT(bufferNameChange(QString)));
+//	Q_ASSERT(res);
+//	res = QObject::connect(totalTimeSlider, SIGNAL(valueChanged(float)), this, SLOT(bufferTotalTimeChange(float)));
+//	Q_ASSERT(res);
+
 	// Create a new QVariantListDataModel, fill it with the slides (wrapped as QVariant objects) and set it to the list view in the page
 	QVariantListDataModel* dataModel = new QVariantListDataModel();
 	QVariantList qVarList = this->wrapListToQVarList(_activePresentation->slides());
@@ -179,14 +187,16 @@ void ApplicationUI::initializePreparePage(Page* page) {
 	// Connect the onTriggered signal of the action buttons to respective slot functions
 	ActionItem* doneButton = page->findChild<ActionItem*>("doneButton");
 	ActionItem* newButton = page->findChild<ActionItem*>("newButton");
-	bool res;
-	res = QObject::connect(doneButton, SIGNAL(triggered()), this, SLOT(savePreparedChanges()));
-	Q_ASSERT(res);
 	res = QObject::connect(doneButton, SIGNAL(triggered()), this, SLOT(commitPreparedChanges()));
 	Q_ASSERT(res);
 	res = QObject::connect(newButton, SIGNAL(triggered()), this, SLOT(addNewSlide()));
 	Q_ASSERT(res);
 	Q_UNUSED(res);
+}
+
+void ApplicationUI::testSlot() {
+	QList<Container*> slideUIList = _root->findChildren<Container*>("slideListItem");
+	qDebug() << QString("There are %1 slides in this view now.").arg(slideUIList.size());
 }
 
 void ApplicationUI::initializePerformPage(Page* page) {
@@ -337,27 +347,26 @@ void ApplicationUI::saveListToJSON(PresentationList list, QString filePath) {
 	jda.save(QVariant(qVarList), filePath);
 }
 
-/* Update the presentations data model with the specified presentation */
-void ApplicationUI::updatePresentationDataModel(Presentation* presentation) {
+/* Update the target presentation in the presentations data model with its corresponding buffer. */
+void ApplicationUI::updatePresentationDataModel(Presentation* target, Presentation* buffer) {
 	GroupDataModel* model = (GroupDataModel*)_dataModel;
 
 	// Find the index path of the presentation in the data model (this is needed because the sorted order is different from the raw list order)
-	QVariantMap bufferPresentationMap = this->wrapToQVarMap(_bufferPresentation);
-	QVariantList indexPath = model->find(bufferPresentationMap);
+	QVariantMap targetMap = this->wrapToQVarMap(target);
+	QVariantList indexPath = model->find(targetMap);
 
 	qDebug() << "PRESENTATION MAP IS ";
-	qDebug() << bufferPresentationMap;
+	qDebug() << targetMap;
 	qDebug() << "INDEX PATH IS: ";
 	qDebug() <<	 indexPath;
-
-//	// Free the active presentation buffer
-//	delete _bufferPresentation;
+	qDebug() << "DATA IS: ";
+	qDebug() << model->data(indexPath);
 
 	// Update the presentation at the computed index (if the presentation exists in the model)
 	if (!indexPath.isEmpty()) {
 		// Note: we do not need to check if the new value is different from the old value, since this is handled in the class mutators themselves
-		QVariantMap presentationMap = this->wrapToQVarMap(presentation);
-		model->updateItem(indexPath, presentationMap);
+		QVariantMap updatedMap = this->wrapToQVarMap(buffer);
+		model->updateItem(indexPath, updatedMap);
 	}
 }
 
@@ -383,9 +392,20 @@ void ApplicationUI::goToPage(bb::cascades::Page* page) {
 void ApplicationUI::commitPreparedChanges() {
 	qDebug() << "Committing all changes to the active presentation...";
 
+	// Preserve the original values of the presentation in order to be able to locate it in the data model
+	Presentation* target = _activePresentation->copy();
+
+	// Commit the changes to the actual presentation via the active presentation reference
 	_activePresentation->setName(_bufferPresentation->name());
 	_activePresentation->setTotalTime(_bufferPresentation->totalTime());
 	_activePresentation->setSlides(_bufferPresentation->slides());
+
+	// Reflect this commit in the presentations data model
+	this->updatePresentationDataModel(target, _bufferPresentation);
+
+	// Free the original copy and the buffer
+	delete target;
+	delete _bufferPresentation;
 
 	qDebug() << "Changes committed.";
 }
@@ -409,38 +429,91 @@ void ApplicationUI::addNewSlide() {
 }
 
 
-/* Save (buffer) any changes made in the prepare page (including adding/deleting slides) */
-void ApplicationUI::savePreparedChanges() {
-	qDebug() << "Buffering the prepared changes...";
+///* Save (buffer) any changes made in the prepare page (including adding/deleting slides) */
+//void ApplicationUI::savePreparedChanges() {
+//	qDebug() << "Buffering the prepared changes...";
+//
+//	// Get references to required UI objects
+//	Page* page = _root->findChild<Page*>("preparePage");
+//	TextField* nameText = page->findChild<TextField*>("nameText");
+//	Slider* totalTimeSlider = page->findChild<Slider*>("totalTimeSlider");
+//	QList<Container*> slideUIList = page->findChildren<Container*>("slideListItem");
+//
+//	// Save the new presentation name
+//	_bufferPresentation->setName(nameText->text());
+//
+//	// Save the new presentation total time
+//	_bufferPresentation->setTotalTime((int)(totalTimeSlider->value()));
+//
+//	// Save all new slide changes
+//	SlideList& slides = _bufferPresentation->slidesRef();
+//	for (int i = 0; i < slideUIList.size(); ++i) {
+//		// Get references to required UI objects
+//		TextField* slideTitleText = slideUIList[i]->findChild<TextField*>("slideTitleText");
+//		Slider* slideTimeSlider = slideUIList[i]->findChild<Slider*>("slideTimeSlider");
+//
+//		// Save the new slide name
+//		slides[i]->setTitle(slideTitleText->text());
+//
+//		// Save the new slide time
+//		slides[i]->setTime((int)(slideTimeSlider->value()));
+//	}
+//
+//	qDebug() << "Buffered prepared changes. Ready to commit.";
+//}
 
-	// Get references to required UI objects
-	Page* page = _root->findChild<Page*>("preparePage");
-	TextField* nameText = page->findChild<TextField*>("nameText");
-	Slider* totalTimeSlider = page->findChild<Slider*>("totalTimeSlider");
-	QList<Container*> slideUIList = page->findChildren<Container*>("slideListItem");
+/* Functions for buffering changes */
 
-	// Save the new presentation name
-	_bufferPresentation->setName(nameText->text());
+void ApplicationUI::bufferNameChange(QString name) {
+	qDebug() << "Buffering presentation name change...";
 
-	// Save the new presentation total time
-	_bufferPresentation->setTotalTime((int)(totalTimeSlider->value()));
+	// Buffer the new presentation name
+	_bufferPresentation->setName(name);
+	_activePresentation->print();
+	_bufferPresentation->print();
 
-	// Save all new slide changes
-	SlideList& slides = _bufferPresentation->slidesRef();
-	for (int i = 0; i < slideUIList.size(); ++i) {
-		// Get references to required UI objects
-		TextField* slideTitleText = slideUIList[i]->findChild<TextField*>("slideTitleText");
-		Slider* slideTimeSlider = slideUIList[i]->findChild<Slider*>("slideTimeSlider");
-
-		// Save the new slide name
-		slides[i]->setTitle(slideTitleText->text());
-
-		// Save the new slide time
-		slides[i]->setTime((int)(slideTimeSlider->value()));
-	}
-
-	qDebug() << "Buffered prepared changes. Ready to commit.";
+	qDebug() << "Buffered name change. Ready to commit.";
 }
+
+void ApplicationUI::bufferTotalTimeChange(float value) {
+	qDebug() << "Buffering presentation total time change...";
+
+	// Buffer the new presentation total time
+	_bufferPresentation->setTotalTime((int)value);
+	_activePresentation->print();
+	_bufferPresentation->print();
+
+	qDebug() << "Buffered total time change. Ready to commit.";
+}
+
+/* Invoked from QML. The slide index is passed to know which slide to modify. */
+void ApplicationUI::bufferSlideTitleChange(int index, QString title) {
+	qDebug() << "Buffering slide title change...";
+
+	SlideList& slides = _bufferPresentation->slidesRef();
+	slides[index]->setTitle(title);
+	_activePresentation->print();
+	_bufferPresentation->print();
+
+	qDebug() << "Buffered slide title change. Ready to commit.";
+
+}
+
+/* Invoked from QML. The slide index is passed to know which slide to modify. */
+void ApplicationUI::bufferSlideTimeChange(int index, float value) {
+
+	qDebug() << "Buffering slide time change...";
+
+	// Buffer the new slide time
+	SlideList& slides = _bufferPresentation->slidesRef();
+	slides[index]->setTime(((int)value));
+	_activePresentation->print();
+	_bufferPresentation->print();
+
+	qDebug() << "Buffered slide time change. Ready to commit.";
+
+}
+
 
 // Memo: One problem with debugging errors is moc errors, since they are not in your code. Usually, you get these errors when not including certain classes explicitly
 

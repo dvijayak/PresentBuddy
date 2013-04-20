@@ -79,13 +79,18 @@ public:
     PresentationList unWrapListFromQVarList(QVariantList qVarList);
     PresentationList getListFromJSON(QString filePath);
     void saveListToJSON(PresentationList list, QString filePath);
+    void updatePresentationDataModel(Presentation* target, Presentation* buffer); // Can be invoked in response to certain actions, like page transitions (returning to the main page)
 
 public slots:
-	void updatePresentationDataModel(Presentation* presentation); // Can be invoked in response to certain actions, like page transitions (returning to the main page)
 	void goToPage(bb::cascades::Page* page); // Cascades data types need to be fully qualified
 	void addNewSlide(); // Add a new slide to the active presentation
-	void savePreparedChanges();
+//	void savePreparedChanges();
 	void commitPreparedChanges(); // Commit all buffered changes to the active presentation made in the prepare page.
+	void testSlot();
+	void bufferNameChange(QString name);
+	void bufferTotalTimeChange(float value);
+	Q_INVOKABLE void bufferSlideTitleChange(int index, QString title);
+	Q_INVOKABLE void bufferSlideTimeChange(int index, float value);
 };
 
 Q_DECLARE_METATYPE(PresentationList);

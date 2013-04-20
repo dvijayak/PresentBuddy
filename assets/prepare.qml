@@ -71,7 +71,11 @@ Page {
                     id: nameText
                     objectName: "nameText"                    
                     hintText: "Presentation Name"
-                    verticalAlignment: VerticalAlignment.Center                    
+                    verticalAlignment: VerticalAlignment.Center
+
+                    onCreationCompleted: {
+                        nameText.textChanged.connect(Qt.appUI.bufferNameChange);
+                    }
                 }
             }
             
@@ -113,6 +117,10 @@ Page {
                     var minute = Math.floor(value / 60);
                     var second = Math.floor(value % 60);
                     totalTimeValueLabel.text = minute + ":" + second;
+                }
+                
+                onCreationCompleted: {
+                    totalTimeSlider.valueChanged.connect(Qt.appUI.bufferTotalTimeChange);
                 }
 
             }
@@ -174,6 +182,10 @@ Page {
                                             text: ListItemData.title
                                             hintText: "Slide title/heading"
                                             verticalAlignment: VerticalAlignment.Center
+                                            
+                                            onTextChanged: {
+                                                Qt.appUI.bufferSlideTitleChange(listItemRoot.ListItem.indexInSection, text);                                                
+                                            }
                                         }
                                     }
                                     // Slide time allocation labels
@@ -220,6 +232,9 @@ Page {
                                                 timeValueLabel.text = minute + ":" + second;
                                             }
 
+                                            onValueChanged: {
+                                                Qt.appUI.bufferSlideTimeChange(listItemRoot.ListItem.indexInSection, value);
+                                            }
                                         }
                                     }
                                 }                                
