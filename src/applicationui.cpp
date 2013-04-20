@@ -74,15 +74,6 @@ ApplicationUI::ApplicationUI(Application *app) : QObject(app)
 	NavigationPane* mRoot = (NavigationPane*)_root; // Need to create this separately in order to properly connect
 	res = QObject::connect(mRoot, SIGNAL(topChanged(bb::cascades::Page*)), this, SLOT(goToPage(bb::cascades::Page*)));
 	Q_ASSERT(res);
-//	// Commit changes made to the active presentation. This would occur when the (or any) page was popped, i.e. exited
-//	res = QObject::connect(mRoot, SIGNAL(popTransitionEnded(bb::cascades::Page*)), this, SLOT(commitPreparedChanges()));
-//	Q_ASSERT(res);
-
-	// The data model must be aware of potential changes to each of its corresponding presentations
-//	foreach (Presentation* presentation, _presentations) {
-//		QObject::connect(presentation, SIGNAL(presentationChanged(Presentation*)), this, SLOT(updatePresentationDataModel(Presentation*)));
-//		Q_ASSERT(res);
-//	}
 	Q_UNUSED(res);
 
 	// Set created root object as a scene
@@ -123,19 +114,6 @@ PresentationList ApplicationUI::presentations() {
 
 /* Mutators */
 
-/* Store a copy of the original active presentation */
-void ApplicationUI::makeCopyActivePresentation() {
-	// Free memory (if allocated before) prior to reuse
-	if (_activePresentationBeforeChange != 0) {
-		delete _activePresentationBeforeChange;
-	}
-
-	// Note: QObject does not have a visible copy constructor, thus we need to explicitly copy ourselves
-	_activePresentationBeforeChange = new Presentation(_activePresentation->name()
-			, _activePresentation->totalTime()
-			, _activePresentation->lastModified()
-			, _activePresentation->slides());
-}
 
 /* Member Functions */
 
@@ -156,8 +134,7 @@ void ApplicationUI::initializePreparePage(Page* page) {
 		}
 	}
 
-	_activePresentation->print();
-	// Create a buffer of the active presentation to store changes
+	// Create a buffer of the active presentation to store changes cumulatively
 	_bufferPresentation = _activePresentation->copy();
 
 	// Fill in the Presentation name and total time fields and slider
@@ -168,13 +145,6 @@ void ApplicationUI::initializePreparePage(Page* page) {
 	totalTimeSlider->setValue(totalTime);
 	Label* totalTimeLabel = page->findChild<Label*>("totalTimeValueLabel");
 	totalTimeLabel->setText(QString("%1:%2").arg((int)(totalTime/60)).arg(totalTime%60));
-
-	// Connect these objects with their respective buffer slots
-	bool res;
-//	res = QObject::connect(nameText, SIGNAL(textChanged(QString)), this, SLOT(bufferNameChange(QString)));
-//	Q_ASSERT(res);
-//	res = QObject::connect(totalTimeSlider, SIGNAL(valueChanged(float)), this, SLOT(bufferTotalTimeChange(float)));
-//	Q_ASSERT(res);
 
 	// Create a new QVariantListDataModel, fill it with the slides (wrapped as QVariant objects) and set it to the list view in the page
 	QVariantListDataModel* dataModel = new QVariantListDataModel();
@@ -187,6 +157,7 @@ void ApplicationUI::initializePreparePage(Page* page) {
 	// Connect the onTriggered signal of the action buttons to respective slot functions
 	ActionItem* doneButton = page->findChild<ActionItem*>("doneButton");
 	ActionItem* newButton = page->findChild<ActionItem*>("newButton");
+	bool res;
 	res = QObject::connect(doneButton, SIGNAL(triggered()), this, SLOT(commitPreparedChanges()));
 	Q_ASSERT(res);
 	res = QObject::connect(newButton, SIGNAL(triggered()), this, SLOT(addNewSlide()));
@@ -297,6 +268,7 @@ QVariantMap ApplicationUI::wrapToQVarMap(Slide* slide) {
 /* Wraps a presentation around a QVariantMap */
 QVariantMap ApplicationUI::wrapToQVarMap(Presentation* presentation) {
 	QVariantMap qVarMap;
+	qVarMap["id"] = QVariant(presentation->id());
 	qVarMap["name"] = QVariant(presentation->name());
 	qVarMap["totalTime"] = this->createTimeQVarMap(presentation->totalTime());
 	qVarMap["dateModified"] = QVariant(presentation->lastModified());
@@ -347,25 +319,25 @@ void ApplicationUI::saveListToJSON(PresentationList list, QString filePath) {
 	jda.save(QVariant(qVarList), filePath);
 }
 
-/* Update the target presentation in the presentations data model with its corresponding buffer. */
-void ApplicationUI::updatePresentationDataModel(Presentation* target, Presentation* buffer) {
+/* Update the target presentation in the presentations data model. */
+void ApplicationUI::updatePresentationDataModel(Presentation* presentation) {
 	GroupDataModel* model = (GroupDataModel*)_dataModel;
-
+qDebug() << "ASDASDASD";
 	// Find the index path of the presentation in the data model (this is needed because the sorted order is different from the raw list order)
-	QVariantMap targetMap = this->wrapToQVarMap(target);
-	QVariantList indexPath = model->find(targetMap);
-
-	qDebug() << "PRESENTATION MAP IS ";
-	qDebug() << targetMap;
-	qDebug() << "INDEX PATH IS: ";
-	qDebug() <<	 indexPath;
-	qDebug() << "DATA IS: ";
-	qDebug() << model->data(indexPath);
-
+	QVariantList indexPath;
+	QList<QVariantMap> modelContents = model->toListOfMaps();
+	for (int i = 0; i < modelContents.size(); ++i) {
+		QVariantMap map = modelContents[i];
+		qint64 mapId = map["id"].value<qint64>();
+		if (presentation->id() == mapId) {
+			indexPath << i;
+		}
+	}
+	qDebug() << indexPath;
 	// Update the presentation at the computed index (if the presentation exists in the model)
 	if (!indexPath.isEmpty()) {
 		// Note: we do not need to check if the new value is different from the old value, since this is handled in the class mutators themselves
-		QVariantMap updatedMap = this->wrapToQVarMap(buffer);
+		QVariantMap updatedMap = this->wrapToQVarMap(presentation);
 		model->updateItem(indexPath, updatedMap);
 	}
 }
@@ -392,19 +364,15 @@ void ApplicationUI::goToPage(bb::cascades::Page* page) {
 void ApplicationUI::commitPreparedChanges() {
 	qDebug() << "Committing all changes to the active presentation...";
 
-	// Preserve the original values of the presentation in order to be able to locate it in the data model
-	Presentation* target = _activePresentation->copy();
-
 	// Commit the changes to the actual presentation via the active presentation reference
 	_activePresentation->setName(_bufferPresentation->name());
 	_activePresentation->setTotalTime(_bufferPresentation->totalTime());
 	_activePresentation->setSlides(_bufferPresentation->slides());
 
 	// Reflect this commit in the presentations data model
-	this->updatePresentationDataModel(target, _bufferPresentation);
+	this->updatePresentationDataModel(_activePresentation);
 
-	// Free the original copy and the buffer
-	delete target;
+	// Free the buffer
 	delete _bufferPresentation;
 
 	qDebug() << "Changes committed.";

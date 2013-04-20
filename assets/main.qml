@@ -53,7 +53,7 @@ NavigationPane {
                     grouping: ItemGrouping.None
                     sortedAscending: false // Latest modified presentations to appear first
                     
-                    sortingKeys: [ "dateModified" ]
+                    sortingKeys: [ "dateModified", "name" ]
                 }
             ]			
 

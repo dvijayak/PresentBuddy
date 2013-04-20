@@ -17,6 +17,9 @@ namespace javelind {
 /* House Keeping */
 
 void Presentation::initialize() {
+	// Initialize any uninitialized data members
+	_id = QDateTime::currentMSecsSinceEpoch(); // Guaranteed to be unique for an entire session
+
 	// Connect signals with slots
 	bool res;
 	res = QObject::connect(this, SIGNAL(nameChanged(QString)), this, SLOT(updateLastModified()));
@@ -68,6 +71,10 @@ Presentation::~Presentation() {
 }
 
 /* Accessors */
+
+qint64 Presentation::id() {
+	return _id;
+}
 
 QString Presentation::name() {
 	return _name;
@@ -138,7 +145,9 @@ Presentation* Presentation::copy() {
 		slidesCopy.append(slide->copy());
 	}
 
-	return new Presentation(_name, _totalTime, _lastModified, slidesCopy);
+	Presentation* copy = new Presentation(_name, _totalTime, _lastModified, slidesCopy);
+	copy->_id = _id;
+	return copy;
 }
 
 /* Add a slide (append at the end) to the presentation list of slides */
