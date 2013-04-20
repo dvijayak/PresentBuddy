@@ -132,7 +132,13 @@ void Presentation::setSlides(SlideList slides) {
 /* Member Functions */
 
 Presentation* Presentation::copy() {
-	return new Presentation(_name, _totalTime, _lastModified, _slides);
+	// Each slide in the list of slides must also be copied
+	SlideList slidesCopy;
+	foreach (Slide* slide, _slides) {
+		slidesCopy.append(slide->copy());
+	}
+
+	return new Presentation(_name, _totalTime, _lastModified, slidesCopy);
 }
 
 /* Add a slide (append at the end) to the presentation list of slides */

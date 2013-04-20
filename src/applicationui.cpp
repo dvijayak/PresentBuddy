@@ -428,40 +428,6 @@ void ApplicationUI::addNewSlide() {
 	qDebug() << "Buffered new slide. Ready to commit.";
 }
 
-
-///* Save (buffer) any changes made in the prepare page (including adding/deleting slides) */
-//void ApplicationUI::savePreparedChanges() {
-//	qDebug() << "Buffering the prepared changes...";
-//
-//	// Get references to required UI objects
-//	Page* page = _root->findChild<Page*>("preparePage");
-//	TextField* nameText = page->findChild<TextField*>("nameText");
-//	Slider* totalTimeSlider = page->findChild<Slider*>("totalTimeSlider");
-//	QList<Container*> slideUIList = page->findChildren<Container*>("slideListItem");
-//
-//	// Save the new presentation name
-//	_bufferPresentation->setName(nameText->text());
-//
-//	// Save the new presentation total time
-//	_bufferPresentation->setTotalTime((int)(totalTimeSlider->value()));
-//
-//	// Save all new slide changes
-//	SlideList& slides = _bufferPresentation->slidesRef();
-//	for (int i = 0; i < slideUIList.size(); ++i) {
-//		// Get references to required UI objects
-//		TextField* slideTitleText = slideUIList[i]->findChild<TextField*>("slideTitleText");
-//		Slider* slideTimeSlider = slideUIList[i]->findChild<Slider*>("slideTimeSlider");
-//
-//		// Save the new slide name
-//		slides[i]->setTitle(slideTitleText->text());
-//
-//		// Save the new slide time
-//		slides[i]->setTime((int)(slideTimeSlider->value()));
-//	}
-//
-//	qDebug() << "Buffered prepared changes. Ready to commit.";
-//}
-
 /* Functions for buffering changes */
 
 void ApplicationUI::bufferNameChange(QString name) {

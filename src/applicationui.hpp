@@ -84,7 +84,6 @@ public:
 public slots:
 	void goToPage(bb::cascades::Page* page); // Cascades data types need to be fully qualified
 	void addNewSlide(); // Add a new slide to the active presentation
-//	void savePreparedChanges();
 	void commitPreparedChanges(); // Commit all buffered changes to the active presentation made in the prepare page.
 	void testSlot();
 	void bufferNameChange(QString name);

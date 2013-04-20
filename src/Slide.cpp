@@ -84,6 +84,10 @@ bool Slide::operator ==(const Slide*& other) const {
 
 /* Member Functions */
 
+Slide* Slide::copy() {
+	return new Slide(_title, _time);
+}
+
 /* Print the slide to stdout */
 void Slide::print() {
 	qDebug() << "\t---xx---";
