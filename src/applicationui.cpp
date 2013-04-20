@@ -527,9 +527,25 @@ void ApplicationUI::commitPreparedChanges() {
 	// Commit the changes to the actual presentation via the active presentation reference
 	_activePresentation->setName(_bufferPresentation->name());
 	_activePresentation->setTotalTime(_bufferPresentation->totalTime());
-	_activePresentation->setSlides(_bufferPresentation->slides());
 
-	// Reflect this commit in the presentations data model
+	// The case of committing the slide list is a little more sophisticated...
+	SlideList& activeSlideList = _activePresentation->slidesRef();
+	int activeSlideListSize = activeSlideList.size();
+	SlideList& bufferSlideList = _bufferPresentation->slidesRef();
+	int bufferSlideListSize = bufferSlideList.size();
+	// If the number of slides changed, commit the entire slide list directly as usual
+	if (activeSlideListSize != bufferSlideListSize) {
+		_activePresentation->setSlides(_bufferPresentation->slides());
+	}
+	// else, commit each slide individually
+	else {
+		for (int i = 0; i < bufferSlideListSize; ++i) {
+			activeSlideList[i]->setTitle(bufferSlideList[i]->title());
+			activeSlideList[i]->setTime(bufferSlideList[i]->time());
+		}
+	}
+
+	// Reflect these commits in the presentations data model
 	this->updatePresentationDataModel(_activePresentation);
 
 	// Free the buffer

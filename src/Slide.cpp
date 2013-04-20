@@ -71,6 +71,7 @@ void Slide::setTime(int time) {
 
 /* Operator Overloads */
 
+/* Copy */
 bool Slide::operator ==(const Slide*& other) const {
 	if (_title == other->_title
 			&& _time == other->_time) {
