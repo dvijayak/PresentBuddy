@@ -16,6 +16,7 @@
 #include <bb/data/JsonDataAccess>
 
 #include <QTimer>
+#include <QFile>
 #include <QDate>
 #include <QDateTime>
 #include <QVector>
@@ -60,14 +61,26 @@ ApplicationUI::ApplicationUI(Application *app) : QObject(app)
     _dataModel = this->mainDataModel();
 
 	// Create initial list of Presentation objects from the data file
-    QString filePath(QDir::currentPath() + "/app/native/assets/presentations.json");
-//    QString filePath(QDir::homePath() + "/presentations_save.json");
-    // TODO Check if file exists. If not, or if file is empty, then show no presentations
-    _presentations = this->getListFromJSON(filePath);
+//    QString filePath(QDir::currentPath() + "/app/native/assets/presentations.json");
+    QString filePath(QDir::homePath() + "/presentations_save.json");
+    // TODO Create more generic file name
+    if (QFile::exists(filePath)) {
+    	qDebug() << QString("File %1 found! Creating presentations list...").arg(filePath);
+
+    	_presentations = this->getListFromJSON(filePath);
+    }
+    else {
+    	qDebug() << "No base file found. Creating an empty presentations list...";
+
+    	_presentations = PresentationList(); // Create empty list
+    }
+	qDebug() << "List created.";
 
 	// Insert the list of presentations into the data model
-    QVariantList presentationList = this->wrapListToQVarList(_presentations);
-    ((GroupDataModel*)_dataModel)->insertList(presentationList);
+    if (!_presentations.isEmpty()) {
+		QVariantList presentationList = this->wrapListToQVarList(_presentations);
+		((GroupDataModel*)_dataModel)->insertList(presentationList);
+    }
 
 	// Connect signals with slots
 	bool res;
@@ -92,6 +105,7 @@ ApplicationUI::~ApplicationUI() {
 }
 
 /* Accessors */
+
 Application* ApplicationUI::app() {
 	return _app;
 }
@@ -224,41 +238,143 @@ void ApplicationUI::reinitializeMainPage(Page* page) {
 
 /* Retrieves a list of Presentation objects from a QVariantList wrapper */
 PresentationList ApplicationUI::unWrapListFromQVarList(QVariantList qVarList) {
+	qDebug() << "Extracting presentations from the JSON file...";
+
 	PresentationList list;
-	foreach (QVariant wrappedEntry, qVarList) {
-		QVariantMap entry = wrappedEntry.value<QVariantMap>();
+	if (!qVarList.isEmpty()) {
+		foreach (QVariant wrappedEntry, qVarList) {
+			QVariantMap entry = wrappedEntry.value<QVariantMap>();
 
-		// Name of the presentation
-		QString name = entry["name"].value<QString>();
+			// Name of the presentation
+			QString name;
+			if (entry.contains("name")) {
+				name = entry["name"].value<QString>();
+				if (name.isEmpty()) { // (Might be irrelevant, but) works well since a default empty string is assigned to key "name" if the key doesn't exist at all (default QMap behaviour)
+					qDebug() << "Error: presentation has not been provided a name. Skipping this JSON entry...";
 
-		// Time-stamp of the date that the presentation was last modified
-		QDateTime lastModified = QDateTime::fromString(entry["dateModified"].value<QString>(), Qt::ISODate);
+					continue;
+				}
+			}
+			else {
+				qDebug() << "Error: presentation has not been provided a Name. Skipping this JSON entry...";
 
-		// Total time required for the presentation
-		QVariantMap time = entry["totalTime"].value<QVariant>().value<QVariantMap>();
-		int totalTime = (60*time["minutes"].value<int>()) + time["seconds"].value<int>();
+				continue;
+			}
 
-		// Slides of the presentation
-		QVariantList qVarSlideList = entry["slides"].value<QVariant>().value<QVariantList>();
-		SlideList slideList;
-		foreach (QVariant wrappedSlide, qVarSlideList) {
-			QVariantMap slideEntry = wrappedSlide.value<QVariantMap>();
+			// Time-stamp of the date that the presentation was last modified
+			QDateTime lastModified;
+			if (entry.contains("dateModified")) {
+				lastModified = QDateTime::fromString(entry["dateModified"].value<QString>(), Qt::ISODate);
+				if (!lastModified.isValid()) { // Also (might be irrelevant, but) works well since the default QDateTime value is a null date/time, which is invalid as per QDateTime
+					qDebug() << "Invalid date/time (most likely bad format - the only format accepted is ISO 8601 standard). Skipping this JSON entry...";
 
-			// Title of the slide
-			QString title = slideEntry["title"].value<QString>();
+					continue;
+				}
+			}
+			else {
+				qDebug() << "Error: presentation has not been provided a Date/Time Time-stamp (format ISO 8601 standard). Skipping this JSON entry...";
 
-			// Time allotted for the slide
-			QVariantMap time = slideEntry["time"].value<QVariant>().value<QVariantMap>();
-			int slideTime = (60*time["minutes"].value<int>()) + time["seconds"].value<int>();
+				continue;
+			}
 
-			Slide* slide = new Slide(title, slideTime);
-			slideList.append(slide);
+			// Total time required for the presentation
+			int totalTime;
+			if (entry.contains("totalTime")) {
+				QVariantMap time = entry["totalTime"].value<QVariant>().value<QVariantMap>();
+				if (time.contains("minutes")) {
+					totalTime = (60*time["minutes"].value<int>());
+					if (time.contains("seconds")) {
+						totalTime += time["seconds"].value<int>();
+					}
+
+					// The total time for the presentation cannot be negative or  0
+					if (totalTime <= 0) {
+						totalTime = 600; // Defaults to 10 minutes
+
+						qDebug() << "Warning: presentation Total Time is negative or 0. Defaulted to 600 (10 minutes).";
+					}
+				}
+				else {
+					totalTime = 600; // Ditto as above
+
+					qDebug() << "Warning: presentation Total Time has not been provided. Defaulted to 600 (10 minutes 0 seconds).";
+				}
+			}
+			else {
+				totalTime = 600; // Ditto as above
+
+				qDebug() << "Warning: presentation Total Time has not been provided. Defaulted to 600 (10 minutes 0 seconds).";
+			}
+
+			// Slides of the presentation
+			SlideList slideList;
+			if (entry.contains("slides")) {
+				QVariantList qVarSlideList = entry["slides"].value<QVariant>().value<QVariantList>();
+				if (!qVarSlideList.isEmpty()) {
+					foreach (QVariant wrappedSlide, qVarSlideList) {
+						QVariantMap slideEntry = wrappedSlide.value<QVariantMap>();
+
+						// Title of the slide
+						QString title;
+						if (slideEntry.contains("title")) {
+							title = slideEntry["title"].value<QString>();
+							if (title.isEmpty()) {
+								title = "Untitled";
+
+								qDebug() << "Warning: slide Title is empty/invalid. Defaulted to \"Untitled\".";
+							}
+						}
+						else {
+							title = "Untitled";
+
+							qDebug() << "Warning: slide Title has not been provided. Defaulted to \"Untitled\".";
+						}
+
+						// Time allotted for the slide
+						int slideTime;
+						if (slideEntry.contains("time")) {
+							QVariantMap time = slideEntry["time"].value<QVariant>().value<QVariantMap>();
+							if (time.contains("minutes")) {
+								slideTime = (60*time["minutes"].value<int>());
+								if (time.contains("seconds")) {
+									slideTime += time["seconds"].value<int>();
+								}
+
+								// The slide time for the presentation cannot be negative or 0 and must be less than or equal to the presentation total time
+								if (slideTime <= 0 || slideTime > totalTime) {
+									slideTime = 1; // Defaults to 1 second
+
+									qDebug() << "Warning: slide Time is negative or 0. Defaulted to 1 (0 minutes 1 second).";
+								}
+								else if (slideTime > totalTime) {
+									slideTime = totalTime; // Defaults to presentation total time
+								}
+							}
+							else {
+								slideTime = 1; // Defaults to 1 second
+
+								qDebug() << "Warning: slide Time has not been provided. Defaulted to 1 (0 minutes 1 second).";
+							}
+						}
+						else {
+							slideTime = totalTime; // Ditto
+
+							qDebug() << "Warning: slide Time has not been provided. Defaulted to 1 (0 minutes 1 second).";
+						}
+
+						Slide* slide = new Slide(title, slideTime);
+						slideList.append(slide);
+					}
+				}
+			}
+			qDebug() << "Warning: presentation has not been provided any Slides. Empty slide list created.";
+
+			Presentation* presentation = new Presentation(name, totalTime, lastModified, slideList);
+			presentation->print();
+			list.append(presentation);
 		}
-
-		Presentation* presentation = new Presentation(name, totalTime, lastModified, slideList);
-		presentation->print();
-		list.append(presentation);
 	}
+	qDebug() << "Error: no presentations exist in the JSON file. Creating empty presentations list...";
 
 	return list;
 }
@@ -271,10 +387,15 @@ PresentationList ApplicationUI::getListFromJSON(QString filePath) {
 	QVariant wrapList = jda.load(filePath);
 	QList<QVariant> fileEntries = wrapList.value<QVariantList>();
 
-	// TODO Error checking - ensuring all required fields are present, and if not, how to deal with them swiftly
+	PresentationList list;
+	if (!wrapList.isNull() && wrapList.isValid() && !fileEntries.isEmpty()) {
+		// Create the list of Presentation objects
+		list = this->unWrapListFromQVarList(fileEntries);
+	}
+	else {
+		qDebug() << "JSON file is invalid or empty. Creating an empty presentations list...";
+	}
 
-	// Create the list of Presentation objects
-	PresentationList list = this->unWrapListFromQVarList(fileEntries);
 	return list;
 }
 
