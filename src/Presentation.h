@@ -69,6 +69,8 @@ public:
 
 	Presentation* copy(); // Note: QObject does not have a visible copy constructor, thus we need to make an explicit copy function ourselves
 	void addSlide(Slide* slide);
+	void deleteSlide(int index);
+	void deleteSlide(Slide* slide);
 	Q_INVOKABLE void print();
 
 signals:

@@ -85,6 +85,7 @@ public slots:
 	void updatePresentationDataModel(Presentation* presentation); // Can be invoked in response to certain actions, like page transitions (returning to the main page)
 	void goToPage(bb::cascades::Page* page); // Cascades data types need to be fully qualified
 	void addNewSlide(); // Add a new slide to the active presentation
+	void deleteSlide(int index); // Delete the specified slide (by index) from the active presentation
 	void commitPreparedChanges(); // Commit all buffered changes to the active presentation made in the prepare page.
 	void testSlot();
 

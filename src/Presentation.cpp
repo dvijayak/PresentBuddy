@@ -150,10 +150,22 @@ Presentation* Presentation::copy() {
 	return copy;
 }
 
-/* Add a slide (append at the end) to the presentation list of slides */
+/* Add the specified slide (append at the end) to the presentation list of slides */
 void Presentation::addSlide(Slide* slide) {
 	_slides.append(slide);
 	slide->print();
+	emit slidesChanged(_slides);
+}
+
+/* Delete the slide corresponding to the specified slide index from the presentation list of slides */
+void Presentation::deleteSlide(int index) {
+	_slides.removeAt(index);
+	emit slidesChanged(_slides);
+}
+
+/* Delete the specified slide from the presentation list of slides */
+void Presentation::deleteSlide(Slide* slide) {
+	_slides.removeOne(slide);
 	emit slidesChanged(_slides);
 }
 

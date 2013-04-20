@@ -128,8 +128,8 @@ NavigationPane {
                                     attachedObjects: [
                                         SystemDialog {
                                             id: deletePresentationDialog
-                                            title: "Confirm delete"
-                                            body: "Are you sure?"
+                                            title: "Confirm delete presentation"
+                                            body: "Are you sure you want to delete " + listItemRoot.ListItem.data.name + "?"
                                             onFinished: {
                                                 if (deletePresentationDialog.result
                                                     == SystemUiResult.ConfirmButtonSelection) {

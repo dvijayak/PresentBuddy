@@ -237,6 +237,30 @@ Page {
                                             }
                                         }
                                     }
+                                    Container {
+	                                    Button {
+	                                        id: deleteSlideButton
+	                                        imageSource: "asset:///icons/ic_delete.png"
+	
+	                                        attachedObjects: [
+	                                            SystemDialog {
+	                                                id: deleteSlideDialog
+	                                                title: "Confirm delete slide"
+	                                                body: "Are you sure you want to delete " + listItemRoot.ListItem.data.title + "?"
+	                                                onFinished: {
+	                                                    if (deleteSlideDialog.result == SystemUiResult.ConfirmButtonSelection) {	                                                        
+	                                                        var index = listItemRoot.ListItem.indexInSection;
+                                                            Qt.appUI.deleteSlide(index);
+	                                                    }
+	                                                }
+	                                            }
+	                                        ]
+	
+	                                        onClicked: {
+	                                            deleteSlideDialog.show();
+	                                        }
+	                                    }
+                                    }
                                 }                                
                             }
                             

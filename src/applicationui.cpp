@@ -148,10 +148,12 @@ Presentation* ApplicationUI::activePresentation() {
 	return 0; // Return NULL if not found
 }
 
+/* Delete the active presentation */
 void ApplicationUI::deletePresentation() {
 	this->deletePresentation(this->activePresentation());
 }
 
+/* Delete the specified presentation, both from the raw list as well as from the data model */
 void ApplicationUI::deletePresentation(Presentation* presentation) {
 	qDebug() << QString("Deleting presentation %1...").arg(presentation->name());
 
@@ -536,6 +538,7 @@ void ApplicationUI::commitPreparedChanges() {
 	qDebug() << "Changes committed.";
 }
 
+/* Append a new slide to the slide list of the active presentation */
 void ApplicationUI::addNewSlide() {
 	qDebug() << "Adding a new slide to the buffer...";
 
@@ -552,6 +555,24 @@ void ApplicationUI::addNewSlide() {
 	dataModel->append(QVariant(qVarMap));
 
 	qDebug() << "Buffered new slide. Ready to commit.";
+}
+
+/* Delete an existing slide (according to index) from the active presentation */
+void ApplicationUI::deleteSlide(int index) {
+	qDebug() << QString("Deleting slide %1: %2...").arg(index).arg(_bufferPresentation->slides().at(index)->title());
+
+	// Delete the slide from the raw list
+	_bufferPresentation->deleteSlide(index);
+
+	qDebug() << "Buffered slide deletion. Ready to commit.";
+
+	// Also, remove the slide from the slides data model
+	Page* page = _root->findChild<Page*>("preparePage");
+	ListView* listView = page->findChild<ListView*>("slideListView");
+	QVariantListDataModel* dataModel = (QVariantListDataModel*)listView->dataModel();
+	dataModel->removeAt(index);
+
+	qDebug() << "Removed from slides data model.";
 }
 
 /* Functions for buffering changes */
