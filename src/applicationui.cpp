@@ -32,6 +32,7 @@ const QString ApplicationUI::DISPLAY_DATE_TIME_FORMAT("MMMM d yyyy h:mm:ss AP");
 ApplicationUI::ApplicationUI(Application *app) : QObject(app)
 {
 	_app = app;
+	_activePresentationBeforeChange = 0;
 
     // Create scene document from main.qml asset and
     // set parent to created document to ensure it exists for the whole application lifetime
@@ -59,8 +60,8 @@ ApplicationUI::ApplicationUI(Application *app) : QObject(app)
     _dataModel = this->getMainDataModel();
 
 	// Create initial list of Presentation objects from the data file
-//    QString filePath(QDir::currentPath() + "/app/native/assets/presentations.json");
-    QString filePath(QDir::homePath() + "/presentations_save.json");
+    QString filePath(QDir::currentPath() + "/app/native/assets/presentations.json");
+//    QString filePath(QDir::homePath() + "/presentations_save.json");
     // TODO Check if file exists. If not, or if file is empty, then show no presentations
     _presentations = this->getListFromJSON(filePath);
 
@@ -118,7 +119,20 @@ PresentationList ApplicationUI::presentations() {
 //}
 
 /* Mutators */
-// TODO
+
+/* Store a copy of the original active presentation */
+void ApplicationUI::makeCopyActivePresentation() {
+	// Free memory (if allocated before) prior to reuse
+	if (_activePresentationBeforeChange != 0) {
+		delete _activePresentationBeforeChange;
+	}
+
+	// Note: QObject does not have a visible copy constructor, thus we need to explicitly copy ourselves
+	_activePresentationBeforeChange = new Presentation(_activePresentation->name()
+			, _activePresentation->totalTime()
+			, _activePresentation->lastModified()
+			, _activePresentation->slides());
+}
 
 /* Member Functions */
 
@@ -320,29 +334,18 @@ void ApplicationUI::updatePresentationDataModel(Presentation* presentation) {
 	GroupDataModel* model = (GroupDataModel*)_dataModel;
 
 	// Find the index path of the presentation in the data model (this is needed because the sorted order is different from the raw list order)
-	QVariantMap presentationMap = this->wrapToQVarMap(presentation);
-	QVariantList indexPath = model->find(presentationMap);
+	QVariantMap beforeChangePresentationMap = this->wrapToQVarMap(_activePresentationBeforeChange);
+	QVariantList indexPath = model->find(beforeChangePresentationMap);
 
 	qDebug() << "PRESENTATION MAP IS ";
-	qDebug() << presentationMap;
+	qDebug() << beforeChangePresentationMap;
 	qDebug() << "INDEX PATH IS: ";
 	qDebug() <<	 indexPath;
-
-	qDebug() << "Here are the existing stuff";
-	QVariant v;
-	QVariantList debugList;
-	debugList.append(QVariant::fromValue(0));
-	qDebug() << model->data(debugList);
-	debugList.clear();
-	debugList.append(QVariant::fromValue(1));
-	qDebug() << model->data(debugList);
-	debugList.clear();
-	debugList.append(QVariant::fromValue(2));
-	qDebug() << model->data(debugList);
 
 	// Update the presentation at the computed index (if the presentation exists in the model)
 	if (!indexPath.isEmpty()) {
 		// Note: we do not need to check if the new value is different from the old value, since this is handled in the class mutators themselves
+		QVariantMap presentationMap = this->wrapToQVarMap(presentation);
 		model->updateItem(indexPath, presentationMap);
 	}
 }
@@ -367,6 +370,9 @@ void ApplicationUI::goToPage(bb::cascades::Page* page) {
 
 void ApplicationUI::addNewSlide() {
 	qDebug() << "Adding a new slide to the active presentation...";
+
+	// Store a copy of the original active presentation
+	this->makeCopyActivePresentation();
 
 	// Create new empty slide and add it to the active presentation
 	Slide* slide = new Slide();
@@ -394,6 +400,9 @@ void ApplicationUI::savePreparedChanges() {
 	TextField* nameText = page->findChild<TextField*>("nameText");
 	Slider* totalTimeSlider = page->findChild<Slider*>("totalTimeSlider");
 	QList<Container*> slideUIList = page->findChildren<Container*>("slideListItem");
+
+	// Store a copy of the original active presentation
+	this->makeCopyActivePresentation();
 
 	// Save the new presentation name
 	_activePresentation->setName(nameText->text());

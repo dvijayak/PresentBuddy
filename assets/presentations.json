@@ -1,6 +1,7 @@
 [
 	{
-		"name" : "An Introduction to the Cloud",
+		"id" : 1366411722599,
+		"name" : "An Introduction to the Cloud",		
 		"dateModified" : "2013-01-28T22:25:00" ,
 		"totalTime" : 
 			{
@@ -44,7 +45,8 @@
 			]
 	} ,
 	{
-		"name" : "Extended Euclidean Algorithm",
+		"id" : 1366411722600,
+		"name" : "Extended Euclidean Algorithm",		
 		"dateModified" : "2012-02-28T12:01:00" ,
 		"totalTime" : 
 			{
@@ -80,7 +82,8 @@
 			]
 	} ,
 	{
-		"name" : "Off-Loading Mobile Applications to the Cloud",
+		"id" : 1366411722602,
+		"name" : "Off-Loading Mobile Applications to the Cloud",		
 		"dateModified" : "2013-04-01T12:00:45" ,
 		"totalTime" : 
 			{

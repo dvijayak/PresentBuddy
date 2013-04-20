@@ -47,6 +47,7 @@ public:
 
 	/* Accessors */
 
+	qint64 id();
 	QString name();
 	int totalTime();
 	QDateTime lastModified();

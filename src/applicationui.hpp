@@ -31,6 +31,7 @@ private:
     DataModel* _dataModel; // the current data model of the application
     PresentationList _presentations;
     Presentation* _activePresentation; // reference to the presentation currently being worked on
+    Presentation* _activePresentationBeforeChange; // A copy of the above, used for identifying its correspondent in the data model
 
 public:
     /* Static Members */
@@ -51,11 +52,13 @@ public:
     DataModel* dataModel();
     PresentationList presentations();
     Presentation* activePresentation();
+    Presentation* activePresentationBeforeChange();
 
     /* QVariant[List] wrappers for exposing to QML */
 //    QVariantList presentationsQML();
 
     /* Mutators */
+    void makeCopyActivePresentation();
 
     void setActivePresentation(Presentation* presentation);
 
