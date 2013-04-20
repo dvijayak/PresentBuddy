@@ -66,6 +66,7 @@ public:
 
 	/* Member Functions */
 
+	Presentation* copy(); // Note: QObject does not have a visible copy constructor, thus we need to make an explicit copy function ourselves
 	void addSlide(Slide* slide);
 	Q_INVOKABLE void print();
 

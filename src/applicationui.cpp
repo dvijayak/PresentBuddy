@@ -372,7 +372,8 @@ void ApplicationUI::addNewSlide() {
 	qDebug() << "Adding a new slide to the active presentation...";
 
 	// Store a copy of the original active presentation
-	this->makeCopyActivePresentation();
+//	this->makeCopyActivePresentation();
+	_activePresentationBeforeChange = _activePresentation->copy();
 
 	// Create new empty slide and add it to the active presentation
 	Slide* slide = new Slide();
@@ -402,7 +403,8 @@ void ApplicationUI::savePreparedChanges() {
 	QList<Container*> slideUIList = page->findChildren<Container*>("slideListItem");
 
 	// Store a copy of the original active presentation
-	this->makeCopyActivePresentation();
+//	this->makeCopyActivePresentation();
+	_activePresentationBeforeChange = _activePresentation->copy();
 
 	// Save the new presentation name
 	_activePresentation->setName(nameText->text());

@@ -131,6 +131,10 @@ void Presentation::setSlides(SlideList slides) {
 
 /* Member Functions */
 
+Presentation* Presentation::copy() {
+	return new Presentation(_name, _totalTime, _lastModified, _slides);
+}
+
 /* Add a slide (append at the end) to the presentation list of slides */
 void Presentation::addSlide(Slide* slide) {
 	_slides.append(slide);
