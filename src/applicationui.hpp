@@ -4,7 +4,9 @@
 
 #include <QObject>
 #include <QList>
+#include <QTimer>
 #include <bb/cascades/Application>
+#include <bb/cascades/QmlDocument>
 #include <bb/cascades/AbstractPane>
 #include <bb/cascades/Page>
 #include <bb/cascades/DataModel>
@@ -25,13 +27,18 @@ typedef QList< Presentation* > PresentationList;
 class ApplicationUI : public QObject
 {
     Q_OBJECT
+    Q_PROPERTY(QVariantMap activePresentation READ activePresentationQML)
+
 private:
     Application* _app;
+    QmlDocument* _qml;
     AbstractPane* _root;
     DataModel* _dataModel; // the current data model of the application
     PresentationList _presentations;
     Presentation* _activePresentation; // reference to the presentation currently being worked on
     Presentation* _bufferPresentation; // A buffer to store any changes made to the active presentation before actually committing them
+    QTimer _slideCountdown;
+    QTimer _siideColour;
 
 public:
     /* Static Members */
@@ -56,14 +63,20 @@ public:
     Presentation* activePresentation();
     DataModel* mainDataModel();
 
-    /* QVariant[List] wrappers for exposing to QML */
+    /* QML Accessors */
 //    QVariantList presentationsQML();
+    QVariantMap activePresentationQML();
 
     /* Mutators */
 
     void setActivePresentation(Presentation* presentation);
 
     /* Member Functions */
+
+    static int* timeToMinSecs(int time);
+    static int timeFromMinSecs(int* time);
+    Q_INVOKABLE static QString timeToText(int time);
+    Q_INVOKABLE static QString minSecToText(int* time);
 
     QVariantList findInDataModel(Presentation* presentation, DataModel* model);
 
@@ -79,7 +92,9 @@ public:
     PresentationList unWrapListFromQVarList(QVariantList qVarList);
     PresentationList getListFromJSON(QString filePath);
     void saveListToJSON(PresentationList list, QString filePath);
-//    void updatePresentationDataModel(Presentation* presentation); // Can be invoked in response to certain actions, like page transitions (returning to the main page)
+
+signals:
+	void performInitialized();
 
 public slots:
 	void updatePresentationDataModel(Presentation* presentation); // Can be invoked in response to certain actions, like page transitions (returning to the main page)
@@ -87,7 +102,6 @@ public slots:
 	void addNewSlide(); // Add a new slide to the active presentation
 	void deleteSlide(int index); // Delete the specified slide (by index) from the active presentation
 	void commitPreparedChanges(); // Commit all buffered changes to the active presentation made in the prepare page.
-	void testSlot();
 
 	Q_INVOKABLE void deletePresentation();
 	Q_INVOKABLE void deletePresentation(Presentation* presentation);
@@ -98,6 +112,9 @@ public slots:
 	void bufferTotalTimeChange(float value);
 	Q_INVOKABLE void bufferSlideTitleChange(int index, QString title);
 	Q_INVOKABLE void bufferSlideTimeChange(int index, float value);
+
+	/* Perform page */
+
 };
 
 Q_DECLARE_METATYPE(PresentationList);

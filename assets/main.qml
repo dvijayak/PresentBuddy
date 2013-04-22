@@ -3,7 +3,7 @@ import bb.system 1.0
 
 NavigationPane {    
     id: navigationPane
-    property string activePresentation // Expose the active presentation to C++
+    property string activePresentationID // Expose the active presentation to C++ via its ID property
 
     attachedObjects: [
         // Attach additional pages of the application dynamically
@@ -26,6 +26,7 @@ NavigationPane {
 
 		// TODO Also, these QML components are created BEFORE the presentations list are read from JSON. Interesting!
 		Qt.appUI = appUI;
+		Qt.activePresentation = activePresentation;
     }
     
 
@@ -95,6 +96,9 @@ NavigationPane {
                                     imageSource: "asset:///icons/9-av-play81.png"
                                     
                                     onClicked: {
+                                        // Set the active presentation to be the one that was selected
+                                        Qt.navigationPane.activePresentationID = listItemRoot.ListItem.data.id;
+
                                         var page = Qt.pageDefinition.createObject();
                                         Qt.navigationPane.push(page);
                                     }                                    
@@ -114,7 +118,7 @@ NavigationPane {
                                     
                                     onClicked: {
                                         // Set the active presentation to be the one that was selected                                              
-                                        Qt.navigationPane.activePresentation = listItemRoot.ListItem.data.id;
+                                        Qt.navigationPane.activePresentationID = listItemRoot.ListItem.data.id;
 
                                         // Push the prepare page on to the stack (go to the prepare page)
                                         var page = Qt.preparePageDefinition.createObject();                                        
@@ -134,7 +138,7 @@ NavigationPane {
                                                 if (deletePresentationDialog.result
                                                     == SystemUiResult.ConfirmButtonSelection) {
                                                     // Set the active presentation to be the one that was selected
-                                                    Qt.navigationPane.activePresentation = listItemRoot.ListItem.data.id;
+                                                    Qt.navigationPane.activePresentationID = listItemRoot.ListItem.data.id;
                                                     
                                                     Qt.appUI.deletePresentation();
                                                 }

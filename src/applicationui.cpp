@@ -38,6 +38,7 @@ ApplicationUI::ApplicationUI(Application *app) : QObject(app)
     // Create scene document from main.qml asset and
     // set parent to created document to ensure it exists for the whole application lifetime
     QmlDocument *qml = QmlDocument::create("asset:///main.qml").parent(this);
+    _qml = qml;
 
     // Register new meta types
     qRegisterMetaType<Presentation*>();
@@ -122,14 +123,46 @@ PresentationList ApplicationUI::presentations() {
 	return _presentations;
 }
 
+/* QML Accessors */
+
 //QVariantList ApplicationUI::presentationsQML() {
 //	return this->wrapListToQVarList(_presentations);
 //}
+
+QVariantMap ApplicationUI::activePresentationQML() {
+	return this->wrapToQVarMap(_activePresentation);
+}
 
 /* Mutators */
 
 
 /* Member Functions */
+
+/* Convert an integer time (seconds) to a minutes/seconds representation */
+int* ApplicationUI::timeToMinSecs(int time) {
+	int* timeRep = new int[2];
+	timeRep[0] = time/60;
+	timeRep[1] = time%60;
+	return timeRep;
+}
+
+/* Convert a minutes/seconds time to an integer (seconds) representation */
+int ApplicationUI::timeFromMinSecs(int* time) {
+	return (time[0]*60) + time[1];
+}
+
+/* Display a time in minutes/seconds as a string. First, convert integer time to minutes/seconds representation. */
+QString ApplicationUI::timeToText(int time) {
+	int* timeRep = ApplicationUI::timeToMinSecs(time);
+	QString output = QString("%1:%2").arg(timeRep[0]).arg(timeRep[1]);
+	delete timeRep;
+	return output;
+}
+
+/* Display a time (already in minutes/seconds representation) as a string. */
+QString ApplicationUI::minSecToText(int* time) {
+	return QString("%1:%2").arg(time[0]).arg(time[1]);
+}
 
 /* Application Logic */
 
@@ -141,7 +174,7 @@ DataModel* ApplicationUI::mainDataModel() {
 Presentation* ApplicationUI::activePresentation() {
 	foreach (Presentation* presentation, _presentations) {
 		// The active presentation is 'selected' in the QML via the "activePresentation" property of the root navigation pane
-		if (presentation->id() == _root->property("activePresentation").value<qint64>()) {
+		if (presentation->id() == _root->property("activePresentationID").value<qint64>()) {
 			return presentation;
 		}
 	}
@@ -212,14 +245,38 @@ void ApplicationUI::initializePreparePage(Page* page) {
 	Q_UNUSED(res);
 }
 
-void ApplicationUI::testSlot() {
-	QList<Container*> slideUIList = _root->findChildren<Container*>("slideListItem");
-	qDebug() << QString("There are %1 slides in this view now.").arg(slideUIList.size());
-}
-
 void ApplicationUI::initializePerformPage(Page* page) {
 	qDebug() << "Going to perform page...";
-	Q_UNUSED(page)
+
+	// Set the presentation that needs to be prepared
+	_activePresentation = this->activePresentation();
+
+	// Get references to required UI elements
+	Label* nameUI = page->findChild<Label*>("performName");
+	Label* titleUI = page->findChild<Label*>("performTitle");
+	Label* timeUI = page->findChild<Label*>("performTime");
+	Label* elapsedUI = page->findChild<Label*>("performElapsed");
+	Label* totalTimeUI = page->findChild<Label*>("performTotalTime");
+
+	// Initialize UI element values/text
+	nameUI->setText(_activePresentation->name());
+	SlideList& slides = _activePresentation->slidesRef();
+	if (slides.size() <= 0) {
+		// TODO Peform: Handle situation when there are no slides for the presentation
+	}
+	titleUI->setText(slides[0]->title());
+	timeUI->setText(ApplicationUI::timeToText(slides[0]->time()));
+	elapsedUI->setText(ApplicationUI::timeToText(0));
+	totalTimeUI->setText(ApplicationUI::timeToText(_activePresentation->totalTime()));
+
+	// Connect the onTriggered signal of the action buttons to respective slot functions
+//	ActionItem* playButton = page->findChild<ActionItem*>("playButton");
+//	bool res;
+//	res = QObject::connect(playButton, SIGNAL(triggered()), this, SLOT(playPresentation()));
+//	Q_ASSERT(res);
+//	Q_UNUSED(page)
+
+	emit performInitialized();
 }
 
 void ApplicationUI::reinitializeMainPage(Page* page) {
@@ -593,6 +650,7 @@ void ApplicationUI::deleteSlide(int index) {
 
 /* Functions for buffering changes */
 
+/* Invoked from QML. */
 void ApplicationUI::bufferNameChange(QString name) {
 	qDebug() << "Buffering presentation name change...";
 
@@ -604,6 +662,7 @@ void ApplicationUI::bufferNameChange(QString name) {
 	qDebug() << "Buffered name change. Ready to commit.";
 }
 
+/* Invoked from QML. */
 void ApplicationUI::bufferTotalTimeChange(float value) {
 	qDebug() << "Buffering presentation total time change...";
 
@@ -642,6 +701,25 @@ void ApplicationUI::bufferSlideTimeChange(int index, float value) {
 	qDebug() << "Buffered slide time change. Ready to commit.";
 
 }
+
+//////////////// Perform Page
+
+//void ApplicationUI::playPresentation() {
+//	SlideList& slides = _activePresentation->slidesRef();
+//
+//	foreach (Slide* slide, slides) {
+//		QString title = slide->title();
+//		int time = slide->time();
+//
+//		QTimer countdown, colour;
+//		countdown.setInterval(1000);
+//		colour.setInterval(100);
+//
+//		bool res;
+//		res = QObject::connect(countdown, SIGNAL(timeout()), this, SLOT(countdownSlide()));
+//		Q_ASSERT(res);
+//	}
+//}
 
 
 // Memo: One problem with debugging errors is moc errors, since they are not in your code. Usually, you get these errors when not including certain classes explicitly
