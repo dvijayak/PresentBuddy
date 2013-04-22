@@ -1,5 +1,4 @@
 Makefile
-PresentBuddy.pro
 arm/*
 config.pri
 icon.png
