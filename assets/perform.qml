@@ -6,17 +6,23 @@ import my.library 1.0
 // Performing page
 Page {
     id: performPage
-    objectName: "performPage"
-    property variant feedbackColor;
+    objectName: "performPage"    
+    property variant feedbackColor; // The color representing the visual feedback to the user about the presentation time progress
     
 	onCreationCompleted: {
 	    // Connect signals with slots
-	    Qt.appUI.performInitialized.connect(performPage.onPerformInitialized);
+	    Qt.appUI.performInitialized.connect(performPage.onPerformInitialized);               
+    }
+
+    titleBar: TitleBar {
+        id: titleBar
+        objectName: "titleBar"
     }
 
     /* Initialize the UI with default values based on the active presentation */
     function onPerformInitialized() {
         Qt.activePresentation = Qt.appUI.activePresentation;
+//        titleBar.title = Qt.activePresentation.name;
         performPage.feedbackColor = Color.White;
 
         // Initialize color transition logic
@@ -28,7 +34,7 @@ Page {
         Qt.whiteToGreen = 0.10; // The time (percentage) spent in the initial transition from white to green        
         Qt.slideIndex = 0;
         Qt.elapsedTime = 0; // Total time elapsed in the presentation
-        Qt.currentSlide = Qt.activePresentation.slides[Qt.slideIndex];
+        Qt.currentSlide = Qt.activePresentation.slides[Qt.slideIndex];        
         performPage.initializeSlide(Qt.currentSlide);        
         
         // Start the presentation!
@@ -39,25 +45,56 @@ Page {
     content: Container {
         id: container
 
+		// Hide the action bar right away from the moment the page loads
+        onCreationCompleted: {                                    
+            userInteractionDelay.play();
+            performPage.actionBarVisibility = ChromeVisibility.Visible;
+            titleBar.visibility = ChromeVisibility.Visible;
+        }
+
+		// Auto-hide animation is achieved via a translate transition
+        animations: [
+            TranslateTransition {
+                id: userInteractionDelay
+                delay: 3000
+                onEnded: {
+                    performPage.actionBarVisibility = ChromeVisibility.Hidden;
+                    titleBar.visibility = ChromeVisibility.Hidden;
+                }
+            }
+        ]
+
+		// Display the action bar when the screen is touched
+        onTouch: {                                    
+            if (userInteractionDelay.isPlaying()) {
+                userInteractionDelay.stop();
+            }
+            userInteractionDelay.play();
+            performPage.actionBarVisibility = ChromeVisibility.Visible;
+            titleBar.visibility = ChromeVisibility.Visible;
+        }
+        
+        /////////////
+
         background: Color.Black
         layout: StackLayout {
             orientation: LayoutOrientation.TopToBottom
         }
         
         // Presentation Name
-        Container {
-            horizontalAlignment: HorizontalAlignment.Fill
-            Label {
-                id: presentationName
-                objectName: "performName"
-                
-                text: "Presentation Name"
-                textStyle.color: performPage.feedbackColor
-                verticalAlignment: VerticalAlignment.Center
-                horizontalAlignment: HorizontalAlignment.Center
-                textStyle.textAlign: TextAlign.Center
-            }
-        }
+//        Container {
+//            horizontalAlignment: HorizontalAlignment.Fill
+//            Label {
+//                id: presentationName
+//                objectName: "performName"
+//                
+//                text: "Presentation Name"
+//                textStyle.color: performPage.feedbackColor
+//                verticalAlignment: VerticalAlignment.Center
+//                horizontalAlignment: HorizontalAlignment.Center
+//                textStyle.textAlign: TextAlign.Center                
+//            }
+//        }
         
         // Slide Data 
         Container {
@@ -100,11 +137,11 @@ Page {
         
         // Time Info (footer)
         Container {
-            layout: StackLayout {
-                orientation: LayoutOrientation.LeftToRight
+            layout: DockLayout {                
             }
 
             horizontalAlignment: HorizontalAlignment.Fill
+            verticalAlignment: VerticalAlignment.Fill
             // Time Elapsed
             Label {
                 id: timeElapsed
@@ -112,7 +149,10 @@ Page {
                 
                 text: "Time Elapsed"
                 textStyle.color: performPage.feedbackColor
-                verticalAlignment: VerticalAlignment.Center
+                
+                // Bottom left
+                horizontalAlignment: HorizontalAlignment.Left
+                verticalAlignment: VerticalAlignment.Bottom
             }
             
             // Presentation Total Time
@@ -120,15 +160,19 @@ Page {
                 id: presentationTotalTime
                 objectName: "performTotalTime"
                 
-                text: "Total Time"
+                text: "Total Time"                            
                 textStyle.color: performPage.feedbackColor
-                verticalAlignment: VerticalAlignment.Center
+
+                // Bottom right
+                horizontalAlignment: HorizontalAlignment.Right
+                verticalAlignment: VerticalAlignment.Bottom
             }
         }
 
 
         
         attachedObjects: [
+            // Timer for counting down the actual clock for each slide
             QTimer {
                 id: countdownTimer
                 interval: 1000 // Time counts down by 1 second
@@ -155,10 +199,13 @@ Page {
                         else {
                             countdownTimer.stop();
                             colorTimer.stop();
+                            
+                            slideTime.text = "LA FIN";
                         }
                     }
                 }
-            } ,            
+            } ,     
+            // Timer for animating colour transitions for the visual feedback
             QTimer {
                 id: colorTimer
                 interval: 100
@@ -267,20 +314,17 @@ Page {
     }
     
     /* Initialize the color transition logic for the specified slide */
-    function initializeSlide(slide) {
-        console.log("Slide " + Qt.slideIndex);
+    function initializeSlide(slide) {        
         Qt.maxTime = Qt.appUI.timeFromMinSecs(slide.time.minutes, slide.time.seconds);
-        Qt.currentTime = Qt.maxTime; // The time that counts down
-        // Initialize the components of the HSB/V (Hue, Saturation, Brightness/Value) colour space
+        Qt.currentTime = Qt.maxTime; // The slide time that counts down
+        
+        // Initialize the colour variables and the components of the HSB/V (Hue, Saturation, Brightness/Value) colour space
         Qt.colorMax = Math.floor((Qt.maxTime * Math.floor(countdownTimer.interval / colorTimer.interval)));
         Qt.whiteToGreenMax = Math.floor(Qt.colorMax*(1-Qt.whiteToGreen)); // The amount of time spent in transitioning from white to green                    
         Qt.H = Qt.hueTable.green/360; // Initialize at green, as the first transition is white to green
         Qt.S = 0; // No saturation of the hue results in a pure white colour
-        Qt.V = 1.0; // Maximum brightness at all times removes black shades
-        Qt.transitionValue = Qt.colorMax; // Parameter representing the decrementing time
-        Qt.transitionH = Qt.colorMax; // Parameter representing Hue transition
-        Qt.transitionS = 0; // Parameter representing Saturation transition
-        // No transition parameter for Brightness/Value as this never changes
+        Qt.V = 1.0; // Maximum brightness at all times removes black shades (never changes)
+        Qt.transitionValue = Qt.colorMax; // Parameter representing the decrementing time        
     }
     
     /* Update UI controls to reflect the current slide */

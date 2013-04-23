@@ -2,8 +2,20 @@ import bb.cascades 1.0
 import bb.system 1.0
 
 NavigationPane {    
-    id: navigationPane
+    id: navigationPane    
     property string activePresentationID // Expose the active presentation to C++ via its ID property
+
+    // Add the application menu using a MenuDefinition
+    Menu.definition: MenuDefinition {
+
+        // Specify the actions that should be included in the menu
+        actions: [
+            ActionItem {
+                title: "Settings"
+                imageSource: "asset:///icons/ic_settings.png"
+            }
+        ] // end of actions list
+    } // end of MenuDefinition
 
     attachedObjects: [
         // Attach additional pages of the application dynamically
@@ -25,8 +37,7 @@ NavigationPane {
         Qt.DISPLAY_DATE_TIME_FORMAT = applicationUIPropertyMap.DISPLAY_DATE_TIME_FORMAT;
 
 		// TODO Also, these QML components are created BEFORE the presentations list are read from JSON. Interesting!
-		Qt.appUI = appUI;
-		Qt.activePresentation = activePresentation;
+		Qt.appUI = appUI;		
     }
     
 

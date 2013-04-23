@@ -4,6 +4,7 @@
 #include <bb/cascades/ScreenIdleMode>
 #include <bb/cascades/Window>
 #include <bb/cascades/QmlDocument>
+#include <bb/cascades/TitleBar>
 #include <bb/cascades/NavigationPane>
 #include <bb/cascades/Page>
 #include <bb/cascades/ListView>
@@ -268,14 +269,14 @@ void ApplicationUI::initializePerformPage(Page* page) {
 	_activePresentation = this->activePresentation();
 
 	// Get references to required UI elements
-	Label* nameUI = page->findChild<Label*>("performName");
+	TitleBar* nameUI = page->findChild<TitleBar*>("titleBar");
 	Label* titleUI = page->findChild<Label*>("performTitle");
 	Label* timeUI = page->findChild<Label*>("performTime");
 	Label* elapsedUI = page->findChild<Label*>("performElapsed");
 	Label* totalTimeUI = page->findChild<Label*>("performTotalTime");
 
 	// Initialize UI element values/text
-	nameUI->setText(_activePresentation->name());
+	nameUI->setTitle(_activePresentation->name());
 	SlideList& slides = _activePresentation->slidesRef();
 	if (slides.size() <= 0) {
 		// TODO Peform: Handle situation when there are no slides for the presentation
