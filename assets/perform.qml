@@ -25,7 +25,7 @@ Page {
             yellow: 60,
             red: 0
         }
-        Qt.whiteToGreen = 0.33; // The time (percentage) spent in the initial transition from white to green        
+        Qt.whiteToGreen = 0.10; // The time (percentage) spent in the initial transition from white to green        
         Qt.slideIndex = 0;
         Qt.elapsedTime = 0; // Total time elapsed in the presentation
         Qt.currentSlide = Qt.activePresentation.slides[Qt.slideIndex];
@@ -143,10 +143,10 @@ Page {
                     if (Qt.currentTime > 0) {
                     	countdownTimer.start();
                     }
-                    else {                        
-                        // Switch to the next slide
+                    else {
+                        // Switch to the next slide                                                
                         performPage.nextSlide();
-
+                        
                         // Repeat until we finish the last slide
                         if (Qt.slideIndex < Qt.activePresentation.slides.length) {
                             countdownTimer.start();
@@ -164,10 +164,6 @@ Page {
                 interval: 100
                 onTimeout: {
                     /* Transition from white to red along the HSV color space */
-                    
-                    // total time = 10 seconds Qt.colorMax
-                    // white to green = 7 seconds Qt.whiteToGreenMax
-                    // green to red = 0 seconds
                     
                     // White to Green
                     if (Qt.transitionValue <= Qt.colorMax 
@@ -210,8 +206,7 @@ Page {
                     }                                                                     
                 }                                
 
-                function convertHSVToRGB (H, S, V) {
-                    console.log(H + " " + S + " " + V + " ");
+                function convertHSVToRGB (H, S, V) {                    
                     var R, G, B;                    
                     if (S == 0.0) {
                         R = V;
@@ -260,10 +255,12 @@ Page {
     
     /* Switch to the next slide and re-initialize */
     function nextSlide() {
-    	Qt.slideIndex++;    	
-        Qt.currentSlide = Qt.activePresentation.slides[Qt.slideIndex];
-        performPage.initializeSlide(Qt.currentSlide);
-        performPage.updateUIElements(Qt.currentSlide);
+    	Qt.slideIndex++;
+    	if (Qt.slideIndex < Qt.activePresentation.slides.length) {
+	        Qt.currentSlide = Qt.activePresentation.slides[Qt.slideIndex];
+	        performPage.initializeSlide(Qt.currentSlide);
+	        performPage.updateUIElements(Qt.currentSlide);
+        }
     }
     
     /* Initialize the color transition logic for the specified slide */
