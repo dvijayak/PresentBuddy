@@ -5,6 +5,10 @@ Page {
     id: preparePage    
     objectName: "preparePage"
     
+    onCreationCompleted: {
+        Qt.totalTimeSlider = totalTimeSlider;
+    }
+    
     actions: [
         ActionItem {
             title: "New Slide"
@@ -248,9 +252,16 @@ Page {
                                             }
                                             value: Qt.appUI.timeFromMinSecs(ListItemData.time.minutes, ListItemData.time.seconds)
                                             fromValue: 1.0
-                                            toValue: 5999.0
+                                            toValue: Qt.totalTimeSlider.immediateValue
                                             onImmediateValueChanged: {
-                                                timeValueLabel.text = Qt.appUI.timeToText(Math.floor(slideTimeSlider.immediateValue));
+                                                var validValue;
+                                                if (immediateValue > Qt.totalTimeSlider.immediateValue) {
+                                                    validValue = Qt.totalTimeSlider.immediateValue;
+                                                }
+                                                else {
+                                                    validValue = immediateValue;
+                                                }
+                                                timeValueLabel.text = Qt.appUI.timeToText(Math.floor(validValue));
                                             }
 
                                             onValueChanged: {
