@@ -103,6 +103,7 @@ public slots:
 	void addNewSlide(); // Add a new slide to the active presentation
 	void deleteSlide(int index); // Delete the specified slide (by index) from the active presentation
 	void commitPreparedChanges(); // Commit all buffered changes to the active presentation made in the prepare page.
+	void resetPreparedChanges();
 
 	Q_INVOKABLE void deletePresentation();
 	Q_INVOKABLE void deletePresentation(Presentation* presentation);

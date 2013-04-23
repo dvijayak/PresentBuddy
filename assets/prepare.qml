@@ -23,8 +23,7 @@ Page {
             
             imageSource: "asset:///icons/ic_done.png"
             ActionBar.placement: ActionBarPlacement.OnBar            
-            onTriggered: {                
-                // TODO Save all changes to the respective presentation object
+            onTriggered: {                                
                 savedChangesToast.show();
                 Qt.navigationPane.pop();                                
             }
@@ -34,7 +33,22 @@ Page {
                     body: "Successfully saved changes."                    
                 }
             ]
-        }        
+        } ,
+        ActionItem {
+            title: "Reset"
+            objectName: "resetButton"
+            
+            imageSource: "asset:///icons/ic_pixle_subway_undo.png"
+            onTriggered: {
+                resetToast.show();
+            }
+            attachedObjects: [
+                SystemToast {
+                    id: resetToast
+                    body: "Changes have been reset."
+                }
+            ]
+        }
     ]
 	
     paneProperties: NavigationPaneProperties {

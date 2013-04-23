@@ -252,9 +252,12 @@ void ApplicationUI::initializePreparePage(Page* page) {
 	dataModel->setParent(page); // Attaching this to the Page allows smooth destruction, i.e. when the page is destroyed, the model is also destroyed
 
 	// Connect the onTriggered signal of the action buttons to respective slot functions
+	ActionItem* resetButton = page->findChild<ActionItem*>("resetButton");
 	ActionItem* doneButton = page->findChild<ActionItem*>("doneButton");
 	ActionItem* newButton = page->findChild<ActionItem*>("newButton");
 	bool res;
+	res = QObject::connect(resetButton, SIGNAL(triggered()), this, SLOT(resetPreparedChanges()));
+	Q_ASSERT(res);
 	res = QObject::connect(doneButton, SIGNAL(triggered()), this, SLOT(commitPreparedChanges()));
 	Q_ASSERT(res);
 	res = QObject::connect(newButton, SIGNAL(triggered()), this, SLOT(addNewSlide()));
@@ -632,6 +635,35 @@ void ApplicationUI::commitPreparedChanges() {
 	delete _bufferPresentation;
 
 	qDebug() << "Changes committed.";
+}
+
+/* Reset all buffered changes in the prepare page to the existing active presentation information */
+void ApplicationUI::resetPreparedChanges() {
+	qDebug() << "Resetting all buffered changes to the active presentation...";
+
+	// Free the buffer and re-copy the active presentation
+	delete _bufferPresentation;
+	_bufferPresentation = _activePresentation->copy();
+
+	// TODO Reflect the changes in the page
+	// Update the Presentation name and total time fields and slider with the reset values
+	Page* page = _root->findChild<Page*>("preparePage");
+	TextField* nameText = page->findChild<TextField*>("nameText");
+	nameText->setText(_activePresentation->name());
+	Slider* totalTimeSlider = page->findChild<Slider*>("totalTimeSlider");
+	int totalTime = _activePresentation->totalTime();
+	totalTimeSlider->setValue(totalTime);
+	Label* totalTimeLabel = page->findChild<Label*>("totalTimeValueLabel");
+	totalTimeLabel->setText(ApplicationUI::timeToText(totalTime));
+
+	// Update the existing data model with the reset slide data (wrapped as a QVariantList)
+	ListView* listView = page->findChild<ListView*>("slideListView");
+	QVariantListDataModel* dataModel = (QVariantListDataModel*)(listView->dataModel());
+	QVariantList qVarList = this->wrapListToQVarList(_activePresentation->slides());
+	dataModel->clear();
+	dataModel->append(qVarList);
+
+	qDebug() << "Changes reset.";
 }
 
 /* Append a new slide to the slide list of the active presentation */
