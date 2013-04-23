@@ -101,29 +101,53 @@ Page {
             }    
             
             // Presentation Total Time Slider
-            Slider {
-                id: totalTimeSlider
-                objectName: "totalTimeSlider"
-                property double maxTimeRemaining; // The maximum amount of time remaining that can be allocated to a slide
-                fromValue: 1.0
-                toValue: 6039.0
-                horizontalAlignment: HorizontalAlignment.Fill
-                layoutProperties: StackLayoutProperties {
-                    spaceQuota: 1.0
+            Container{
+                layout: StackLayout {
+                    orientation: LayoutOrientation.LeftToRight
                 }
+                Slider {
+                    id: totalTimeSlider
+                    objectName: "totalTimeSlider"
+                    property double maxTimeRemaining; // The maximum amount of time remaining that can be allocated to a slide
+                    fromValue: 1.0
+                    toValue: 5999.0
+                    horizontalAlignment: HorizontalAlignment.Fill
+                    layoutProperties: StackLayoutProperties {
+                        spaceQuota: 3.0
+                    }
 
-                onImmediateValueChanged: {
-                    var value = Math.floor(immediateValue);
-                    var minute = Math.floor(value / 60);
-                    var second = Math.floor(value % 60);
-                    totalTimeValueLabel.text = minute + ":" + second;
-                }
-                
-                onCreationCompleted: {
-                    totalTimeSlider.valueChanged.connect(Qt.appUI.bufferTotalTimeChange);
-                }
+                    onImmediateValueChanged: {
+                        totalTimeValueLabel.text = Qt.appUI.timeToText(Math.floor(immediateValue));
+                    }
 
-            }
+                    onCreationCompleted: {
+                        totalTimeSlider.valueChanged.connect(Qt.appUI.bufferTotalTimeChange);
+                    }
+
+                }
+                // Lock button
+                ImageToggleButton {
+                    id: totalTimeLock
+                    imageSourcePressedUnchecked: "asset:///icons/ic_pixle_subway_unlock2.png"
+                    imageSourcePressedChecked: "asset:///icons/ic_pixle_subway_lock2.png"
+                    imageSourceDefault: "asset:///icons/ic_pixle_subway_unlock2.png"
+                    imageSourceChecked: "asset:///icons/ic_pixle_subway_lock2.png"
+                    
+                    verticalAlignment: VerticalAlignment.Center
+                    horizontalAlignment: HorizontalAlignment.Center
+                    
+                    onCheckedChanged: {
+                        if (totalTimeLock.checked) {
+                            totalTimeSlider.enabled = false;
+                        }
+                        else {
+                            totalTimeSlider.enabled = true;
+                        }
+                                                
+                    }
+
+                }                
+            }            
         } // end of MetaData
 
         Divider {}
@@ -205,35 +229,51 @@ Page {
                                             textStyle.textAlign: TextAlign.Left
 
                                             onCreationCompleted: {
-                                                var value = Math.floor(slideTimeSlider.immediateValue);
-                                                var minute = Math.floor(value / 60);
-                                                var second = Math.floor(value % 60);
-                                                timeValueLabel.text = minute + ":" + second;
+                                                timeValueLabel.text = Qt.appUI.timeToText(Math.floor(slideTimeSlider.immediateValue));
                                             }
                                         }
                                     }
                                     // Slide time allocation slider
                                     Container {
+                                        layout: StackLayout {
+                                            orientation: LayoutOrientation.LeftToRight
+                                        }
                                         Slider {
                                             id: slideTimeSlider
                                             objectName: "slideTimeSlider"
                                             
                                             horizontalAlignment: HorizontalAlignment.Fill
                                             layoutProperties: StackLayoutProperties {
-                                                spaceQuota: 1.0
+                                                spaceQuota: 3.0
                                             }
-                                            value: (60 * ListItemData.time.minutes) + ListItemData.time.seconds
+                                            value: Qt.appUI.timeFromMinSecs(ListItemData.time.minutes, ListItemData.time.seconds)
                                             fromValue: 1.0
-                                            toValue: 6039.0
+                                            toValue: 5999.0
                                             onImmediateValueChanged: {
-                                                var value = Math.floor(immediateValue);
-                                                var minute = Math.floor(value / 60);
-                                                var second = Math.floor(value % 60);
-                                                timeValueLabel.text = minute + ":" + second;
+                                                timeValueLabel.text = Qt.appUI.timeToText(Math.floor(slideTimeSlider.immediateValue));
                                             }
 
                                             onValueChanged: {
                                                 Qt.appUI.bufferSlideTimeChange(listItemRoot.ListItem.indexInSection, value);
+                                            }
+                                        }
+                                        // Lock button
+                                        ImageToggleButton {
+                                            id: slideTimeLock
+                                            imageSourcePressedUnchecked: "asset:///icons/ic_pixle_subway_unlock2.png"
+                                            imageSourcePressedChecked: "asset:///icons/ic_pixle_subway_lock2.png"
+                                            imageSourceDefault: "asset:///icons/ic_pixle_subway_unlock2.png"
+                                            imageSourceChecked: "asset:///icons/ic_pixle_subway_lock2.png"
+                                            
+                                            verticalAlignment: VerticalAlignment.Center
+                                            horizontalAlignment: HorizontalAlignment.Center
+
+                                            onCheckedChanged: {
+                                                if (slideTimeLock.checked) {
+                                                    slideTimeSlider.enabled = false;
+                                                } else {
+                                                    slideTimeSlider.enabled = true;
+                                                }
                                             }
                                         }
                                     }

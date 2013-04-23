@@ -241,7 +241,7 @@ void ApplicationUI::initializePreparePage(Page* page) {
 	int totalTime = _activePresentation->totalTime();
 	totalTimeSlider->setValue(totalTime);
 	Label* totalTimeLabel = page->findChild<Label*>("totalTimeValueLabel");
-	totalTimeLabel->setText(QString("%1:%2").arg((int)(totalTime/60)).arg(totalTime%60));
+	totalTimeLabel->setText(ApplicationUI::timeToText(totalTime));
 
 	// Create a new QVariantListDataModel, fill it with the slides (wrapped as QVariant objects) and set it to the list view in the page
 	QVariantListDataModel* dataModel = new QVariantListDataModel();
@@ -727,22 +727,6 @@ void ApplicationUI::bufferSlideTimeChange(int index, float value) {
 
 //////////////// Perform Page
 
-//void ApplicationUI::playPresentation() {
-//	SlideList& slides = _activePresentation->slidesRef();
-//
-//	foreach (Slide* slide, slides) {
-//		QString title = slide->title();
-//		int time = slide->time();
-//
-//		QTimer countdown, colour;
-//		countdown.setInterval(1000);
-//		colour.setInterval(100);
-//
-//		bool res;
-//		res = QObject::connect(countdown, SIGNAL(timeout()), this, SLOT(countdownSlide()));
-//		Q_ASSERT(res);
-//	}
-//}
 
 
 // Memo: One problem with debugging errors is moc errors, since they are not in your code. Usually, you get these errors when not including certain classes explicitly
@@ -751,6 +735,5 @@ void ApplicationUI::bufferSlideTimeChange(int index, float value) {
 // TODO Implement time slider auto-correction logic for prepare page
 // TODO Maybe convert main page UI to plain list with no buttons. Buttons should be provided at the action bar (same for prepare page)
 // TODO Need a reset button and functionality for prepare page
-// TODO Implement the perform functionality!
 // TODO Implement the practise functionality!
 // TODO Need a restore defaults button in setting to restore all data to initial load state
