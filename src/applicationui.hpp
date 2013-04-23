@@ -73,10 +73,10 @@ public:
 
     /* Member Functions */
 
-    static int* timeToMinSecs(int time);
-    static int timeFromMinSecs(int* time);
+    Q_INVOKABLE static int* timeToMinSecs(int time);
+    Q_INVOKABLE static int timeFromMinSecs(int minutes, int seconds);
     Q_INVOKABLE static QString timeToText(int time);
-    Q_INVOKABLE static QString minSecToText(int* time);
+    Q_INVOKABLE static QString minSecToText(int minutes, int seconds);
 
     QVariantList findInDataModel(Presentation* presentation, DataModel* model);
 

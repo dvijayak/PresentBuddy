@@ -1,7 +1,7 @@
 import bb.cascades 1.0
 
 // Import the library that exposes the registered QTimer class
-//import my.library 1.0
+import my.library 1.0
 
 // Performing page
 Page {
@@ -10,40 +10,48 @@ Page {
 //    property variant activePresentation;
     property variant feedbackColor;
 
-    actions: [
-        ActionItem {
-            objectName: "playButton"
-            
-            title: "Begin Presenting"
-            imageSource: "asset:///icons/9-av-play81.png"
-            ActionBar.placement: ActionBarPlacement.OnBar
-            
-            onTriggered: {
-                timer.start();
-            }
-        }
-    ]
-    
-    
-    // Initialize the UI with default values based on the active presentation
-    function onPerformInitialized() {
-        Qt.activePresentation = Qt.appUI.activePresentation;
-        performPage.feedbackColor = Color.White;
-
-		// Initialize color transition logic
-        Qt.maxTime = Math.floor(600 / 3);
-        Qt.orangeTime = Math.floor(Qt.maxTime * 0.65); // The time at which the colour indicator turns orange - about 65% of total time
-        console.log(Qt.orangeTime + "ORANGE TIME");
-        Qt.rValue = Qt.maxTime; // R
-        Qt.gValue = Qt.maxTime; // G
-        Qt.bValue = Qt.maxTime; // B
-        Qt.rgbDiff = 1; // Increment/Decrement parameter
-    }
+//    actions: [
+//        ActionItem {
+//            objectName: "playButton"
+//            
+//            title: "Begin Presenting"
+//            imageSource: "asset:///icons/9-av-play81.png"
+//            ActionBar.placement: ActionBarPlacement.OnBar
+//            
+//            onTriggered: {
+//                colorTimer.start();
+//            }
+//        }
+//    ]
     
 	onCreationCompleted: {
 	    // Connect signals with slots
 	    Qt.appUI.performInitialized.connect(performPage.onPerformInitialized);
-    }	
+    }
+
+    /* Initialize the UI with default values based on the active presentation */
+    function onPerformInitialized() {
+        Qt.activePresentation = Qt.appUI.activePresentation;
+        performPage.feedbackColor = Color.White;
+
+        // Initialize color transition logic
+        Qt.slideIndex = 0;
+        Qt.currentSlide = Qt.activePresentation.slides[Qt.slideIndex];
+        Qt.maxTime = Qt.appUI.timeFromMinSecs(Qt.currentSlide.time.minutes, Qt.currentSlide.time.seconds);
+        Qt.currentTime = Qt.maxTime; // The time that counts down
+        console.log(Qt.maxTime);
+        Qt.orangeTime = Math.floor(Qt.maxTime * 0.65); // The time at which the colour indicator turns orange - about 65% of total time
+        console.log("ORANGE TIME = " + Qt.orangeTime);
+        Qt.rValue = Qt.maxTime; // R
+        Qt.gValue = Qt.maxTime; // G
+        Qt.bValue = Qt.maxTime; // B
+        Qt.rgbDiff = 1; // Increment/Decrement parameter
+        
+        // Start the presentation!
+        countdownTimer.start();
+        colorTimer.start();
+    }
+
     content: Container {
         id: container
 
@@ -115,69 +123,85 @@ Page {
 
 
         
-//        attachedObjects: [
-//            QTimer {
-//                id: timer
-//                interval: 100
-//                onTimeout: {
-////                    console.log("R: " + Qt.rValue + " G: " + Qt.gValue + " B: " + Qt.bValue);
-//                    // White to Green
-//                    if (Qt.rValue <= Qt.maxTime && Qt.gValue == Qt.maxTime && Qt.bValue <= Qt.maxTime 
-//                        	&& Qt.rValue != 0 && Qt.bValue != 0) {
-//                        Qt.rValue -= Qt.rgbDiff;
-//                        Qt.bValue -= Qt.rgbDiff;
-//                    }
-//                    // Green to Yellow
-//                    else if (Qt.rValue >= 0 && Qt.gValue == Qt.maxTime && Qt.bValue == 0 
-//                        	&& Qt.rValue != Qt.maxTime) {
-//                        Qt.rValue += Qt.rgbDiff;
-//                    } 
-//                    // Yellow to Orange
-//                    else if (Qt.rValue == Qt.maxTime && Qt.gValue <= Qt.maxTime && Qt.bValue == 0 
-//                        	&& Qt.gValue != Qt.orangeTime) {                        
-//                        Qt.gValue -= Qt.rgbDiff;
-//                    }
-//                    // Orange to Red (can technically be combined with Yellow to Orange)
-//                    else if (Qt.rValue == Qt.maxTime && Qt.gValue <= Qt.orangeTime && Qt.bValue == 0 
-//                        	&& Qt.gValue != 0) {
-//                        Qt.gValue -= Qt.rgbDiff;
-//                    }
-//                                        
-//                    Qt.rValue = timer.correctRGBValues(Qt.rValue, Qt.maxTime);
-//                    Qt.gValue = timer.correctRGBValues(Qt.gValue, Qt.maxTime);
-//                    Qt.bValue = timer.correctRGBValues(Qt.bValue, Qt.maxTime);
-//
-//                    // Divide by maxTime to get a double/float percentage
-//					var R = Qt.rValue/Qt.maxTime, 
-//						G = Qt.gValue/Qt.maxTime, 
-//						B = Qt.bValue/Qt.maxTime;
-//					
-//                    container.background = Color.create(R, G, B);
-//                    console.log("R: " + R*256 + " G: " + G*256 + " B: " + B*256);
-//
-//                    // We have reached Red
-//                    if (Qt.rValue == Qt.maxTime && Qt.gValue == 0 && Qt.bValue == 0) {
-//                        timer.stop();
-//                    }
-//                    else {
-//                        timer.start();
-//                    }                    
-//                }
-//
-//                // Boundary cases where values < 0 or > maxTime are possible when dec or inc by some numbers
-//                function correctRGBValues (value, maxTime) {                    
-//                    if (value < 0) {                        
-//                        return 0;
-//                    }
-//                    else if (value > maxTime) {                        
-//                        return maxTime;
-//                    }
-//                    else {                        
-//                        return value;
-//                    }
-//                }
-//            }
-//        ]
+        attachedObjects: [
+            QTimer {
+                id: countdownTimer
+                interval: 1000 // Time counts down by 1 second
+                onTimeout: {
+                    Qt.currentTime -= 1;
+                    slideTime.text = Qt.appUI.timeToText(Qt.currentTime);
+                    
+                    // Count down until 0
+                    if (Qt.currentTime > 0) {
+                    	countdownTimer.start();
+                    }
+                    else {
+                        countdownTimer.stop();
+                    }
+                }
+            } ,            
+            QTimer {
+                id: colorTimer
+                interval: 100
+                onTimeout: {
+//                    console.log("R: " + Qt.rValue + " G: " + Qt.gValue + " B: " + Qt.bValue);
+                    // White to Green
+                    if (Qt.rValue <= Qt.maxTime && Qt.gValue == Qt.maxTime && Qt.bValue <= Qt.maxTime 
+                        	&& Qt.rValue != 0 && Qt.bValue != 0) {
+                        Qt.rValue -= Qt.rgbDiff;
+                        Qt.bValue -= Qt.rgbDiff;
+                    }
+                    // Green to Yellow
+                    else if (Qt.rValue >= 0 && Qt.gValue == Qt.maxTime && Qt.bValue == 0 
+                        	&& Qt.rValue != Qt.maxTime) {
+                        Qt.rValue += Qt.rgbDiff;
+                    } 
+                    // Yellow to Orange
+                    else if (Qt.rValue == Qt.maxTime && Qt.gValue <= Qt.maxTime && Qt.bValue == 0 
+                        	&& Qt.gValue != Qt.orangeTime) {                        
+                        Qt.gValue -= Qt.rgbDiff;
+                    }
+                    // Orange to Red (can technically be combined with Yellow to Orange)
+                    else if (Qt.rValue == Qt.maxTime && Qt.gValue <= Qt.orangeTime && Qt.bValue == 0 
+                        	&& Qt.gValue != 0) {
+                        Qt.gValue -= Qt.rgbDiff;
+                    }
+                                        
+                    Qt.rValue = colorTimer.correctRGBValues(Qt.rValue, Qt.maxTime);
+                    Qt.gValue = colorTimer.correctRGBValues(Qt.gValue, Qt.maxTime);
+                    Qt.bValue = colorTimer.correctRGBValues(Qt.bValue, Qt.maxTime);
+
+                    // Divide by maxTime to get a double/float percentage
+					var R = Qt.rValue/Qt.maxTime, 
+						G = Qt.gValue/Qt.maxTime, 
+						B = Qt.bValue/Qt.maxTime;
+					
+					performPage.feedbackColor = Color.create(R, G, B);				
+                    console.log("R: " + R*256 + " G: " + G*256 + " B: " + B*256);
+
+                    // We have reached Red
+                    if (Qt.rValue == Qt.maxTime && Qt.gValue == 0 && Qt.bValue == 0) {
+                        colorTimer.stop();
+                    }
+                    else {
+                        colorTimer.start();
+                    }                    
+                }
+
+                // Boundary cases where values < 0 or > maxTime are possible when dec or inc by some numbers
+                function correctRGBValues (value, maxTime) {                    
+                    if (value < 0) {                        
+                        return 0;
+                    }
+                    else if (value > maxTime) {                        
+                        return maxTime;
+                    }
+                    else {                        
+                        return value;
+                    }
+                }
+            }
+        ]
     }
     
 //    paneProperties: NavigationPaneProperties {

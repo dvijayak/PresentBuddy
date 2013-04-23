@@ -147,8 +147,8 @@ int* ApplicationUI::timeToMinSecs(int time) {
 }
 
 /* Convert a minutes/seconds time to an integer (seconds) representation */
-int ApplicationUI::timeFromMinSecs(int* time) {
-	return (time[0]*60) + time[1];
+int ApplicationUI::timeFromMinSecs(int minutes, int seconds) {
+	return (minutes*60) + seconds;
 }
 
 /* Display a time in minutes/seconds as a string. First, convert integer time to minutes/seconds representation. */
@@ -160,8 +160,8 @@ QString ApplicationUI::timeToText(int time) {
 }
 
 /* Display a time (already in minutes/seconds representation) as a string. */
-QString ApplicationUI::minSecToText(int* time) {
-	return QString("%1:%2").arg(time[0]).arg(time[1]);
+QString ApplicationUI::minSecToText(int minutes, int seconds) {
+	return QString("%1:%2").arg(minutes).arg(seconds);
 }
 
 /* Application Logic */
