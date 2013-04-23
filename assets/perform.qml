@@ -20,11 +20,16 @@ Page {
         performPage.feedbackColor = Color.White;
 
         // Initialize color transition logic
+        Qt.hueTable = { // Pre-defined constants on the H axis for the specific colours we are working with
+            green : 120,
+            yellow: 60,
+            red: 0
+        }
+        Qt.whiteToGreen = 0.33; // The time (percentage) spent in the initial transition from white to green        
         Qt.slideIndex = 0;
         Qt.elapsedTime = 0; // Total time elapsed in the presentation
         Qt.currentSlide = Qt.activePresentation.slides[Qt.slideIndex];
-        performPage.initializeSlide(Qt.currentSlide);
-        Qt.rgbDiff = 1; // Increment/Decrement parameter
+        performPage.initializeSlide(Qt.currentSlide);        
         
         // Start the presentation!
         countdownTimer.start();
@@ -158,60 +163,97 @@ Page {
                 id: colorTimer
                 interval: 100
                 onTimeout: {
-                    // Transition the colours
-                    // White to Green
-                    if (Qt.rValue <= Qt.colorMax && Qt.gValue == Qt.colorMax && Qt.bValue <= Qt.colorMax 
-                        	&& Qt.rValue != 0 && Qt.bValue != 0) {
-                        Qt.rValue -= Qt.rgbDiff;
-                        Qt.bValue -= Qt.rgbDiff;
-                    }
-                    // Green to Yellow
-                    else if (Qt.rValue >= 0 && Qt.gValue == Qt.colorMax && Qt.bValue == 0 
-                        	&& Qt.rValue != Qt.colorMax) {
-                        Qt.rValue += Qt.rgbDiff;
-                    } 
-                    // Yellow to Red
-                    else if (Qt.rValue == Qt.colorMax && Qt.gValue <= Qt.colorMax && Qt.bValue == 0 
-                        	&& Qt.gValue != 0) {                        
-                        Qt.gValue -= Qt.rgbDiff;
-                    }
+                    /* Transition from white to red along the HSV color space */
                     
-                    // Rectify invalid values
-                    Qt.rValue = colorTimer.correctRGBValues(Qt.rValue, Qt.colorMax);
-                    Qt.gValue = colorTimer.correctRGBValues(Qt.gValue, Qt.colorMax);
-                    Qt.bValue = colorTimer.correctRGBValues(Qt.bValue, Qt.colorMax);
+                    // total time = 10 seconds Qt.colorMax
+                    // white to green = 7 seconds Qt.whiteToGreenMax
+                    // green to red = 0 seconds
+                    
+                    // White to Green
+                    if (Qt.transitionValue <= Qt.colorMax 
+                        && Qt.transitionValue >= Qt.whiteToGreenMax) {
+                            // Only the Saturation (representing the 'whiteness') is incremented
+                        	Qt.S = (Qt.colorMax-Qt.transitionValue)/(Qt.colorMax-Qt.whiteToGreenMax);
+                    }                    
+                    // Green to Red
+                    else if (Qt.transitionValue < Qt.whiteToGreenMax
+                        && Qt.transitionValue >= 0) {
+                            // Only the Hue (representing the colour) is incremented
+                            Qt.H = (Qt.transitionValue*(Qt.hueTable.green/360))/(Qt.whiteToGreenMax);
+                    }
 
-                    // Divide by colorMax to get a double/float percentage
-					var R = Qt.rValue/Qt.colorMax, 
-						G = Qt.gValue/Qt.colorMax, 
-						B = Qt.bValue/Qt.colorMax;
-					
-					// Update the color of elements to provide the visual feedback to the user
-					performPage.feedbackColor = Color.create(R, G, B);				
-                    console.log("R: " + Math.floor(R*256) + " G: " + Math.floor(G*256) + " B: " + Math.floor(B*256));
-//                    console.log("R: " + Math.floor(Qt.rValue) + " G: " + Math.floor(Qt.gValue) + " B: " + Math.floor(Qt.bValue));
+                    console.log("H: " + Math.floor(Qt.H*360) + " S: " + Math.floor(Qt.S*100) + " V: " + Math.floor(Qt.V*100));
+//                    console.log("H: " + Qt.H + " S: " + Qt.S + " V: " + Qt.V);
 
-                    // We have reached Red
-                    if (Qt.rValue == Qt.colorMax && Qt.gValue == 0 && Qt.bValue == 0) {
-                        colorTimer.stop();                                        
+                    // Convert HSV to RGB
+                    var convertedColor = colorTimer.convertHSVToRGB(Qt.H, Qt.S, Qt.V);
+                    var R = convertedColor.R,
+                    	G = convertedColor.G,
+                    	B = convertedColor.B;
+                    
+                    console.log("R: " + Math.floor(R*255) + " G: " + Math.floor(G*255) + " B: " + Math.floor(B*255));
+//                    console.log("R: " + R + " G: " + G + " B: " + B);
+
+                    // Update the color of elements to provide the visual feedback to the user
+                    performPage.feedbackColor = Color.create(R, G, B);
+                    
+                    // Exit condition: when the time is up
+                    if (Qt.transitionValue == 0) {
+                        colorTimer.stop();
                     }
                     else {
+                        // Decrement the time
+                        Qt.transitionValue--;
+                        
+                        // Restart the timer
                         colorTimer.start();
-                    }                    
+                    }                                                                     
                 }                                
 
-                // Boundary cases where values < 0 or > maxTime are possible when dec or inc by some numbers
-                function correctRGBValues (value, max) {                    
-                    if (value < 0) {                        
-                        return 0;
+                function convertHSVToRGB (H, S, V) {
+                    console.log(H + " " + S + " " + V + " ");
+                    var R, G, B;                    
+                    if (S == 0.0) {
+                        R = V;
+                        G = V;
+                        B = V;
+                    } else {
+                        var h = H*6;
+                        var i = Math.floor(h);
+                        var p = V*(1-S);
+                        var q = V*(1-S*(h-i));
+                        var t = V*(1-S*(1-(h-i)));
+
+                        if (i == 0) {
+                            R = V;
+                            G = t;
+                            B = p;
+                        } else if (i == 1) {
+                            R = q;
+                            G = V;
+                            B = p;
+                        } else if (i == 2) {
+                            R = p;
+                            G = V;
+                            B = t;
+                        } else if (i == 3) {
+                            R = p;
+                            G = q;
+                            B = V;
+                        } else if (i == 4) {
+                            R = t;
+                            G = p;
+                            B = V;
+                        } else {
+                            R = V;
+                            G = p;
+                            B = q;
+                        }                                        
                     }
-                    else if (value > max) {                        
-                        return max;
-                    }
-                    else {                        
-                        return value;
-                    }
+
+                    return {"R": R, "G": G, "B": B};
                 }
+
             }
         ]
     }
@@ -228,14 +270,17 @@ Page {
     function initializeSlide(slide) {
         console.log("Slide " + Qt.slideIndex);
         Qt.maxTime = Qt.appUI.timeFromMinSecs(slide.time.minutes, slide.time.seconds);
-        Qt.colorMax = Math.floor((Qt.maxTime * Math.floor(countdownTimer.interval / colorTimer.interval)) / 3); // We divide by 3 since we have three colour transitions
-        Qt.currentTime = Qt.maxTime; // The time that counts down        
-        console.log(Qt.maxTime + "," + Qt.colorMax);
-        Qt.orangeTime = Math.floor(Qt.colorMax * 0.65); // The time at which the feedback colo is orange - about 65% of max time
-        console.log("ORANGE TIME = " + Qt.orangeTime);
-        Qt.rValue = Qt.colorMax; // R
-        Qt.gValue = Qt.colorMax; // G
-        Qt.bValue = Qt.colorMax; // B
+        Qt.currentTime = Qt.maxTime; // The time that counts down
+        // Initialize the components of the HSB/V (Hue, Saturation, Brightness/Value) colour space
+        Qt.colorMax = Math.floor((Qt.maxTime * Math.floor(countdownTimer.interval / colorTimer.interval)));
+        Qt.whiteToGreenMax = Math.floor(Qt.colorMax*(1-Qt.whiteToGreen)); // The amount of time spent in transitioning from white to green                    
+        Qt.H = Qt.hueTable.green/360; // Initialize at green, as the first transition is white to green
+        Qt.S = 0; // No saturation of the hue results in a pure white colour
+        Qt.V = 1.0; // Maximum brightness at all times removes black shades
+        Qt.transitionValue = Qt.colorMax; // Parameter representing the decrementing time
+        Qt.transitionH = Qt.colorMax; // Parameter representing Hue transition
+        Qt.transitionS = 0; // Parameter representing Saturation transition
+        // No transition parameter for Brightness/Value as this never changes
     }
     
     /* Update UI controls to reflect the current slide */
