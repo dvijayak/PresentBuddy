@@ -73,6 +73,7 @@ public:
 
     /* Member Functions */
 
+    static QString padInt(int number, int n);
     Q_INVOKABLE static int* timeToMinSecs(int time);
     Q_INVOKABLE static int timeFromMinSecs(int minutes, int seconds);
     Q_INVOKABLE static QString timeToText(int time);

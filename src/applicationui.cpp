@@ -1,6 +1,8 @@
 // Default empty project template
 #include "applicationui.hpp"
 
+#include <bb/cascades/ScreenIdleMode>
+#include <bb/cascades/Window>
 #include <bb/cascades/QmlDocument>
 #include <bb/cascades/NavigationPane>
 #include <bb/cascades/Page>
@@ -13,6 +15,8 @@
 #include <bb/cascades/GroupDataModel>
 #include <bb/cascades/QListDataModel>
 #include <bb/cascades/ActionItem>
+#include <bb/cascades/OrientationSupport>
+#include <bb/cascades/DisplayDirection>
 #include <bb/data/JsonDataAccess>
 
 #include <QTimer>
@@ -138,6 +142,18 @@ QVariantMap ApplicationUI::activePresentationQML() {
 
 /* Member Functions */
 
+/* Pad zeros to the left of an integer ensuring that it is a n-character string */
+QString ApplicationUI::padInt(int number, int n) {
+	QString str = QString::number(number);
+	int length = str.length();
+	if (length < n) {
+		for (int i = 0; i < n - length; ++i) {
+			str = "0" + str;
+		}
+	}
+	return str;
+}
+
 /* Convert an integer time (seconds) to a minutes/seconds representation */
 int* ApplicationUI::timeToMinSecs(int time) {
 	int* timeRep = new int[2];
@@ -154,14 +170,14 @@ int ApplicationUI::timeFromMinSecs(int minutes, int seconds) {
 /* Display a time in minutes/seconds as a string. First, convert integer time to minutes/seconds representation. */
 QString ApplicationUI::timeToText(int time) {
 	int* timeRep = ApplicationUI::timeToMinSecs(time);
-	QString output = QString("%1:%2").arg(timeRep[0]).arg(timeRep[1]);
+	QString output = QString("%1:%2").arg(timeRep[0]).arg(ApplicationUI::padInt(timeRep[1], 2));
 	delete timeRep;
 	return output;
 }
 
 /* Display a time (already in minutes/seconds representation) as a string. */
 QString ApplicationUI::minSecToText(int minutes, int seconds) {
-	return QString("%1:%2").arg(minutes).arg(seconds);
+	return QString("%1:%2").arg(minutes).arg(ApplicationUI::padInt(seconds, 2));
 }
 
 /* Application Logic */
@@ -269,24 +285,30 @@ void ApplicationUI::initializePerformPage(Page* page) {
 	elapsedUI->setText(ApplicationUI::timeToText(0));
 	totalTimeUI->setText(ApplicationUI::timeToText(_activePresentation->totalTime()));
 
-	// Connect the onTriggered signal of the action buttons to respective slot functions
-//	ActionItem* playButton = page->findChild<ActionItem*>("playButton");
-//	bool res;
-//	res = QObject::connect(playButton, SIGNAL(triggered()), this, SLOT(playPresentation()));
-//	Q_ASSERT(res);
-//	Q_UNUSED(page)
+	// Rotate (and lock) screen to Landscape mode. Provides greater screen real-estate for the slideshow
+	OrientationSupport* orientInstance = OrientationSupport::instance();
+	orientInstance->setSupportedDisplayOrientation(SupportedDisplayOrientation::DisplayLandscape);
+	orientInstance->requestDisplayDirection(DisplayDirection::West);
+	orientInstance->setSupportedDisplayOrientation(SupportedDisplayOrientation::CurrentLocked);
 
+	// Ensure that the screen is kept from powering off due to inactivity (important for slideshow)
+	_app->mainWindow()->setScreenIdleMode(ScreenIdleMode::KeepAwake);
+
+	// Inform the QML UI that data and device-specific initialization is complete
 	emit performInitialized();
 }
 
 void ApplicationUI::reinitializeMainPage(Page* page) {
 	qDebug() << "Returning to main page...";
 
-//		// TODO If required, clear all slide data models and restore back to original data model
-//		if (dynamic_cast<QListDataModel<Slide*> *>(_dataModel) != 0) {
-//			delete _dataModel;
-//			_dataModel = this->getMainDataModel();
-//		}
+	// Reset screen orientation to portrait mode
+	OrientationSupport* orientInstance = OrientationSupport::instance();
+	orientInstance->setSupportedDisplayOrientation(SupportedDisplayOrientation::DisplayPortrait);
+	orientInstance->requestDisplayDirection(DisplayDirection::North);
+	orientInstance->setSupportedDisplayOrientation(SupportedDisplayOrientation::CurrentLocked);
+
+	// Reset the idle behaviour to normal (VERY important to save battery power)
+	_app->mainWindow()->setScreenIdleMode(ScreenIdleMode::KeepAwake);
 
 	qDebug() << _dataModel;
 

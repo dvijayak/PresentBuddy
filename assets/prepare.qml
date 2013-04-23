@@ -106,7 +106,7 @@ Page {
                 objectName: "totalTimeSlider"
                 property double maxTimeRemaining; // The maximum amount of time remaining that can be allocated to a slide
                 fromValue: 1.0
-                toValue: 3600.0
+                toValue: 6039.0
                 horizontalAlignment: HorizontalAlignment.Fill
                 layoutProperties: StackLayoutProperties {
                     spaceQuota: 1.0
@@ -224,7 +224,7 @@ Page {
                                             }
                                             value: (60 * ListItemData.time.minutes) + ListItemData.time.seconds
                                             fromValue: 1.0
-                                            toValue: 3600.0
+                                            toValue: 6039.0
                                             onImmediateValueChanged: {
                                                 var value = Math.floor(immediateValue);
                                                 var minute = Math.floor(value / 60);

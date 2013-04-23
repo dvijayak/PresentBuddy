@@ -7,22 +7,7 @@ import my.library 1.0
 Page {
     id: performPage
     objectName: "performPage"
-//    property variant activePresentation;
     property variant feedbackColor;
-
-//    actions: [
-//        ActionItem {
-//            objectName: "playButton"
-//            
-//            title: "Begin Presenting"
-//            imageSource: "asset:///icons/9-av-play81.png"
-//            ActionBar.placement: ActionBarPlacement.OnBar
-//            
-//            onTriggered: {
-//                colorTimer.start();
-//            }
-//        }
-//    ]
     
 	onCreationCompleted: {
 	    // Connect signals with slots
@@ -36,15 +21,9 @@ Page {
 
         // Initialize color transition logic
         Qt.slideIndex = 0;
+        Qt.elapsedTime = 0; // Total time elapsed in the presentation
         Qt.currentSlide = Qt.activePresentation.slides[Qt.slideIndex];
-        Qt.maxTime = Qt.appUI.timeFromMinSecs(Qt.currentSlide.time.minutes, Qt.currentSlide.time.seconds);
-        Qt.currentTime = Qt.maxTime; // The time that counts down
-        console.log(Qt.maxTime);
-        Qt.orangeTime = Math.floor(Qt.maxTime * 0.65); // The time at which the colour indicator turns orange - about 65% of total time
-        console.log("ORANGE TIME = " + Qt.orangeTime);
-        Qt.rValue = Qt.maxTime; // R
-        Qt.gValue = Qt.maxTime; // G
-        Qt.bValue = Qt.maxTime; // B
+        performPage.initializeSlide(Qt.currentSlide);
         Qt.rgbDiff = 1; // Increment/Decrement parameter
         
         // Start the presentation!
@@ -62,12 +41,16 @@ Page {
         
         // Presentation Name
         Container {
+            horizontalAlignment: HorizontalAlignment.Fill
             Label {
                 id: presentationName
                 objectName: "performName"
                 
                 text: "Presentation Name"
                 textStyle.color: performPage.feedbackColor
+                verticalAlignment: VerticalAlignment.Center
+                horizontalAlignment: HorizontalAlignment.Center
+                textStyle.textAlign: TextAlign.Center
             }
         }
         
@@ -76,7 +59,8 @@ Page {
             layout: StackLayout {
                 orientation: LayoutOrientation.TopToBottom
             }
-            
+
+            horizontalAlignment: HorizontalAlignment.Fill
             // Slide Title
             Label {
                 id: slideTitle
@@ -84,6 +68,9 @@ Page {
                 
                 text: "Slide Title"
                 textStyle.color: performPage.feedbackColor
+                verticalAlignment: VerticalAlignment.Center
+                horizontalAlignment: HorizontalAlignment.Center
+                textStyle.textAlign: TextAlign.Center
             }
             
             // Slide Time Countdown
@@ -92,7 +79,17 @@ Page {
                 objectName: "performTime"
                 
                 text: "Slide Countdown"
-                textStyle.color: performPage.feedbackColor
+
+                verticalAlignment: VerticalAlignment.Center
+                horizontalAlignment: HorizontalAlignment.Center
+                textStyle {
+                    base: SystemDefaults.TextStyles.BigText
+                    color: performPage.feedbackColor
+                    textAlign: TextAlign.Center
+                    fontWeight: FontWeight.Bold
+                    fontSize: FontSize.PointValue
+                    fontSizeValue: 80
+                }
             }
         }
         
@@ -101,7 +98,8 @@ Page {
             layout: StackLayout {
                 orientation: LayoutOrientation.LeftToRight
             }
-            
+
+            horizontalAlignment: HorizontalAlignment.Fill
             // Time Elapsed
             Label {
                 id: timeElapsed
@@ -109,6 +107,7 @@ Page {
                 
                 text: "Time Elapsed"
                 textStyle.color: performPage.feedbackColor
+                verticalAlignment: VerticalAlignment.Center
             }
             
             // Presentation Total Time
@@ -118,6 +117,7 @@ Page {
                 
                 text: "Total Time"
                 textStyle.color: performPage.feedbackColor
+                verticalAlignment: VerticalAlignment.Center
             }
         }
 
@@ -128,15 +128,29 @@ Page {
                 id: countdownTimer
                 interval: 1000 // Time counts down by 1 second
                 onTimeout: {
-                    Qt.currentTime -= 1;
-                    slideTime.text = Qt.appUI.timeToText(Qt.currentTime);
+                    // Update the current time and the elapsed time
+                    Qt.currentTime--;
+                    Qt.elapsedTime++;
+                    slideTime.text = Qt.appUI.timeToText(Qt.currentTime);                    
+                    timeElapsed.text = Qt.appUI.timeToText(Qt.elapsedTime);
                     
                     // Count down until 0
                     if (Qt.currentTime > 0) {
                     	countdownTimer.start();
                     }
-                    else {
-                        countdownTimer.stop();
+                    else {                        
+                        // Switch to the next slide
+                        performPage.nextSlide();
+
+                        // Repeat until we finish the last slide
+                        if (Qt.slideIndex < Qt.activePresentation.slides.length) {
+                            countdownTimer.start();
+                            colorTimer.start();
+                        }
+                        else {
+                            countdownTimer.stop();
+                            colorTimer.stop();
+                        }
                     }
                 }
             } ,            
@@ -144,57 +158,55 @@ Page {
                 id: colorTimer
                 interval: 100
                 onTimeout: {
-//                    console.log("R: " + Qt.rValue + " G: " + Qt.gValue + " B: " + Qt.bValue);
+                    // Transition the colours
                     // White to Green
-                    if (Qt.rValue <= Qt.maxTime && Qt.gValue == Qt.maxTime && Qt.bValue <= Qt.maxTime 
+                    if (Qt.rValue <= Qt.colorMax && Qt.gValue == Qt.colorMax && Qt.bValue <= Qt.colorMax 
                         	&& Qt.rValue != 0 && Qt.bValue != 0) {
                         Qt.rValue -= Qt.rgbDiff;
                         Qt.bValue -= Qt.rgbDiff;
                     }
                     // Green to Yellow
-                    else if (Qt.rValue >= 0 && Qt.gValue == Qt.maxTime && Qt.bValue == 0 
-                        	&& Qt.rValue != Qt.maxTime) {
+                    else if (Qt.rValue >= 0 && Qt.gValue == Qt.colorMax && Qt.bValue == 0 
+                        	&& Qt.rValue != Qt.colorMax) {
                         Qt.rValue += Qt.rgbDiff;
                     } 
-                    // Yellow to Orange
-                    else if (Qt.rValue == Qt.maxTime && Qt.gValue <= Qt.maxTime && Qt.bValue == 0 
-                        	&& Qt.gValue != Qt.orangeTime) {                        
+                    // Yellow to Red
+                    else if (Qt.rValue == Qt.colorMax && Qt.gValue <= Qt.colorMax && Qt.bValue == 0 
+                        	&& Qt.gValue != 0) {                        
                         Qt.gValue -= Qt.rgbDiff;
                     }
-                    // Orange to Red (can technically be combined with Yellow to Orange)
-                    else if (Qt.rValue == Qt.maxTime && Qt.gValue <= Qt.orangeTime && Qt.bValue == 0 
-                        	&& Qt.gValue != 0) {
-                        Qt.gValue -= Qt.rgbDiff;
-                    }
-                                        
-                    Qt.rValue = colorTimer.correctRGBValues(Qt.rValue, Qt.maxTime);
-                    Qt.gValue = colorTimer.correctRGBValues(Qt.gValue, Qt.maxTime);
-                    Qt.bValue = colorTimer.correctRGBValues(Qt.bValue, Qt.maxTime);
+                    
+                    // Rectify invalid values
+                    Qt.rValue = colorTimer.correctRGBValues(Qt.rValue, Qt.colorMax);
+                    Qt.gValue = colorTimer.correctRGBValues(Qt.gValue, Qt.colorMax);
+                    Qt.bValue = colorTimer.correctRGBValues(Qt.bValue, Qt.colorMax);
 
-                    // Divide by maxTime to get a double/float percentage
-					var R = Qt.rValue/Qt.maxTime, 
-						G = Qt.gValue/Qt.maxTime, 
-						B = Qt.bValue/Qt.maxTime;
+                    // Divide by colorMax to get a double/float percentage
+					var R = Qt.rValue/Qt.colorMax, 
+						G = Qt.gValue/Qt.colorMax, 
+						B = Qt.bValue/Qt.colorMax;
 					
+					// Update the color of elements to provide the visual feedback to the user
 					performPage.feedbackColor = Color.create(R, G, B);				
-                    console.log("R: " + R*256 + " G: " + G*256 + " B: " + B*256);
+                    console.log("R: " + Math.floor(R*256) + " G: " + Math.floor(G*256) + " B: " + Math.floor(B*256));
+//                    console.log("R: " + Math.floor(Qt.rValue) + " G: " + Math.floor(Qt.gValue) + " B: " + Math.floor(Qt.bValue));
 
                     // We have reached Red
-                    if (Qt.rValue == Qt.maxTime && Qt.gValue == 0 && Qt.bValue == 0) {
-                        colorTimer.stop();
+                    if (Qt.rValue == Qt.colorMax && Qt.gValue == 0 && Qt.bValue == 0) {
+                        colorTimer.stop();                                        
                     }
                     else {
                         colorTimer.start();
                     }                    
-                }
+                }                                
 
                 // Boundary cases where values < 0 or > maxTime are possible when dec or inc by some numbers
-                function correctRGBValues (value, maxTime) {                    
+                function correctRGBValues (value, max) {                    
                     if (value < 0) {                        
                         return 0;
                     }
-                    else if (value > maxTime) {                        
-                        return maxTime;
+                    else if (value > max) {                        
+                        return max;
                     }
                     else {                        
                         return value;
@@ -204,13 +216,34 @@ Page {
         ]
     }
     
-//    paneProperties: NavigationPaneProperties {
-//        backButton: ActionItem {
-//            title: "Previous Page"
-//            imageSource: "asset:///icons/ic_previous.png"
-//            onTriggered: {
-//                navigationPane.pop();
-//            }
-//        }
-//    }
+    /* Switch to the next slide and re-initialize */
+    function nextSlide() {
+    	Qt.slideIndex++;    	
+        Qt.currentSlide = Qt.activePresentation.slides[Qt.slideIndex];
+        performPage.initializeSlide(Qt.currentSlide);
+        performPage.updateUIElements(Qt.currentSlide);
+    }
+    
+    /* Initialize the color transition logic for the specified slide */
+    function initializeSlide(slide) {
+        console.log("Slide " + Qt.slideIndex);
+        Qt.maxTime = Qt.appUI.timeFromMinSecs(slide.time.minutes, slide.time.seconds);
+        Qt.colorMax = Math.floor((Qt.maxTime * Math.floor(countdownTimer.interval / colorTimer.interval)) / 3); // We divide by 3 since we have three colour transitions
+        Qt.currentTime = Qt.maxTime; // The time that counts down        
+        console.log(Qt.maxTime + "," + Qt.colorMax);
+        Qt.orangeTime = Math.floor(Qt.colorMax * 0.65); // The time at which the feedback colo is orange - about 65% of max time
+        console.log("ORANGE TIME = " + Qt.orangeTime);
+        Qt.rValue = Qt.colorMax; // R
+        Qt.gValue = Qt.colorMax; // G
+        Qt.bValue = Qt.colorMax; // B
+    }
+    
+    /* Update UI controls to reflect the current slide */
+    function updateUIElements(slide) {
+        var title = slide.title;
+        var time = Qt.appUI.timeToText(slide.time.minutes, slide.time.seconds);
+        slideTitle.text = title;
+        slideTime.text = time;
+        performPage.feedbackColor = Color.White;
+    }
 }
