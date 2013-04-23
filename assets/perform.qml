@@ -205,7 +205,10 @@ Page {
                         colorTimer.start();
                     }                                                                     
                 }                                
-
+                
+                /* Convert a color from the HSV space to the RGB space.
+                 * Implementation adapted from http://www.cs.rit.edu/~ncs/color/t_convert.html
+                 * Retrieved April 23rd 2013. */
                 function convertHSVToRGB (H, S, V) {                    
                     var R, G, B;                    
                     if (S == 0.0) {
