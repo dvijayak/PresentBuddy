@@ -312,7 +312,7 @@ void ApplicationUI::reinitializeMainPage(Page* page) {
 	orientInstance->setSupportedDisplayOrientation(SupportedDisplayOrientation::CurrentLocked);
 
 	// Reset the idle behaviour to normal (VERY important to save battery power)
-	_app->mainWindow()->setScreenIdleMode(ScreenIdleMode::KeepAwake);
+	_app->mainWindow()->setScreenIdleMode(ScreenIdleMode::Normal);
 
 	qDebug() << _dataModel;
 
