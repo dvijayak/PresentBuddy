@@ -9,7 +9,7 @@ Features
 	- Same as Perform except that you get to manually switch between slides
 	- Automatically record time elapsed for each slide and update (to a certain threshold) if different from existing value
 	- (optional) Start from a specific slide
-- Implement create new presentation feature
+- (DONE) Implement create new presentation feature
 - Integrate app with BBM
 	- Send an invitation to friends to download the app
 	- Share your list of presentations with a friend
