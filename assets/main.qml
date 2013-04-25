@@ -119,87 +119,88 @@ NavigationPane {
                             layout: StackLayout {}
                             
                             Container {
+                                Divider {}
                                 StandardListItem {                                    
                                     title: ListItemData.name
-                                    status: ListItemData.totalTime.minutes + ":" + ListItemData.totalTime.seconds
+                                    status: Qt.appUI.minSecToText(ListItemData.totalTime.minutes, ListItemData.totalTime.seconds)
                                     description: "Last Modified: " + Qt.formatDateTime(ListItemData.dateModified, Qt.DISPLAY_DATE_TIME_FORMAT)
-                                }                                
-                            }
-                            Container {
-                                layout: StackLayout {
-                                    orientation: LayoutOrientation.LeftToRight
-                                }                                
-                                Button {
-                                    id: performButton                                                                        
-                                    imageSource: "asset:///icons/9-av-play81.png"
                                     
-                                    onClicked: {
-                                        // Set the active presentation to be the one that was selected
-                                        Qt.navigationPane.activePresentationID = listItemRoot.ListItem.data.id;
-
-                                        var page = Qt.performPageDefinition.createObject();
-                                        Qt.navigationPane.push(page);
-                                    }                                    
-                                }
-                                Button {
-                                    id: practiseButton
-                                    text: "Practise"                                                                    
-                                }
-                                Button {
-                                    id: previewButton
-                                    imageSource: "asset:///icons/ic_view_details.png"
-
-                                    onClicked: {
-                                        // Set the active presentation to be the one that was selected
-                                        Qt.navigationPane.activePresentationID = listItemRoot.ListItem.data.id;
-
-                                        // Push the prepare page on to the stack (go to the prepare page)
-                                        var page = Qt.previewPageDefinition.createObject();
-                                        Qt.navigationPane.push(page);
-                                    }
-                                }
-                                Button {
-                                    id: editButton
-                                    objectName: "editButton"                                    
-                                    imageSource: "asset:///icons/ic_edit.png"
-                                    
-                                    onClicked: {
-                                        // Set the active presentation to be the one that was selected                                              
-                                        Qt.navigationPane.activePresentationID = listItemRoot.ListItem.data.id;
-
-                                        // Push the prepare page on to the stack (go to the prepare page)
-                                        var page = Qt.preparePageDefinition.createObject();                                        
-                                        Qt.navigationPane.push(page);
-                                    }
-                                }
-                                Button {
-                                    id: deleteButton
-                                    imageSource: "asset:///icons/ic_delete.png"
-                                    
-                                    attachedObjects: [
-                                        SystemDialog {
-                                            id: deletePresentationDialog
-                                            title: "Confirm delete presentation"
-                                            body: "Are you sure you want to delete " + listItemRoot.ListItem.data.name + "?"
-                                            onFinished: {
-                                                if (deletePresentationDialog.result
-                                                    == SystemUiResult.ConfirmButtonSelection) {
-                                                    // Set the active presentation to be the one that was selected
-                                                    Qt.navigationPane.activePresentationID = listItemRoot.ListItem.data.id;
+                                    contextActions: [
+                                        ActionSet {
+                                            title: "Presentation"
+                                            
+                                            actions: [
+                                                ActionItem {
+                                                    id: performButton
+                                                    title: "Perform"
+                                                    imageSource: "asset:///icons/9-av-play81.png"
                                                     
-                                                    Qt.appUI.deletePresentation();
+                                                    onTriggered: {
+                                                        // Set the active presentation to be the one that was selected
+                                                        Qt.navigationPane.activePresentationID = listItemRoot.ListItem.data.id;
+
+                                                        var page = Qt.performPageDefinition.createObject();
+                                                        Qt.navigationPane.push(page);
+                                                    }
+                                                } ,
+                                                ActionItem {
+                                                    id: previewButton
+                                                    title: "Preview"
+                                                    imageSource: "asset:///icons/ic_view_details.png"
+                                                    
+                                                    onTriggered: {
+                                                        // Set the active presentation to be the one that was selected
+                                                        Qt.navigationPane.activePresentationID = listItemRoot.ListItem.data.id;
+
+                                                        // Push the prepare page on to the stack (go to the prepare page)
+                                                        var page = Qt.previewPageDefinition.createObject();
+                                                        Qt.navigationPane.push(page);
+                                                    }
+                                                } ,
+                                                ActionItem {
+                                                    id: editButton
+                                                    title: "Prepare"                                                
+                                                    imageSource: "asset:///icons/ic_edit.png"
+                                                    
+                                                    onTriggered: {
+                                                        // Set the active presentation to be the one that was selected
+                                                        Qt.navigationPane.activePresentationID = listItemRoot.ListItem.data.id;
+
+                                                        // Push the prepare page on to the stack (go to the prepare page)
+                                                        var page = Qt.preparePageDefinition.createObject();
+                                                        Qt.navigationPane.push(page);
+                                                    }
+                                                } ,
+                                                ActionItem {
+                                                    id: deleteButton
+                                                    title: "Delete"
+                                                    imageSource: "asset:///icons/ic_delete.png"
+
+                                                    attachedObjects: [
+                                                        SystemDialog {
+                                                            id: deletePresentationDialog
+                                                            title: "Confirm delete presentation"
+                                                            body: "Are you sure you want to delete " + listItemRoot.ListItem.data.name + "?"
+                                                            onFinished: {
+                                                                if (deletePresentationDialog.result == SystemUiResult.ConfirmButtonSelection) {
+                                                                    // Set the active presentation to be the one that was selected
+                                                                    Qt.navigationPane.activePresentationID = listItemRoot.ListItem.data.id;
+
+                                                                    Qt.appUI.deletePresentation();
+                                                                }
+                                                            }
+                                                        }
+                                                    ]
+
+                                                    onTriggered: {
+                                                        deletePresentationDialog.show();
+                                                    }
                                                 }
-                                            }
+                                            ]
                                         }
                                     ]
-                                    
-                                    onClicked: {                                    
-                                        deletePresentationDialog.show();                                        
-                                    }
-                                }
-                            }
-                            
-                            Divider {}
+                                }                                
+                            }                                                                                    
                         }
                     }
                 ]
