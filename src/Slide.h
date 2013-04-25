@@ -12,8 +12,9 @@
 #include <QMetaType>
 #include <QString>
 
-namespace bb {
 namespace javelind {
+namespace bb {
+namespace pbuddy {
 
 
 class Slide : public QObject {
@@ -65,9 +66,10 @@ public slots:
 	void setSlide();
 };
 
-} /* namespace javelind */
+} /* namespace pbuddy */
 } /* namespace bb */
+} /* namespace javelind */
 
-Q_DECLARE_METATYPE(bb::javelind::Slide*);
+Q_DECLARE_METATYPE(javelind::bb::pbuddy::Slide*);
 
 #endif /* SLIDE_H_ */

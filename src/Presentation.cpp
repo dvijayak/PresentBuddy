@@ -11,8 +11,9 @@
 #include "Presentation.h"
 #include "Slide.h"
 
-namespace bb {
 namespace javelind {
+namespace bb {
+namespace pbuddy {
 
 /* House Keeping */
 
@@ -196,5 +197,6 @@ void Presentation::setPresentation() {
 	emit presentationChanged(this);
 }
 
-} /* namespace javelind */
+} /* namespace pbuddy */
 } /* namespace bb */
+} /* namespace javelind */

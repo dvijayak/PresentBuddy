@@ -15,8 +15,9 @@
 #include <QMetaType>
 #include "Slide.h"
 
-namespace bb {
 namespace javelind {
+namespace bb {
+namespace pbuddy {
 
 typedef QList< Slide* > SlideList;
 
@@ -86,11 +87,12 @@ public slots:
 	void setPresentation();
 };
 
-} /* namespace javelind */
+} /* namespace pbuddy */
 } /* namespace bb */
+} /* namespace javelind */
 
-Q_DECLARE_METATYPE(bb::javelind::Presentation*);
-Q_DECLARE_METATYPE(bb::javelind::SlideList);
+Q_DECLARE_METATYPE(javelind::bb::pbuddy::Presentation*);
+Q_DECLARE_METATYPE(javelind::bb::pbuddy::SlideList);
 
 #endif /* PRESENTATION_H_ */
 

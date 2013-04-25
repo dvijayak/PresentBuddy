@@ -31,7 +31,7 @@
 using namespace bb::cascades;
 using namespace bb::system;
 using namespace bb::data;
-using namespace bb::javelind;
+using namespace javelind::bb::pbuddy;
 
 const QString ApplicationUI::DATA_FILE("/pbuddy-data.json");
 const QString ApplicationUI::READ_DATE_TIME_FORMAT("yyyy-MM-dd hh:mm:ss");

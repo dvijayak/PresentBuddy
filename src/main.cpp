@@ -12,7 +12,7 @@
 #include <Qt/qdeclarativedebug.h>
 
 using namespace bb::cascades;
-using namespace bb::javelind;
+using namespace javelind::bb::pbuddy;
 
 Q_DECL_EXPORT int main(int argc, char **argv)
 {

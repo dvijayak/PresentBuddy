@@ -8,8 +8,9 @@
 #include <QDebug>
 #include "Slide.h"
 
-namespace bb {
 namespace javelind {
+namespace bb {
+namespace pbuddy {
 
 /* House Keeping */
 
@@ -106,5 +107,6 @@ void Slide::setSlide() {
 	emit slideChanged(this);
 }
 
-} /* namespace javelind */
+} /* namespace pbuddy */
 } /* namespace bb */
+} /* namespace javelind */

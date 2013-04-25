@@ -13,7 +13,7 @@
 #include "Presentation.h"
 
 using namespace bb::cascades;
-using namespace bb::javelind;
+using namespace javelind::bb::pbuddy;
 
 namespace bb { namespace cascades { class Application; }}
 
