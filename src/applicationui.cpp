@@ -137,9 +137,7 @@ ApplicationUI::ApplicationUI(Application *app) : QObject(app)
 
 ApplicationUI::~ApplicationUI() {
 	// Save the current list of presentations to a JSON file
-	if (!_presentations.isEmpty()) { // A paranoid defense mechanism. I have no idea what it could defend against, but it seems a good idea.
-		Util::saveListToJSON(_presentations, QDir::homePath() + Util::DATA_FILE);
-	}
+	Util::saveListToJSON(_presentations, QDir::homePath() + Util::DATA_FILE);
 
 	// Free all memory that we are responsible for
 	foreach(Presentation* presentation, _presentations) {
