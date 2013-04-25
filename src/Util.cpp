@@ -193,7 +193,6 @@ PresentationList Util::getListFromJSON(QString filePath) {
 			SystemToast* toast = new SystemToast();
 			toast->setBody("Create a new presentation!");
 			toast->show();
-			delete toast; // We are responsible for freeing it since we are not attaching it to any QObject
 		}
 	}
 	else {
@@ -219,7 +218,6 @@ PresentationList Util::getListFromJSON(QString filePath) {
 		SystemToast* toast = new SystemToast();
 		toast->setBody("Create a new presentation!");
 		toast->show();
-		delete toast; // Ditto as above
 	}
 
 	return list;
