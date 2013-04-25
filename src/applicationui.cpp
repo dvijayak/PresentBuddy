@@ -733,10 +733,16 @@ void ApplicationUI::bufferTotalTimeChange(float value) {
 void ApplicationUI::bufferSlideTitleChange(int index, QString title) {
 	qDebug() << "Buffering slide title change...";
 
+	qDebug() << QString("SLIDE TITLE RETURNED IS: %1, THE INDEX RETURNED IS %2").arg(title).arg(index);
+
+	// Buffer the new slide title
 	SlideList& slides = _bufferPresentation->slidesRef();
-	slides[index]->setTitle(title);
-	_activePresentation->print();
-	_bufferPresentation->print();
+	// Fixes bugs where this function is unexpectedly (and erroneously) called (when that happens, the index passed is usually out of bounds)
+	if (index < slides.size()) {
+		slides[index]->setTitle(title);
+		_activePresentation->print();
+		_bufferPresentation->print();
+	}
 
 	qDebug() << "Buffered slide title change. Ready to commit.";
 
@@ -747,11 +753,16 @@ void ApplicationUI::bufferSlideTimeChange(int index, float value) {
 
 	qDebug() << "Buffering slide time change...";
 
+	qDebug() << QString("SLIDE TIME RETURNED IS: %1, THE INDEX RETURNED IS %2").arg(value).arg(index);
+
 	// Buffer the new slide time
 	SlideList& slides = _bufferPresentation->slidesRef();
-	slides[index]->setTime(((int)value));
-	_activePresentation->print();
-	_bufferPresentation->print();
+	// Fixes bugs where this function is unexpectedly (and erroneously) called (when that happens, the index passed is usually out of bounds)
+	if (index < slides.size()) {
+		slides[index]->setTime(((int)value));
+		_activePresentation->print();
+		_bufferPresentation->print();
+	}
 
 	qDebug() << "Buffered slide time change. Ready to commit.";
 
