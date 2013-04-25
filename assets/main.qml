@@ -12,8 +12,13 @@ NavigationPane {
         // Specify the actions that should be included in the menu
         actions: [
             ActionItem {
-                title: "Settings"
-                imageSource: "asset:///icons/ic_settings.png"
+                title: "Help"
+                imageSource: "asset:///icons/ic_help.png"
+                
+                onTriggered: {
+                    var page = helpPageDefinition.createObject();
+                    navigationPane.push(page);
+                }
             }, 
             ActionItem {
                 title: "Invite Friends"
@@ -44,6 +49,12 @@ NavigationPane {
         ComponentDefinition {
             id: preparePageDefinition
             source: "prepare.qml"
+        } ,
+        
+        // The help page
+        ComponentDefinition {
+           id: helpPageDefinition
+           source: "help.qml"
         }
     ]    
 
