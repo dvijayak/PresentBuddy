@@ -233,6 +233,7 @@ void ApplicationUI::deletePresentation(Presentation* presentation) {
 
 }
 
+/* Initialize the Prepare page */
 void ApplicationUI::initializePreparePage(Page* page) {
 	qDebug() << "Going to prepare page...";
 
@@ -273,6 +274,32 @@ void ApplicationUI::initializePreparePage(Page* page) {
 	Q_UNUSED(res);
 }
 
+/* Initialize the Preview page */
+void ApplicationUI::initializePreviewPage(Page* page) {
+	qDebug() << "Going to preview page...";
+
+	// Set the presentation that needs to be prepared
+	_activePresentation = this->activePresentation();
+
+	// Fill in the Presentation name and total time fields and slider
+	TextField* nameText = page->findChild<TextField*>("nameValueLabel");
+	nameText->setText(_activePresentation->name());
+	Slider* totalTimeSlider = page->findChild<Slider*>("totalTimeSlider");
+	int totalTime = _activePresentation->totalTime();
+	totalTimeSlider->setValue(totalTime);
+	Label* totalTimeLabel = page->findChild<Label*>("totalTimeValueLabel");
+	totalTimeLabel->setText(ApplicationUI::timeToText(totalTime));
+
+	// Create a new QVariantListDataModel, fill it with the slides (wrapped as QVariant objects) and set it to the list view in the page
+	QVariantListDataModel* dataModel = new QVariantListDataModel();
+	QVariantList qVarList = this->wrapListToQVarList(_activePresentation->slides());
+	dataModel->append(qVarList);
+	ListView* listView = page->findChild<ListView*>("slideListView");
+	listView->setDataModel(dataModel);
+	dataModel->setParent(page); // Attaching this to the Page allows smooth destruction, i.e. when the page is destroyed, the model is also destroyed
+}
+
+/* Initialize the Perform page */
 void ApplicationUI::initializePerformPage(Page* page) {
 	qDebug() << "Going to perform page...";
 
@@ -467,7 +494,9 @@ PresentationList ApplicationUI::unWrapListFromQVarList(QVariantList qVarList) {
 			list.append(presentation);
 		}
 	}
-	qDebug() << "Error: no presentations exist in the JSON file. Creating empty presentations list...";
+	else {
+		qDebug() << "Error: no presentations exist in the JSON file. Creating empty presentations list...";
+	}
 
 	return list;
 }
@@ -650,7 +679,7 @@ void ApplicationUI::goToPage(bb::cascades::Page* page) {
 		this->initializePreparePage(page);
 	}
 	else if (pageName == "previewPage") {
-
+		this->initializePreviewPage(page);
 	}
 	else if (pageName == "performPage") {
 		this->initializePerformPage(page);

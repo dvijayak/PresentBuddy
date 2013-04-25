@@ -83,6 +83,7 @@ public:
     QVariantList findInDataModel(Presentation* presentation, DataModel* model);
 
     void initializePreparePage(Page* page);
+    void initializePreviewPage(Page* page);
     void initializePerformPage(Page* page);
     void reinitializeMainPage(Page* page);
 
