@@ -7,7 +7,7 @@ Page {
     
     actions: [
         ActionItem {
-            title: "Slideshow"
+            title: "Perform"
             objectName: "playButton"
             
             imageSource: "asset:///icons/9-av-play81.png"
@@ -19,7 +19,7 @@ Page {
             }
         } ,
         ActionItem {
-            title: "Edit"
+            title: "Prepare"
             objectName: "editButton"
             
             imageSource: "asset:///icons/ic_edit.png"
@@ -31,7 +31,7 @@ Page {
             }
         } ,
         ActionItem {
-            title: "Delete"
+            title: "Perish"
             objectName: "deleteButton"
             
             imageSource: "asset:///icons/ic_delete.png"

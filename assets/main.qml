@@ -101,6 +101,15 @@ NavigationPane {
                 id: listView
                 objectName: "listView"
 
+                onTriggered: {
+                    // Set the active presentation to be the one that was selected
+                    Qt.navigationPane.activePresentationID = mainDataModel.data(indexPath).id;
+
+                    // Push the prepare page on to the stack (go to the prepare page)
+                    var page = Qt.previewPageDefinition.createObject();
+                    Qt.navigationPane.push(page);
+                }
+
                 // Associate the GroupDataModel from the attached objects
                 // list with this ListView
                 dataModel: mainDataModel
@@ -111,6 +120,8 @@ NavigationPane {
                     ListItemComponent {                        
                         type: "item"
 
+
+						
                         // Each list item is represented by a StandardListItem
                         // whose text fields are populated with data from the
                         // item
@@ -123,7 +134,7 @@ NavigationPane {
                                 StandardListItem {                                    
                                     title: ListItemData.name
                                     status: Qt.appUI.minSecToText(ListItemData.totalTime.minutes, ListItemData.totalTime.seconds)
-                                    description: "Last Modified: " + Qt.formatDateTime(ListItemData.dateModified, Qt.DISPLAY_DATE_TIME_FORMAT)
+                                    description: "Last Modified: " + Qt.formatDateTime(ListItemData.dateModified, Qt.DISPLAY_DATE_TIME_FORMAT)                                                                        
                                     
                                     contextActions: [
                                         ActionSet {
@@ -173,7 +184,7 @@ NavigationPane {
                                                 } ,
                                                 ActionItem {
                                                     id: deleteButton
-                                                    title: "Delete"
+                                                    title: "Perish"
                                                     imageSource: "asset:///icons/ic_delete.png"
 
                                                     attachedObjects: [
