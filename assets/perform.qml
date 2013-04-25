@@ -185,12 +185,8 @@ Page {
             QTimer {
                 id: countdownTimer
                 interval: 1000 // Time counts down by 1 second
-                onTimeout: {
-                    // Update the current time and the elapsed time
-                    Qt.currentTime--;
-                    Qt.elapsedTime++;
-                    slideTime.text = Qt.appUI.timeToText(Qt.currentTime);                    
-                    timeElapsed.text = Qt.appUI.timeToText(Qt.elapsedTime) + "/" + Qt.appUI.minSecToText(Qt.activePresentation.totalTime.minutes, Qt.activePresentation.totalTime.seconds);                    
+                onTimeout: {                    
+					console.log("Current time is: " + Qt.currentTime);
 
                     // Count down until 0
                     if (Qt.currentTime > 0) {
@@ -212,6 +208,12 @@ Page {
                             slideTime.text = "LA FIN";
                         }
                     }
+
+                    // Update the current time and the elapsed time
+                    Qt.currentTime --;
+                    Qt.elapsedTime ++;
+                    slideTime.text = Qt.appUI.timeToText(Qt.currentTime);
+                    timeElapsed.text = Qt.appUI.timeToText(Qt.elapsedTime) + "/" + Qt.appUI.minSecToText(Qt.activePresentation.totalTime.minutes, Qt.activePresentation.totalTime.seconds);
                 }
             } ,     
             // Timer for animating colour transitions for the visual feedback
@@ -234,7 +236,7 @@ Page {
                             Qt.H = (Qt.transitionValue*(Qt.hueTable.green/360))/(Qt.whiteToGreenMax);
                     }
 
-                    console.log("H: " + Math.floor(Qt.H*360) + " S: " + Math.floor(Qt.S*100) + " V: " + Math.floor(Qt.V*100));
+//                    console.log("H: " + Math.floor(Qt.H*360) + " S: " + Math.floor(Qt.S*100) + " V: " + Math.floor(Qt.V*100));
 //                    console.log("H: " + Qt.H + " S: " + Qt.S + " V: " + Qt.V);
 
                     // Convert HSV to RGB
@@ -243,7 +245,7 @@ Page {
                     	G = convertedColor.G,
                     	B = convertedColor.B;
                     
-                    console.log("R: " + Math.floor(R*255) + " G: " + Math.floor(G*255) + " B: " + Math.floor(B*255));
+//                    console.log("R: " + Math.floor(R*255) + " G: " + Math.floor(G*255) + " B: " + Math.floor(B*255));
 //                    console.log("R: " + R + " G: " + G + " B: " + B);
 
                     // Update the color of elements to provide the visual feedback to the user
