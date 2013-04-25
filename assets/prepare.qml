@@ -190,7 +190,6 @@ Page {
                                 // Image View/Slide Number
                                 Container {                                                                    
                                     Label {
-//                                        preferredWidth: 150
                                         text: listItemRoot.ListItem.indexInSection + 1
                                         verticalAlignment: VerticalAlignment.Fill
                                         horizontalAlignment: HorizontalAlignment.Fill
@@ -201,6 +200,36 @@ Page {
                                             fontSize: FontSize.PointValue
                                             fontSizeValue: 35
                                         }
+                                        
+                                        contextActions: [
+                                            ActionSet {
+                                                actions: [
+                                                    ActionItem {
+                                                        id: deleteSlideButton
+                                                        title: "Perish"
+                                                        imageSource: "asset:///icons/ic_delete.png"
+
+                                                        attachedObjects: [
+                                                            SystemDialog {
+                                                                id: deleteSlideDialog
+                                                                title: "Confirm delete slide"
+                                                                body: "Are you sure you want to delete " + listItemRoot.ListItem.data.title + "?"
+                                                                onFinished: {
+                                                                    if (deleteSlideDialog.result == SystemUiResult.ConfirmButtonSelection) {
+                                                                        var index = listItemRoot.ListItem.indexInSection;
+                                                                        Qt.appUI.deleteSlide(index);
+                                                                    }
+                                                                }
+                                                            }
+                                                        ]
+
+                                                        onTriggered: {
+                                                            deleteSlideDialog.show();
+                                                        }
+                                                    }
+                                                ]
+                                            }
+                                        ]                                                                                
 
                                     }
                                 }
@@ -300,31 +329,7 @@ Page {
                                                 }
                                             }
                                         }
-                                    }
-                                    Container {
-	                                    Button {
-	                                        id: deleteSlideButton
-	                                        imageSource: "asset:///icons/ic_delete.png"
-	
-	                                        attachedObjects: [
-	                                            SystemDialog {
-	                                                id: deleteSlideDialog
-	                                                title: "Confirm delete slide"
-	                                                body: "Are you sure you want to delete " + listItemRoot.ListItem.data.title + "?"
-	                                                onFinished: {
-	                                                    if (deleteSlideDialog.result == SystemUiResult.ConfirmButtonSelection) {	                                                        
-	                                                        var index = listItemRoot.ListItem.indexInSection;
-                                                            Qt.appUI.deleteSlide(index);
-	                                                    }
-	                                                }
-	                                            }
-	                                        ]
-	
-	                                        onClicked: {
-	                                            deleteSlideDialog.show();
-	                                        }
-	                                    }
-                                    }
+                                    }                                    
                                 }                                
                             }
                             

@@ -138,8 +138,6 @@ NavigationPane {
                                     
                                     contextActions: [
                                         ActionSet {
-                                            title: "Presentation"
-                                            
                                             actions: [
                                                 ActionItem {
                                                     id: performButton
