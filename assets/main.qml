@@ -3,6 +3,7 @@ import bb.system 1.0
 
 NavigationPane {    
     id: navigationPane    
+    
     property string activePresentationID // Expose the active presentation to C++ via its ID property
 
     // Add the application menu using a MenuDefinition

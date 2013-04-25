@@ -344,35 +344,43 @@ void ApplicationUI::initializePerformPage(Page* page) {
 	// Set the presentation that needs to be prepared
 	_activePresentation = this->activePresentation();
 
-	// Get references to required UI elements
-	TitleBar* nameUI = page->findChild<TitleBar*>("titleBar");
-	Label* titleUI = page->findChild<Label*>("performTitle");
-	Label* timeUI = page->findChild<Label*>("performTime");
-	Label* elapsedUI = page->findChild<Label*>("performElapsed");
-	Label* totalTimeUI = page->findChild<Label*>("performTotalTime");
-
-	// Initialize UI element values/text
-	nameUI->setTitle(_activePresentation->name());
+	// Ensure that the presentation has at least 1 slide for a slideshow to work
 	SlideList& slides = _activePresentation->slidesRef();
 	if (slides.size() <= 0) {
-		// TODO Peform: Handle situation when there are no slides for the presentation
+		SystemToast* toast = new SystemToast(this);
+		toast->setBody(tr("There are no slides for this presentation."));
+		toast->show();
+
+		// Pop out of the perform page
+		((NavigationPane*)_root)->pop();
 	}
-	titleUI->setText(slides[0]->title());
-	timeUI->setText(ApplicationUI::timeToText(slides[0]->time()));
-	elapsedUI->setText(ApplicationUI::timeToText(0));
-	totalTimeUI->setText(ApplicationUI::timeToText(_activePresentation->totalTime()));
+	else {
+		// Get references to required UI elements
+		TitleBar* nameUI = page->findChild<TitleBar*>("titleBar");
+		Label* titleUI = page->findChild<Label*>("performTitle");
+		Label* timeUI = page->findChild<Label*>("performTime");
+		Label* elapsedUI = page->findChild<Label*>("performElapsed");
+		Label* totalTimeUI = page->findChild<Label*>("performTotalTime");
 
-	// Rotate (and lock) screen to Landscape mode. Provides greater screen real-estate for the slideshow
-	OrientationSupport* orientInstance = OrientationSupport::instance();
-	orientInstance->setSupportedDisplayOrientation(SupportedDisplayOrientation::DisplayLandscape);
-	orientInstance->requestDisplayDirection(DisplayDirection::West);
-	orientInstance->setSupportedDisplayOrientation(SupportedDisplayOrientation::CurrentLocked);
+		// Initialize UI element values/text
+		nameUI->setTitle(_activePresentation->name());
+		titleUI->setText(slides[0]->title());
+		timeUI->setText(ApplicationUI::timeToText(slides[0]->time()));
+		elapsedUI->setText(ApplicationUI::timeToText(0));
+		totalTimeUI->setText(ApplicationUI::timeToText(_activePresentation->totalTime()));
 
-	// Ensure that the screen is kept from powering off due to inactivity (important for slideshow)
-	_app->mainWindow()->setScreenIdleMode(ScreenIdleMode::KeepAwake);
+		// Rotate (and lock) screen to Landscape mode. Provides greater screen real-estate for the slideshow
+		OrientationSupport* orientInstance = OrientationSupport::instance();
+		orientInstance->setSupportedDisplayOrientation(SupportedDisplayOrientation::DisplayLandscape);
+		orientInstance->requestDisplayDirection(DisplayDirection::West);
+		orientInstance->setSupportedDisplayOrientation(SupportedDisplayOrientation::CurrentLocked);
 
-	// Inform the QML UI that data and device-specific initialization is complete
-	emit performInitialized();
+		// Ensure that the screen is kept from powering off due to inactivity (important for slideshow)
+		_app->mainWindow()->setScreenIdleMode(ScreenIdleMode::KeepAwake);
+
+		// Inform the QML UI that data and device-specific initialization is complete
+		emit performInitialized();
+	}
 }
 
 void ApplicationUI::reinitializeMainPage(Page* page) {
