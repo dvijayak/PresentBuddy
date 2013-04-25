@@ -38,7 +38,7 @@ Page {
             title: "Reset"
             objectName: "resetButton"
             
-            imageSource: "asset:///icons/ic_pixle_subway_undo.png"
+            imageSource: "asset:///icons/ic_pixle_subway_reset.png"
             onTriggered: {
                 resetToast.show();
             }
