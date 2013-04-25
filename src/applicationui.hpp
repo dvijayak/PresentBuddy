@@ -43,6 +43,7 @@ private:
 public:
     /* Static Members */
 
+    static const QString DATA_FILE;
     static const QString READ_DATE_TIME_FORMAT;
     static const QString WRITE_DATE_TIME_FORMAT;
     static const QString DISPLAY_DATE_TIME_FORMAT;

@@ -18,6 +18,7 @@
 #include <bb/cascades/ActionItem>
 #include <bb/cascades/OrientationSupport>
 #include <bb/cascades/DisplayDirection>
+#include <bb/system/SystemToast>
 #include <bb/data/JsonDataAccess>
 
 #include <QTimer>
@@ -28,9 +29,11 @@
 #include <QDebug>
 
 using namespace bb::cascades;
+using namespace bb::system;
 using namespace bb::data;
 using namespace bb::javelind;
 
+const QString ApplicationUI::DATA_FILE("/pbuddy-data.json");
 const QString ApplicationUI::READ_DATE_TIME_FORMAT("yyyy-MM-dd hh:mm:ss");
 const QString ApplicationUI::WRITE_DATE_TIME_FORMAT(ApplicationUI::READ_DATE_TIME_FORMAT);
 const QString ApplicationUI::DISPLAY_DATE_TIME_FORMAT("MMMM d yyyy h:mm:ss AP"); // A separate format solely for rendering on the device
@@ -67,16 +70,19 @@ ApplicationUI::ApplicationUI(Application *app) : QObject(app)
     _dataModel = this->mainDataModel();
 
 	// Create initial list of Presentation objects from the data file
-//    QString filePath(QDir::currentPath() + "/app/native/assets/presentations.json");
-    QString filePath(QDir::homePath() + "/presentations_save.json");
-    // TODO Create more generic file name
+    QString filePath(QDir::homePath() + DATA_FILE);
+
     if (QFile::exists(filePath)) {
     	qDebug() << QString("File %1 found! Creating presentations list...").arg(filePath);
 
     	_presentations = this->getListFromJSON(filePath);
     }
     else {
-    	qDebug() << "No base file found. Creating an empty presentations list...";
+    	qDebug() << "No data file found. Creating an empty presentations list...";
+    	// Nudge the user to create a new presentation
+    	SystemToast* toast = new SystemToast(this);
+    	toast->setBody("Create a new presentation!");
+    	toast->show();
 
     	_presentations = PresentationList(); // Create empty list
     }
@@ -101,7 +107,9 @@ ApplicationUI::ApplicationUI(Application *app) : QObject(app)
 
 ApplicationUI::~ApplicationUI() {
 	// Save the current list of presentations to a JSON file
-	this->saveListToJSON(_presentations, QDir::homePath() + "/presentations_save.json");
+	if (!_presentations.isEmpty()) { // A paranoid defense mechanism. I have no idea what it could defend against, but it seems a good idea.
+		this->saveListToJSON(_presentations, QDir::homePath() + ApplicationUI::DATA_FILE);
+	}
 
 	// Free all memory that we are responsible for
 	foreach(Presentation* presentation, _presentations) {
@@ -473,12 +481,45 @@ PresentationList ApplicationUI::getListFromJSON(QString filePath) {
 	QList<QVariant> fileEntries = wrapList.value<QVariantList>();
 
 	PresentationList list;
-	if (!wrapList.isNull() && wrapList.isValid() && !fileEntries.isEmpty()) {
+	// Ensure that there was no error reading the file or any other error
+	if (!jda.hasError()
+			&& !wrapList.isNull()
+			&& wrapList.isValid()
+			&& !fileEntries.isEmpty()) {
+
 		// Create the list of Presentation objects
 		list = this->unWrapListFromQVarList(fileEntries);
+
+		// For an empty data file, nudge the user to create a new presentation
+		if (list.size() <= 0) {
+			SystemToast* toast = new SystemToast(this);
+			toast->setBody("Create a new presentation!");
+			toast->show();
+		}
 	}
 	else {
 		qDebug() << "JSON file is invalid or empty. Creating an empty presentations list...";
+
+		// Error checking
+		if (jda.hasError()) {
+			// Retrieve the error
+			DataAccessError theError = jda.error();
+
+			// Log the error
+			QString errorMessage;
+			if (theError.errorType() == DataAccessErrorType::SourceNotFound)
+				errorMessage = "File not found: " + theError.errorMessage();
+			else if (theError.errorType() == DataAccessErrorType::ConnectionFailure)
+				errorMessage = "Connection failure: " + theError.errorMessage();
+			else if (theError.errorType() == DataAccessErrorType::OperationFailure)
+				 errorMessage = "Operation failure: " + theError.errorMessage();
+			qDebug() << errorMessage;
+		}
+
+		// Nudge the user to create a new presentation
+		SystemToast* toast = new SystemToast(this);
+		toast->setBody("Create a new presentation!");
+		toast->show();
 	}
 
 	return list;
@@ -554,6 +595,20 @@ void ApplicationUI::saveListToJSON(PresentationList list, QString filePath) {
 	// Create a JDA object and save to the JSON file
 	JsonDataAccess jda;
 	jda.save(QVariant(qVarList), filePath);
+
+	// Error checking
+	if (jda.hasError()) {
+		// Retrieve the error
+		DataAccessError theError = jda.error();
+
+		// Log the error
+		QString errorMessage;
+		if (theError.errorType() == DataAccessErrorType::ConnectionFailure)
+			errorMessage = "Connection failure: " + theError.errorMessage();
+		else if (theError.errorType() == DataAccessErrorType::OperationFailure)
+			 errorMessage = "Operation failure: " + theError.errorMessage();
+		qDebug() << errorMessage;
+	}
 }
 
 /* Find the index path of the specified presentation in the specified data model according to id
