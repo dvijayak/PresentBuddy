@@ -191,10 +191,24 @@ DataModel* ApplicationUI::mainDataModel() {
 
 /* Retrieve the active presentation that is currently being worked on */
 Presentation* ApplicationUI::activePresentation() {
-	foreach (Presentation* presentation, _presentations) {
-		// The active presentation is 'selected' in the QML via the "activePresentation" property of the root navigation pane
-		if (presentation->id() == _root->property("activePresentationID").value<qint64>()) {
-			return presentation;
+	// If the id is -1, we create a new presentation
+	if (_root->property("activePresentationID").value<qint64>() == -1) {
+		Presentation *presentation = new Presentation();
+		SlideList slideList;
+		presentation->setSlides(slideList);
+
+		// Append the presentation to the list of presentations
+		_presentations.append(presentation);
+
+		return presentation;
+	}
+	// Else, return the active presentation
+	else {
+		foreach (Presentation* presentation, _presentations) {
+			// The active presentation is 'selected' in the QML via the "activePresentation" property of the root navigation pane
+			if (presentation->id() == _root->property("activePresentationID").value<qint64>()) {
+				return presentation;
+			}
 		}
 	}
 	return 0; // Return NULL if not found
@@ -231,7 +245,7 @@ void ApplicationUI::deletePresentation(Presentation* presentation) {
 void ApplicationUI::initializePreparePage(Page* page) {
 	qDebug() << "Going to prepare page...";
 
-	// Set the presentation that needs to be prepared
+	// Set the presentation that needs to be prepared (or create a brand new one)
 	_activePresentation = this->activePresentation();
 
 	// Create a buffer of the active presentation to store changes cumulatively
@@ -376,6 +390,11 @@ void ApplicationUI::updatePresentationDataModel(Presentation* presentation) {
 		// Note: we do not need to check if the new value is different from the old value, since this is handled in the class mutators themselves
 		QVariantMap updatedMap = Util::wrapToQVarMap(presentation);
 		model->updateItem(indexPath, updatedMap);
+	}
+	// Else, the presentation does not exist in the model so create a new entry and append it
+	else {
+		QVariantMap newMap = Util::wrapToQVarMap(presentation);
+		model->insert(newMap);
 	}
 }
 

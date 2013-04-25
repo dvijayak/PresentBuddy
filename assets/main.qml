@@ -57,7 +57,15 @@ NavigationPane {
             ActionItem {
                 title: "New Presentation"
                 imageSource: "asset:///icons/ic_add.png"
-                ActionBar.placement: ActionBarPlacement.OnBar                
+                ActionBar.placement: ActionBarPlacement.OnBar
+                
+                onTriggered: {
+                    // Indicate that a new presentation is to be created
+                    Qt.navigationPane.activePresentationID = -1;
+                    
+                    var page = Qt.preparePageDefinition.createObject();
+                    Qt.navigationPane.push(page);
+                }
             }
         ]
         

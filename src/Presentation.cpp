@@ -44,8 +44,8 @@ void Presentation::initialize() {
 /* Constructors/Destructors */
 
 Presentation::Presentation() {
-	_name = "Untitled Presentation";
-	_totalTime = 0;
+	_name = "Untitled";
+	_totalTime = 600; // Default total time of 10 minutes
 	_lastModified = QDateTime::currentDateTime();
 
 	this->initialize();
