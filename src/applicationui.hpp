@@ -44,13 +44,6 @@ private:
     QTimer _siideColour;
 
 public:
-//    /* Static Members */
-//
-//    static const QString DATA_FILE;
-//    static const QString READ_DATE_TIME_FORMAT;
-//    static const QString WRITE_DATE_TIME_FORMAT;
-//    static const QString DISPLAY_DATE_TIME_FORMAT;
-
     /* Constructors/Destructors */
 
     ApplicationUI(bb::cascades::Application *app);
@@ -68,7 +61,6 @@ public:
     DataModel* mainDataModel();
 
     /* QML Accessors */
-//    QVariantList presentationsQML();
     QVariantMap activePresentationQML();
 
     /* Mutators */
@@ -89,15 +81,6 @@ public:
     void initializePreviewPage(Page* page);
     void initializePerformPage(Page* page);
     void reinitializeMainPage(Page* page);
-
-//    QVariantMap createTimeQVarMap(int time);
-//    QVariantMap wrapToQVarMap(Presentation* slide);
-//    QVariantMap wrapToQVarMap(Slide* slide);
-//    QVariantList wrapListToQVarList(PresentationList list);
-//    QVariantList wrapListToQVarList(SlideList list);
-//    PresentationList unWrapListFromQVarList(QVariantList qVarList);
-//    PresentationList getListFromJSON(QString filePath);
-//    void saveListToJSON(PresentationList list, QString filePath);
 
 signals:
 	void performInitialized();

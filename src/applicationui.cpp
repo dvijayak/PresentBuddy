@@ -136,10 +136,6 @@ PresentationList ApplicationUI::presentations() {
 
 /* QML Accessors */
 
-//QVariantList ApplicationUI::presentationsQML() {
-//	return Util::wrapListToQVarList(_presentations);
-//}
-
 QVariantMap ApplicationUI::activePresentationQML() {
 	return Util::wrapToQVarMap(_activePresentation);
 }
@@ -578,6 +574,5 @@ void ApplicationUI::bufferSlideTimeChange(int index, float value) {
 
 // TODO Implement time slider auto-correction logic for prepare page
 // TODO Maybe convert main page UI to plain list with no buttons. Buttons should be provided at the action bar (same for prepare page)
-// TODO Need a reset button and functionality for prepare page
 // TODO Implement the practise functionality!
 // TODO Need a restore defaults button in setting to restore all data to initial load state
