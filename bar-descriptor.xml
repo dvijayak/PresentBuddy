@@ -87,7 +87,7 @@
        <asset path="x86/o-g/PresentBuddy" entry="true" type="Qnx/Elf">PresentBuddy</asset>
     </configuration>
     
-    <!--  The icon for the application -->
+    <!--  The icon for the application, which should be 86 x 86 -->
     <icon>
         <image>icon.png</image>
     </icon>

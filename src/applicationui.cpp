@@ -38,6 +38,38 @@ using namespace javelind::bb::pbuddy;
 //const QString ApplicationUI::WRITE_DATE_TIME_FORMAT(ApplicationUI::READ_DATE_TIME_FORMAT);
 //const QString ApplicationUI::DISPLAY_DATE_TIME_FORMAT("MMMM d yyyy h:mm:ss AP"); // A separate format solely for rendering on the device
 
+/* BBM Functions */
+
+void ApplicationUI::bbmRegistration() {
+    // Every application is required to have its own unique UUID. You should
+    // keep using the same UUID when you release a new version of your
+    // application.
+    // Genered from http://www.guidgenerator.com/
+    const QUuid uuid(QLatin1String("53707577-1159-45D7-87AB-C961AE320838"));
+
+    // Register with BBM Social Platform (SP)
+    RegistrationHandler *registrationHandler = new RegistrationHandler(uuid, this);
+    _registrationHandler = registrationHandler;
+    // Expose the registrationHandler to QML in order to facilitate dynamic registration (only when needed)
+    // This entire function MUST be called before the document root is created, etc.
+    _qml->setContextProperty("_registrationHandler", _registrationHandler);
+
+    InviteToDownload *inviteToDownload = new InviteToDownload(registrationHandler->context(), this);
+    // Ditto exposing in order to facilitate dynamic invitation to download the app
+//    _qml->setContextProperty("_inviteToDownload", inviteToDownload);
+
+    // After successful registration, we need to connect to a slot in the application
+    bool res;
+    res = QObject::connect(registrationHandler, SIGNAL(registered()), inviteToDownload, SLOT(sendInvite()));
+    Q_ASSERT(res);
+    Q_UNUSED(res);
+}
+
+//void ApplicationUI::bbmInviteToDownload() {
+//    // Invite contacts to download the application
+//    _inviteToDownload.sendInvite();
+//}
+
 ApplicationUI::ApplicationUI(Application *app) : QObject(app)
 {
 	_app = app;
@@ -47,6 +79,9 @@ ApplicationUI::ApplicationUI(Application *app) : QObject(app)
     // set parent to created document to ensure it exists for the whole application lifetime
     QmlDocument *qml = QmlDocument::create("asset:///main.qml").parent(this);
     _qml = qml;
+
+    // Initialize BBM Social Platform registration
+    this->bbmRegistration();
 
     // Register new meta types
     qRegisterMetaType<Presentation*>();

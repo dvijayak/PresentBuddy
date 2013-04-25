@@ -1,11 +1,12 @@
-// Default empty project template
 #include <bb/cascades/Application>
-#include <bb/cascades/QListDataModel>
 
 #include <QLocale>
 #include <QTranslator>
 #include "applicationui.hpp"
 #include "Util.h"
+
+#include "InviteToDownload.hpp"
+#include "RegistrationHandler.hpp"
 
 // include JS Debugger / CS Profiler enabler
 // this feature is enabled by default in the debug build only
@@ -17,10 +18,10 @@ using namespace javelind::bb::pbuddy;
 
 Q_DECL_EXPORT int main(int argc, char **argv)
 {
-    // this is where the server is started etc
+    // Create a Cascades application (this is where the server is started etc)
     Application app(argc, argv);
 
-    // localization support
+    // Configure localization support
     QTranslator translator;
     QString locale_string = QLocale().name();
     QString filename = QString( "PresentBuddy_%1" ).arg( locale_string );

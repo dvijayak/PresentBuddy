@@ -13,6 +13,18 @@ NavigationPane {
             ActionItem {
                 title: "Settings"
                 imageSource: "asset:///icons/ic_settings.png"
+            }, 
+            ActionItem {
+                title: "Invite Friends"
+                imageSource: "asset:///icons/ic_bbm.png"
+                
+                onTriggered: {
+                    // Register with the BBM Social Platform
+                    _registrationHandler.registerApplication();
+                    _registrationHandler.finishRegistration();
+                    
+                    // N.B. Upon successful registeration, a signal is emitted and a slot sends out an invite to contacts
+                }
             }
         ] // end of actions list
     } // end of MenuDefinition

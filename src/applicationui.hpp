@@ -14,6 +14,9 @@
 #include "Presentation.h"
 #include "Util.h"
 
+#include "InviteToDownload.hpp"
+#include "RegistrationHandler.hpp"
+
 using namespace bb::cascades;
 using namespace javelind::bb::pbuddy;
 
@@ -42,6 +45,13 @@ private:
     Presentation* _bufferPresentation; // A buffer to store any changes made to the active presentation before actually committing them
     QTimer _slideCountdown;
     QTimer _siideColour;
+
+    RegistrationHandler* _registrationHandler; // Used for registering with the BBM Social Platform
+//    InviteToDownload* _inviteToDownload; // Used for inviting BBM contacts to download the app from the app store
+
+private slots:
+	void bbmRegistration();
+//	void bbmInviteToDownload();
 
 public:
     /* Constructors/Destructors */
