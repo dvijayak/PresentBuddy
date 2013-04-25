@@ -65,10 +65,7 @@ void ApplicationUI::bbmRegistration() {
     Q_UNUSED(res);
 }
 
-//void ApplicationUI::bbmInviteToDownload() {
-//    // Invite contacts to download the application
-//    _inviteToDownload.sendInvite();
-//}
+/* Constructors & Destructors */
 
 ApplicationUI::ApplicationUI(Application *app) : QObject(app)
 {

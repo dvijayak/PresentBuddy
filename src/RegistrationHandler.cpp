@@ -19,6 +19,7 @@
 #include <bb/cascades/Application>
 #include <bb/cascades/QmlDocument>
 #include <bb/system/SystemDialog>
+#include <bb/system/SystemToast>
 
 #include <bb/platform/bbm/Context>
 #include <bb/platform/bbm/RegistrationState>
@@ -128,7 +129,7 @@ void RegistrationHandler::registrationFinished()
     m_progress = BbmRegistrationProgress::Finished;
     switch (m_context.registrationState()) {
     case RegistrationState::Allowed:
-        m_statusMessage = tr("Successfully connected to BBM.");
+        m_statusMessage = tr("Successfully connected to BBM!");
         m_temporaryError = false;
         break;
 
@@ -140,36 +141,36 @@ void RegistrationHandler::registrationFinished()
 //        break;
 
     case RegistrationState::BlockedByRIM:
-        m_statusMessage = tr("Disconnected by RIM. RIM is preventing this "
-                             "application from connecting to BBM :(");
+        m_statusMessage = tr("Disconnected by RIM. RIM is preventing me "
+                             "from connecting to BBM :(");
         m_temporaryError = false;
         break;
 
     case RegistrationState::BlockedByUser:
-        m_statusMessage = tr("No permission from you.. Go to Settings -> Security and "
+        m_statusMessage = tr("No permissions from you :( Go to Settings -> Security and "
                              "Privacy -> Application Permissions and "
-                             "connect this application to BBM.");
+                             "connect me to BBM.");
         m_temporaryError = false;
         break;
 
     case RegistrationState::InvalidUuid:
         // You should be resolving this error at development time.
-        m_statusMessage = tr("Invalid UUID. Report this error to the "
-                             "vendor.");
+        m_statusMessage = tr("Invalid UUID. Report this error to "
+                             "my Maker.");
         m_temporaryError = true;
         break;
 
     case RegistrationState::MaxAppsReached:
-        m_statusMessage = tr("Too many applications are connected to BBM. "
-                             "Uninstall one or more applications and try "
+        m_statusMessage = tr("Too many other applications are connected to BBM. "
+                             "Uninstall one or more of them and try "
                              "again.");
         m_temporaryError = false;
         break;
 
     case RegistrationState::Expired:
     case RegistrationState::MaxDownloadsReached:
-        m_statusMessage = tr("Cannot connect to BBM. Download this "
-                             "application from AppWorld to keep using it.");
+        m_statusMessage = tr("I cannot connect to BBM. Download me "
+                             "from AppWorld to keep using me.");
         m_temporaryError = false;
         break;
 
@@ -196,7 +197,7 @@ void RegistrationHandler::registrationFinished()
     case RegistrationState::CancelledByUser:
     default:
         // If new error codes are added, treat them as temporary errors.
-        m_statusMessage = tr("Would you like to connect the application to "
+        m_statusMessage = tr("Would you like to connect me to "
                              "BBM?");
         m_temporaryError = true;
         break;
@@ -208,7 +209,13 @@ void RegistrationHandler::registrationFinished()
         m_isAllowed = false;
     }
     qDebug() << "Finished BBM Social Platform registration, success="
-        << m_isAllowed << "temporaryError=" << m_temporaryError;
+        << m_isAllowed << "temporaryError=" << m_temporaryError << "Context state is" << m_context.registrationState();
+
+    // Display the message to the user via toast
+    SystemToast* toast = new SystemToast(this->parent());
+	toast->setBody(m_statusMessage);
+	toast->show();
+
     emit stateChanged();
 }
 
