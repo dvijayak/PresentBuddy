@@ -14,6 +14,26 @@ Page {
 	    Qt.appUI.performInitialized.connect(performPage.onPerformInitialized);               
     }
 
+    paneProperties: NavigationPaneProperties {
+        // Custom back button
+        backButton: ActionItem {
+            title: "Back"
+            imageSource: "asset:///icons/ic_previous.png"
+            onTriggered: {
+            	// Reset screen orientation to portrait mode				
+				OrientationSupport.supportedDisplayOrientation = SupportedDisplayOrientation.DisplayPortrait;				
+				OrientationSupport.requestDisplayDirection(DisplayDirection.North);
+                OrientationSupport.supportedDisplayOrientation = SupportedDisplayOrientation.CurrentLocked;                
+			
+				// Reset the idle behaviour to normal (VERY important to save battery power)
+				Application.mainWindow.screenIdleMode = 0; //ScreenIdleMode.Normal; this is not being recognized by QML. Should really expose it myself instead of assuming Normal will always be 0. But this is a quick fix.
+				
+				// Go back
+				Qt.navigationPane.pop();
+            }
+        }
+    }	
+
     titleBar: TitleBar {
         id: titleBar
         objectName: "titleBar"

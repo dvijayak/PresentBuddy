@@ -29,7 +29,6 @@ Q_DECL_EXPORT int main(int argc, char **argv)
 
     // Register classes with the Qt meta-object system
     qmlRegisterType<QTimer>("my.library", 1, 0, "QTimer");
-//    qmlRegisterType<ApplicationUI>("my.library", 1, 0, "ApplicationUI");
 
     new ApplicationUI(&app);
 

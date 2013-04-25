@@ -5,6 +5,7 @@
 #include <QObject>
 #include <QList>
 #include <QTimer>
+#include <bb/cascades/ScreenIdleMode>
 #include <bb/cascades/Application>
 #include <bb/cascades/QmlDocument>
 #include <bb/cascades/AbstractPane>
@@ -28,6 +29,9 @@ class ApplicationUI : public QObject
 {
     Q_OBJECT
     Q_PROPERTY(QVariantMap activePresentation READ activePresentationQML)
+
+    // Expose the ScreenIdleMode enum from bb::cascades::ScreenIdleMode to QML - for some reason, it does not recognize it
+//    Q_ENUMS(bb::cascades::ScreenIdleMode::Normal)
 
 private:
     Application* _app;
