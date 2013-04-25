@@ -97,99 +97,88 @@ Page {
         /////////////
 
         background: Color.Black
-        layout: StackLayout {
-            orientation: LayoutOrientation.TopToBottom
-        }
+        layout: DockLayout {}        
         
-        // Presentation Name
-//        Container {
-//            horizontalAlignment: HorizontalAlignment.Fill
-//            Label {
-//                id: presentationName
-//                objectName: "performName"
-//                
-//                text: "Presentation Name"
-//                textStyle.color: performPage.feedbackColor
-//                verticalAlignment: VerticalAlignment.Center
-//                horizontalAlignment: HorizontalAlignment.Center
-//                textStyle.textAlign: TextAlign.Center                
-//            }
-//        }
+        // Slide Data
         
-        // Slide Data 
-        Container {
-            layout: StackLayout {
-                orientation: LayoutOrientation.TopToBottom
+        // Slide Index
+        Label {
+            id: slideIndex
+            objectName: "performIndex"
+            
+            text: "0"
+            textStyle.color: Color.White
+            textStyle {
+                base: SystemDefaults.TextStyles.BigText
+                textAlign: TextAlign.Center
+                fontWeight: FontWeight.Bold
+                fontSize: FontSize.PointValue
+                fontSizeValue: 30
             }
 
-            horizontalAlignment: HorizontalAlignment.Fill
-            // Slide Title
-            Label {
-                id: slideTitle
-                objectName: "performTitle"
-                
-                text: "Slide Title"
-                textStyle.color: performPage.feedbackColor
-                verticalAlignment: VerticalAlignment.Center
-                horizontalAlignment: HorizontalAlignment.Center
-                textStyle.textAlign: TextAlign.Center
+            horizontalAlignment: HorizontalAlignment.Left
+            verticalAlignment: VerticalAlignment.Top
+            topMargin: 140.0
+        }
+        // Slide Title
+        Label {
+            id: slideTitle
+            objectName: "performTitle"
+            
+            text: "Slide Title"
+            textStyle.color: Color.White
+            textStyle {
+                base: SystemDefaults.TextStyles.BigText                
+                textAlign: TextAlign.Center
+                fontWeight: FontWeight.Bold
+                fontSize: FontSize.PointValue
+                fontSizeValue: 10
+            }                    
+
+            horizontalAlignment: HorizontalAlignment.Center
+            verticalAlignment: VerticalAlignment.Top
+            topMargin: 20.0
+        }
+        
+        // Slide Time Countdown
+        Label {
+            id: slideTime
+            objectName: "performTime"
+            
+            text: "Slide Countdown"
+            textStyle {
+                base: SystemDefaults.TextStyles.BigText
+                color: performPage.feedbackColor
+                textAlign: TextAlign.Center
+                fontWeight: FontWeight.Bold
+                fontSize: FontSize.PointValue
+                fontSizeValue: 100
             }
             
-            // Slide Time Countdown
-            Label {
-                id: slideTime
-                objectName: "performTime"
-                
-                text: "Slide Countdown"
-
-                verticalAlignment: VerticalAlignment.Center
-                horizontalAlignment: HorizontalAlignment.Center
-                textStyle {
-                    base: SystemDefaults.TextStyles.BigText
-                    color: performPage.feedbackColor
-                    textAlign: TextAlign.Center
-                    fontWeight: FontWeight.Bold
-                    fontSize: FontSize.PointValue
-                    fontSizeValue: 80
-                }
-            }
-        }
+            horizontalAlignment: HorizontalAlignment.Center
+            verticalAlignment: VerticalAlignment.Center
+        }        
         
         // Time Info (footer)
-        Container {
-            layout: DockLayout {                
-            }
-
-            horizontalAlignment: HorizontalAlignment.Fill
-            verticalAlignment: VerticalAlignment.Fill
-            // Time Elapsed
-            Label {
-                id: timeElapsed
-                objectName: "performElapsed"
-                
-                text: "Time Elapsed"
-                textStyle.color: performPage.feedbackColor
-                
-                // Bottom left
-                horizontalAlignment: HorizontalAlignment.Left
-                verticalAlignment: VerticalAlignment.Bottom
-            }
+        // Time Elapsed
+        Label {
+            id: timeElapsed
+            objectName: "performElapsed"
             
-            // Presentation Total Time
-            Label {
-                id: presentationTotalTime
-                objectName: "performTotalTime"
-                
-                text: "Total Time"                            
-                textStyle.color: performPage.feedbackColor
-
-                // Bottom right
-                horizontalAlignment: HorizontalAlignment.Right
-                verticalAlignment: VerticalAlignment.Bottom
+            text: "Time Elapsed"
+            textStyle.color: Color.White
+            textStyle {
+                base: SystemDefaults.TextStyles.BigText
+                textAlign: TextAlign.Center
+                fontWeight: FontWeight.Bold
+                fontSize: FontSize.PointValue
+                fontSizeValue: 10
             }
+
+            // Bottom middle
+            horizontalAlignment: HorizontalAlignment.Center
+            verticalAlignment: VerticalAlignment.Bottom
         }
-
-
         
         attachedObjects: [
             // Timer for counting down the actual clock for each slide
@@ -201,8 +190,8 @@ Page {
                     Qt.currentTime--;
                     Qt.elapsedTime++;
                     slideTime.text = Qt.appUI.timeToText(Qt.currentTime);                    
-                    timeElapsed.text = Qt.appUI.timeToText(Qt.elapsedTime);
-                    
+                    timeElapsed.text = Qt.appUI.timeToText(Qt.elapsedTime) + "/" + Qt.appUI.minSecToText(Qt.activePresentation.totalTime.minutes, Qt.activePresentation.totalTime.seconds);                    
+
                     // Count down until 0
                     if (Qt.currentTime > 0) {
                     	countdownTimer.start();
@@ -351,6 +340,7 @@ Page {
     function updateUIElements(slide) {
         var title = slide.title;
         var time = Qt.appUI.timeToText(slide.time.minutes, slide.time.seconds);
+        slideIndex.text = Qt.slideIndex+1 + "/" + Qt.activePresentation.slides.length;
         slideTitle.text = title;
         slideTime.text = time;
         performPage.feedbackColor = Color.White;

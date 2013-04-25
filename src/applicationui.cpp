@@ -357,17 +357,18 @@ void ApplicationUI::initializePerformPage(Page* page) {
 	else {
 		// Get references to required UI elements
 		TitleBar* nameUI = page->findChild<TitleBar*>("titleBar");
+		Label* indexUI = page->findChild<Label*>("performIndex");
 		Label* titleUI = page->findChild<Label*>("performTitle");
 		Label* timeUI = page->findChild<Label*>("performTime");
 		Label* elapsedUI = page->findChild<Label*>("performElapsed");
-		Label* totalTimeUI = page->findChild<Label*>("performTotalTime");
 
 		// Initialize UI element values/text
 		nameUI->setTitle(_activePresentation->name());
+		indexUI->setText(QString("1/%1").arg(slides.size()));
 		titleUI->setText(slides[0]->title());
 		timeUI->setText(ApplicationUI::timeToText(slides[0]->time()));
-		elapsedUI->setText(ApplicationUI::timeToText(0));
-		totalTimeUI->setText(ApplicationUI::timeToText(_activePresentation->totalTime()));
+		QString totalTimeString = ApplicationUI::timeToText(_activePresentation->totalTime());
+		elapsedUI->setText(QString("%1/%2").arg(ApplicationUI::timeToText(0)).arg(totalTimeString));
 
 		// Rotate (and lock) screen to Landscape mode. Provides greater screen real-estate for the slideshow
 		OrientationSupport* orientInstance = OrientationSupport::instance();
