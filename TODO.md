@@ -1,4 +1,4 @@
-Present Buddy BB10 TODO
+Present Buddy BB10 Task List (as of April 25th 2013)
 -------------------------------------------
 
 Features
