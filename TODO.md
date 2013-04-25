@@ -1,4 +1,4 @@
-ent Buddy BB10 TODO
+Present Buddy BB10 Task List
 -------------------------------------------
 
 Features
