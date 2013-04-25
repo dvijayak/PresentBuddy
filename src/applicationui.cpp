@@ -281,12 +281,10 @@ void ApplicationUI::initializePreviewPage(Page* page) {
 	// Set the presentation that needs to be prepared
 	_activePresentation = this->activePresentation();
 
-	// Fill in the Presentation name and total time fields and slider
-	TextField* nameText = page->findChild<TextField*>("nameValueLabel");
-	nameText->setText(_activePresentation->name());
-	Slider* totalTimeSlider = page->findChild<Slider*>("totalTimeSlider");
+	// Fill in the Presentation name and total time fields
+	Label* nameValueLabel = page->findChild<Label*>("nameValueLabel");
+	nameValueLabel->setText(_activePresentation->name());
 	int totalTime = _activePresentation->totalTime();
-	totalTimeSlider->setValue(totalTime);
 	Label* totalTimeLabel = page->findChild<Label*>("totalTimeValueLabel");
 	totalTimeLabel->setText(ApplicationUI::timeToText(totalTime));
 

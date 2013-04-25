@@ -111,8 +111,7 @@ Page {
                 Label {
                     id: totalTimeValueLabel
                     objectName: "totalTimeValueLabel"
-                    preferredWidth: 120
-                    maxWidth: 120
+
                     textStyle.color: Color.Cyan
                     textStyle.textAlign: TextAlign.Left                    
                 }
