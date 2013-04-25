@@ -44,6 +44,9 @@ Page {
                     onFinished: {
                         if (deletePresentationDialog.result == SystemUiResult.ConfirmButtonSelection) {
                             Qt.appUI.deletePresentation();
+                            
+                            // Return to the main page
+                            Qt.navigationPane.pop();
                         }
                     }
                 }
