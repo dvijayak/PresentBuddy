@@ -8,6 +8,7 @@
 #include <QDebug>
 #include <QDateTime>
 #include "applicationui.hpp"
+#include "Util.h"
 #include "Presentation.h"
 #include "Slide.h"
 
@@ -177,7 +178,7 @@ void Presentation::print() {
 	qDebug() << "--------";
 	qDebug() << "Name = " << _name;
 	qDebug() << "Total Time = " << (int)(_totalTime/60) << ":" << _totalTime%60; // Display a time in seconds as minutes:seconds
-	qDebug() << "Last Modified = " << _lastModified.toString(ApplicationUI::DISPLAY_DATE_TIME_FORMAT);
+	qDebug() << "Last Modified = " << _lastModified.toString(Util::DISPLAY_DATE_TIME_FORMAT);
 	qDebug() << "Slides = ";
 	foreach (Slide* slide, _slides) {
 		slide->print();

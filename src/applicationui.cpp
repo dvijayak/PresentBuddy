@@ -33,10 +33,10 @@ using namespace bb::system;
 using namespace bb::data;
 using namespace javelind::bb::pbuddy;
 
-const QString ApplicationUI::DATA_FILE("/pbuddy-data.json");
-const QString ApplicationUI::READ_DATE_TIME_FORMAT("yyyy-MM-dd hh:mm:ss");
-const QString ApplicationUI::WRITE_DATE_TIME_FORMAT(ApplicationUI::READ_DATE_TIME_FORMAT);
-const QString ApplicationUI::DISPLAY_DATE_TIME_FORMAT("MMMM d yyyy h:mm:ss AP"); // A separate format solely for rendering on the device
+//const QString ApplicationUI::DATA_FILE("/pbuddy-data.json");
+//const QString ApplicationUI::READ_DATE_TIME_FORMAT("yyyy-MM-dd hh:mm:ss");
+//const QString ApplicationUI::WRITE_DATE_TIME_FORMAT(ApplicationUI::READ_DATE_TIME_FORMAT);
+//const QString ApplicationUI::DISPLAY_DATE_TIME_FORMAT("MMMM d yyyy h:mm:ss AP"); // A separate format solely for rendering on the device
 
 ApplicationUI::ApplicationUI(Application *app) : QObject(app)
 {
@@ -56,9 +56,7 @@ ApplicationUI::ApplicationUI(Application *app) : QObject(app)
 
     // Attach class values to the QML document
     QDeclarativePropertyMap* applicationUIPropertyMap = new QDeclarativePropertyMap;
-    applicationUIPropertyMap->insert("READ_DATE_TIME_FORMAT", QVariant(READ_DATE_TIME_FORMAT));
-    applicationUIPropertyMap->insert("WRITE_DATE_TIME_FORMAT", QVariant(WRITE_DATE_TIME_FORMAT));
-    applicationUIPropertyMap->insert("DISPLAY_DATE_TIME_FORMAT", QVariant(DISPLAY_DATE_TIME_FORMAT));
+    applicationUIPropertyMap->insert("DISPLAY_DATE_TIME_FORMAT", QVariant(Util::DISPLAY_DATE_TIME_FORMAT));
     qml->setContextProperty("applicationUIPropertyMap", applicationUIPropertyMap);
     qml->setContextProperty("appUI", this);
 
@@ -70,12 +68,12 @@ ApplicationUI::ApplicationUI(Application *app) : QObject(app)
     _dataModel = this->mainDataModel();
 
 	// Create initial list of Presentation objects from the data file
-    QString filePath(QDir::homePath() + DATA_FILE);
+    QString filePath(QDir::homePath() + Util::DATA_FILE);
 
     if (QFile::exists(filePath)) {
     	qDebug() << QString("File %1 found! Creating presentations list...").arg(filePath);
 
-    	_presentations = this->getListFromJSON(filePath);
+    	_presentations = Util::getListFromJSON(filePath);
     }
     else {
     	qDebug() << "No data file found. Creating an empty presentations list...";
@@ -90,7 +88,7 @@ ApplicationUI::ApplicationUI(Application *app) : QObject(app)
 
 	// Insert the list of presentations into the data model
     if (!_presentations.isEmpty()) {
-		QVariantList presentationList = this->wrapListToQVarList(_presentations);
+		QVariantList presentationList = Util::wrapListToQVarList(_presentations);
 		((GroupDataModel*)_dataModel)->insertList(presentationList);
     }
 
@@ -108,7 +106,7 @@ ApplicationUI::ApplicationUI(Application *app) : QObject(app)
 ApplicationUI::~ApplicationUI() {
 	// Save the current list of presentations to a JSON file
 	if (!_presentations.isEmpty()) { // A paranoid defense mechanism. I have no idea what it could defend against, but it seems a good idea.
-		this->saveListToJSON(_presentations, QDir::homePath() + ApplicationUI::DATA_FILE);
+		Util::saveListToJSON(_presentations, QDir::homePath() + Util::DATA_FILE);
 	}
 
 	// Free all memory that we are responsible for
@@ -139,11 +137,11 @@ PresentationList ApplicationUI::presentations() {
 /* QML Accessors */
 
 //QVariantList ApplicationUI::presentationsQML() {
-//	return this->wrapListToQVarList(_presentations);
+//	return Util::wrapListToQVarList(_presentations);
 //}
 
 QVariantMap ApplicationUI::activePresentationQML() {
-	return this->wrapToQVarMap(_activePresentation);
+	return Util::wrapToQVarMap(_activePresentation);
 }
 
 /* Mutators */
@@ -254,7 +252,7 @@ void ApplicationUI::initializePreparePage(Page* page) {
 
 	// Create a new QVariantListDataModel, fill it with the slides (wrapped as QVariant objects) and set it to the list view in the page
 	QVariantListDataModel* dataModel = new QVariantListDataModel();
-	QVariantList qVarList = this->wrapListToQVarList(_activePresentation->slides());
+	QVariantList qVarList = Util::wrapListToQVarList(_activePresentation->slides());
 	dataModel->append(qVarList);
 	ListView* listView = page->findChild<ListView*>("slideListView");
 	listView->setDataModel(dataModel);
@@ -290,7 +288,7 @@ void ApplicationUI::initializePreviewPage(Page* page) {
 
 	// Create a new QVariantListDataModel, fill it with the slides (wrapped as QVariant objects) and set it to the list view in the page
 	QVariantListDataModel* dataModel = new QVariantListDataModel();
-	QVariantList qVarList = this->wrapListToQVarList(_activePresentation->slides());
+	QVariantList qVarList = Util::wrapListToQVarList(_activePresentation->slides());
 	dataModel->append(qVarList);
 	ListView* listView = page->findChild<ListView*>("slideListView");
 	listView->setDataModel(dataModel);
@@ -354,289 +352,7 @@ void ApplicationUI::reinitializeMainPage(Page* page) {
 
 /* Working with data */
 
-/* Retrieves a list of Presentation objects from a QVariantList wrapper */
-PresentationList ApplicationUI::unWrapListFromQVarList(QVariantList qVarList) {
-	qDebug() << "Extracting presentations from the JSON file...";
 
-	PresentationList list;
-	if (!qVarList.isEmpty()) {
-		foreach (QVariant wrappedEntry, qVarList) {
-			QVariantMap entry = wrappedEntry.value<QVariantMap>();
-
-			// Name of the presentation
-			QString name;
-			if (entry.contains("name")) {
-				name = entry["name"].value<QString>();
-				if (name.isEmpty()) { // (Might be irrelevant, but) works well since a default empty string is assigned to key "name" if the key doesn't exist at all (default QMap behaviour)
-					qDebug() << "Error: presentation has not been provided a name. Skipping this JSON entry...";
-
-					continue;
-				}
-			}
-			else {
-				qDebug() << "Error: presentation has not been provided a Name. Skipping this JSON entry...";
-
-				continue;
-			}
-
-			// Time-stamp of the date that the presentation was last modified
-			QDateTime lastModified;
-			if (entry.contains("dateModified")) {
-				lastModified = QDateTime::fromString(entry["dateModified"].value<QString>(), Qt::ISODate);
-				if (!lastModified.isValid()) { // Also (might be irrelevant, but) works well since the default QDateTime value is a null date/time, which is invalid as per QDateTime
-					qDebug() << "Invalid date/time (most likely bad format - the only format accepted is ISO 8601 standard). Skipping this JSON entry...";
-
-					continue;
-				}
-			}
-			else {
-				qDebug() << "Error: presentation has not been provided a Date/Time Time-stamp (format ISO 8601 standard). Skipping this JSON entry...";
-
-				continue;
-			}
-
-			// Total time required for the presentation
-			int totalTime;
-			if (entry.contains("totalTime")) {
-				QVariantMap time = entry["totalTime"].value<QVariant>().value<QVariantMap>();
-				if (time.contains("minutes")) {
-					totalTime = (60*time["minutes"].value<int>());
-					if (time.contains("seconds")) {
-						totalTime += time["seconds"].value<int>();
-					}
-
-					// The total time for the presentation cannot be negative or  0
-					if (totalTime <= 0) {
-						totalTime = 600; // Defaults to 10 minutes
-
-						qDebug() << "Warning: presentation Total Time is negative or 0. Defaulted to 600 (10 minutes).";
-					}
-				}
-				else {
-					totalTime = 600; // Ditto as above
-
-					qDebug() << "Warning: presentation Total Time has not been provided. Defaulted to 600 (10 minutes 0 seconds).";
-				}
-			}
-			else {
-				totalTime = 600; // Ditto as above
-
-				qDebug() << "Warning: presentation Total Time has not been provided. Defaulted to 600 (10 minutes 0 seconds).";
-			}
-
-			// Slides of the presentation
-			SlideList slideList;
-			if (entry.contains("slides")) {
-				QVariantList qVarSlideList = entry["slides"].value<QVariant>().value<QVariantList>();
-				if (!qVarSlideList.isEmpty()) {
-					foreach (QVariant wrappedSlide, qVarSlideList) {
-						QVariantMap slideEntry = wrappedSlide.value<QVariantMap>();
-
-						// Title of the slide
-						QString title;
-						if (slideEntry.contains("title")) {
-							title = slideEntry["title"].value<QString>();
-							if (title.isEmpty()) {
-								title = "Untitled";
-
-								qDebug() << "Warning: slide Title is empty/invalid. Defaulted to \"Untitled\".";
-							}
-						}
-						else {
-							title = "Untitled";
-
-							qDebug() << "Warning: slide Title has not been provided. Defaulted to \"Untitled\".";
-						}
-
-						// Time allotted for the slide
-						int slideTime;
-						if (slideEntry.contains("time")) {
-							QVariantMap time = slideEntry["time"].value<QVariant>().value<QVariantMap>();
-							if (time.contains("minutes")) {
-								slideTime = (60*time["minutes"].value<int>());
-								if (time.contains("seconds")) {
-									slideTime += time["seconds"].value<int>();
-								}
-
-								// The slide time for the presentation cannot be negative or 0 and must be less than or equal to the presentation total time
-								if (slideTime <= 0 || slideTime > totalTime) {
-									slideTime = 1; // Defaults to 1 second
-
-									qDebug() << "Warning: slide Time is negative or 0. Defaulted to 1 (0 minutes 1 second).";
-								}
-								else if (slideTime > totalTime) {
-									slideTime = totalTime; // Defaults to presentation total time
-								}
-							}
-							else {
-								slideTime = 1; // Defaults to 1 second
-
-								qDebug() << "Warning: slide Time has not been provided. Defaulted to 1 (0 minutes 1 second).";
-							}
-						}
-						else {
-							slideTime = totalTime; // Ditto
-
-							qDebug() << "Warning: slide Time has not been provided. Defaulted to 1 (0 minutes 1 second).";
-						}
-
-						Slide* slide = new Slide(title, slideTime);
-						slideList.append(slide);
-					}
-				}
-			}
-			qDebug() << "Warning: presentation has not been provided any Slides. Empty slide list created.";
-
-			Presentation* presentation = new Presentation(name, totalTime, lastModified, slideList);
-			presentation->print();
-			list.append(presentation);
-		}
-	}
-	else {
-		qDebug() << "Error: no presentations exist in the JSON file. Creating empty presentations list...";
-	}
-
-	return list;
-}
-
-/* Parse a JSON file, store the data in appropriate structures and return a list of this data.
- * Note: dateModified field must be of the ISO 8601 date/time standard format. */
-PresentationList ApplicationUI::getListFromJSON(QString filePath) {
-	// Create a JDA object and read the JSON file
-	JsonDataAccess jda;
-	QVariant wrapList = jda.load(filePath);
-	QList<QVariant> fileEntries = wrapList.value<QVariantList>();
-
-	PresentationList list;
-	// Ensure that there was no error reading the file or any other error
-	if (!jda.hasError()
-			&& !wrapList.isNull()
-			&& wrapList.isValid()
-			&& !fileEntries.isEmpty()) {
-
-		// Create the list of Presentation objects
-		list = this->unWrapListFromQVarList(fileEntries);
-
-		// For an empty data file, nudge the user to create a new presentation
-		if (list.size() <= 0) {
-			SystemToast* toast = new SystemToast(this);
-			toast->setBody("Create a new presentation!");
-			toast->show();
-		}
-	}
-	else {
-		qDebug() << "JSON file is invalid or empty. Creating an empty presentations list...";
-
-		// Error checking
-		if (jda.hasError()) {
-			// Retrieve the error
-			DataAccessError theError = jda.error();
-
-			// Log the error
-			QString errorMessage;
-			if (theError.errorType() == DataAccessErrorType::SourceNotFound)
-				errorMessage = "File not found: " + theError.errorMessage();
-			else if (theError.errorType() == DataAccessErrorType::ConnectionFailure)
-				errorMessage = "Connection failure: " + theError.errorMessage();
-			else if (theError.errorType() == DataAccessErrorType::OperationFailure)
-				 errorMessage = "Operation failure: " + theError.errorMessage();
-			qDebug() << errorMessage;
-		}
-
-		// Nudge the user to create a new presentation
-		SystemToast* toast = new SystemToast(this);
-		toast->setBody("Create a new presentation!");
-		toast->show();
-	}
-
-	return list;
-}
-
-/* Create a QVariantMap representation of a time object */
-QVariantMap ApplicationUI::createTimeQVarMap(int time) {
-	QVariantMap timeMap;
-	timeMap["minutes"] = QVariant((int)(time/60));
-	timeMap["seconds"] = QVariant(time%60);
-	return timeMap;
-}
-
-/* Wraps a slide around a QVariantMap */
-QVariantMap ApplicationUI::wrapToQVarMap(Slide* slide) {
-	QVariantMap qVarMap;
-	qVarMap["title"] = QVariant(slide->title());
-	qVarMap["time"] = this->createTimeQVarMap(slide->time());
-//	qVarMap["dateModified"] = QVariant(slide->lastModified());
-	return qVarMap;
-}
-
-
-/* Wraps a presentation around a QVariantMap */
-QVariantMap ApplicationUI::wrapToQVarMap(Presentation* presentation) {
-	QVariantMap qVarMap;
-	qVarMap["id"] = QVariant(presentation->id());
-	qVarMap["name"] = QVariant(presentation->name());
-	qVarMap["totalTime"] = this->createTimeQVarMap(presentation->totalTime());
-	qVarMap["dateModified"] = QVariant(presentation->lastModified());
-
-	// Create a QVariant in turn for each slide object belonging to the presentation, also wrapping as QVariantMap objects
-	QVariantList slideQVarList = this->wrapListToQVarList(presentation->slides());
-	qVarMap["slides"] = QVariant(slideQVarList);
-
-	return qVarMap;
-}
-
-/* Wraps a list of Slide objects around a list of QVariant objects */
-QVariantList ApplicationUI::wrapListToQVarList(SlideList list) {
-	QVariantList qVarList;
-	// Create a QVariant for each slide object that wraps its members as QVariantMap objects
-	foreach (Slide* slide, list) {
-		QVariantMap qVarMap = this->wrapToQVarMap(slide);
-
-		// Push each Slide QVariantMap object to qVarList
-		qVarList.append(QVariant(qVarMap));
-	}
-
-	return qVarList;
-}
-
-/* Wraps a list of Presentation objects around a list of QVariant objects */
-QVariantList ApplicationUI::wrapListToQVarList(PresentationList list) {
-	QVariantList qVarList;
-	// Create a QVariant for each presentation object that wraps its members as QVariantMap objects
-	foreach (Presentation* presentation, list) {
-		QVariantMap qVarMap = this->wrapToQVarMap(presentation);
-
-		// Push each Presentation QVariantMap object to qVarList
-		qVarList.append(QVariant(qVarMap));
-	}
-
-	return qVarList;
-}
-
-/* Serialize the specified list of presentations to the specified JSON file.
- * Note: dateModified field is saved using the ISO 8601 date/time standard format. */
-void ApplicationUI::saveListToJSON(PresentationList list, QString filePath) {
-	// Retrieve the list as a QVariantList
-	QVariantList qVarList = this->wrapListToQVarList(list);
-
-	// Create a JDA object and save to the JSON file
-	JsonDataAccess jda;
-	jda.save(QVariant(qVarList), filePath);
-
-	// Error checking
-	if (jda.hasError()) {
-		// Retrieve the error
-		DataAccessError theError = jda.error();
-
-		// Log the error
-		QString errorMessage;
-		if (theError.errorType() == DataAccessErrorType::ConnectionFailure)
-			errorMessage = "Connection failure: " + theError.errorMessage();
-		else if (theError.errorType() == DataAccessErrorType::OperationFailure)
-			 errorMessage = "Operation failure: " + theError.errorMessage();
-		qDebug() << errorMessage;
-	}
-}
 
 /* Find the index path of the specified presentation in the specified data model according to id
  * (This is needed because the sorted order is different from the raw list order) */
@@ -662,7 +378,7 @@ void ApplicationUI::updatePresentationDataModel(Presentation* presentation) {
 	// Update the presentation at the computed index (if the presentation exists in the model)
 	if (!indexPath.isEmpty()) {
 		// Note: we do not need to check if the new value is different from the old value, since this is handled in the class mutators themselves
-		QVariantMap updatedMap = this->wrapToQVarMap(presentation);
+		QVariantMap updatedMap = Util::wrapToQVarMap(presentation);
 		model->updateItem(indexPath, updatedMap);
 	}
 }
@@ -744,7 +460,7 @@ void ApplicationUI::resetPreparedChanges() {
 	// Update the existing data model with the reset slide data (wrapped as a QVariantList)
 	ListView* listView = page->findChild<ListView*>("slideListView");
 	QVariantListDataModel* dataModel = (QVariantListDataModel*)(listView->dataModel());
-	QVariantList qVarList = this->wrapListToQVarList(_activePresentation->slides());
+	QVariantList qVarList = Util::wrapListToQVarList(_activePresentation->slides());
 	dataModel->clear();
 	dataModel->append(qVarList);
 
@@ -764,7 +480,7 @@ void ApplicationUI::addNewSlide() {
 	ListView* listView = page->findChild<ListView*>("slideListView");
 	QVariantListDataModel* dataModel = (QVariantListDataModel*)listView->dataModel();
 	// Wrap around a QVariantMap in order for QML to recognize object members
-	QVariantMap qVarMap = this->wrapToQVarMap(slide);
+	QVariantMap qVarMap = Util::wrapToQVarMap(slide);
 	dataModel->append(QVariant(qVarMap));
 
 	qDebug() << "Buffered new slide. Ready to commit.";

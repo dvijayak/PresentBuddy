@@ -5,6 +5,7 @@
 #include <QLocale>
 #include <QTranslator>
 #include "applicationui.hpp"
+#include "Util.h"
 
 // include JS Debugger / CS Profiler enabler
 // this feature is enabled by default in the debug build only

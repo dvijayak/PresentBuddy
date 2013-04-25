@@ -12,13 +12,12 @@
 #include <bb/cascades/Page>
 #include <bb/cascades/DataModel>
 #include "Presentation.h"
+#include "Util.h"
 
 using namespace bb::cascades;
 using namespace javelind::bb::pbuddy;
 
 namespace bb { namespace cascades { class Application; }}
-
-typedef QList< Presentation* > PresentationList;
 
 /*!
  * @brief Application pane object
@@ -45,12 +44,12 @@ private:
     QTimer _siideColour;
 
 public:
-    /* Static Members */
-
-    static const QString DATA_FILE;
-    static const QString READ_DATE_TIME_FORMAT;
-    static const QString WRITE_DATE_TIME_FORMAT;
-    static const QString DISPLAY_DATE_TIME_FORMAT;
+//    /* Static Members */
+//
+//    static const QString DATA_FILE;
+//    static const QString READ_DATE_TIME_FORMAT;
+//    static const QString WRITE_DATE_TIME_FORMAT;
+//    static const QString DISPLAY_DATE_TIME_FORMAT;
 
     /* Constructors/Destructors */
 
@@ -91,14 +90,14 @@ public:
     void initializePerformPage(Page* page);
     void reinitializeMainPage(Page* page);
 
-    QVariantMap createTimeQVarMap(int time);
-    QVariantMap wrapToQVarMap(Presentation* slide);
-    QVariantMap wrapToQVarMap(Slide* slide);
-    QVariantList wrapListToQVarList(PresentationList list);
-    QVariantList wrapListToQVarList(SlideList list);
-    PresentationList unWrapListFromQVarList(QVariantList qVarList);
-    PresentationList getListFromJSON(QString filePath);
-    void saveListToJSON(PresentationList list, QString filePath);
+//    QVariantMap createTimeQVarMap(int time);
+//    QVariantMap wrapToQVarMap(Presentation* slide);
+//    QVariantMap wrapToQVarMap(Slide* slide);
+//    QVariantList wrapListToQVarList(PresentationList list);
+//    QVariantList wrapListToQVarList(SlideList list);
+//    PresentationList unWrapListFromQVarList(QVariantList qVarList);
+//    PresentationList getListFromJSON(QString filePath);
+//    void saveListToJSON(PresentationList list, QString filePath);
 
 signals:
 	void performInitialized();
