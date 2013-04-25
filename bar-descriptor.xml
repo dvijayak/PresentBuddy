@@ -45,7 +45,7 @@
 
     <!-- Description, displayed in the BlackBerry Tablet OS application installer.
          May have multiple values for each language. See samples or xsd schema file. Optional. -->
-    <description>The PresentBuddy application</description>
+    <description>A cool little application to help you master the skill of good time management while giving a presentation/talk.</description>
 
     <!-- Copyright information. Optional. -->
     <!-- <copyright></copyright> -->
@@ -65,7 +65,7 @@
     </initialWindow>
     
     <!--  The category where the application appears. Either core.games or core.media. -->
-    <name>PresentBuddy</name>
+    <name>Present Buddy</name>
     <configuration name="Device-Debug">
        <platformArchitecture>armle-v7</platformArchitecture>
        <asset path="arm/o.le-v7-g/PresentBuddy" entry="true" type="Qnx/Elf">PresentBuddy</asset>
