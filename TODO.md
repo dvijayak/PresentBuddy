@@ -21,7 +21,7 @@ Features
 		- Determine which BBM contact has downloaded your app.
 		- (Possible through Invocation Framework) Share content with BBM contacts from within your apps.
 		- (NOT CURRENTLY POSSIBLE IN BB10) Stream data between users of your applications for real-time activities such as communication, gaming, and location tracking.
-- (tentative) Change the UI to have buttons separate from list items
+- (DONE) (tentative) Change the UI to have buttons separate from list items
 	- Only the Play button must exist in the ListItemComponent
 	- All presentation actions appear in the context menu for each presentation (longpress anywhere on the element)
 		- Context actions: Practise, Preview, Edit, Delete, (optional) Share
@@ -30,13 +30,13 @@ Features
 		- Context actions: Delete (maybe without the confirmation box?), (optional) Reset, (optional) Swap
 - (DONE) Make sure the app reads and writes to the correct file (pbuddy-data.json)
 - (DONE) (optional) Produce a toast when launching app and reading an empty file OR when file does not exist OR when error opening file
-- (tentative) Make all list views display items asynchronously
 - (optional) Implement the slide reset and slide swap features
 - (optional) Ability to start from a specific slide if desired
-- (optional) Add progress bars (per slide and/or for the whole progress) to perform (and maybe practise)
+- (ONLY ONE COLOUR SUPPORTED) (optional) Add progress bars (per slide and/or for the whole progress) to perform (and maybe practise)
 
 Bugs
 --------------
+- (DONE) Delete Presentation functionality is extremely buggy. Problems creep up when deleting presentations that were created using New Presentation.
 - (DONE) App crashes when trying to perform a slideshow of a presentation with no slides
 - After committing changes to a presentation, they won't be visible right away on preview page. You have to go forward and go back (or w/e) to see the changes
 - (DONE) When going back from the perform page that was accessed from the preview page, the screen orientation remains in landscape mode until you go back to the main page
@@ -52,11 +52,12 @@ Fine-Tuning
 	- Sum of times of slides should be equal to or less than Total time value
 - Improve the time sliders to allow choosing more discretely
 	- (optional) Allow a Setting to specify a snap-to value (and implement this feature) if desired or free movement
-- Action bar takes up valuable space at the bottom of the screen while performing a slideshow
+- (DONE) Action bar takes up valuable space at the bottom of the screen while performing a slideshow
 - (tentative) Replace time sliders into time pickers
 - (DONE) (tentative) Refactor classes and code
-- (optional) When there are no presentations and/or no slides, display a simple message "No presentations/slides"
 - (tentative) Memory management (tip - attach classes that inherit from QObject by default to the parent)
+- (optional) Make all list views display items asynchronously
+- (optional) When there are no presentations and/or no slides, display a simple message "No presentations/slides"
 
 Submission
 -------------------
