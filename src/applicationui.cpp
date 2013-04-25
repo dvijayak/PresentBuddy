@@ -649,6 +649,9 @@ void ApplicationUI::goToPage(bb::cascades::Page* page) {
 	if (pageName == "preparePage") {
 		this->initializePreparePage(page);
 	}
+	else if (pageName == "previewPage") {
+
+	}
 	else if (pageName == "performPage") {
 		this->initializePerformPage(page);
 	}

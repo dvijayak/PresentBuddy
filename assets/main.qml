@@ -21,9 +21,13 @@ NavigationPane {
         // Attach additional pages of the application dynamically
         // Note: would be better to separate the main page as well
         ComponentDefinition {
-            id: pageDefinition
+            id: performPageDefinition
             source: "perform.qml"
-        },
+        } ,
+        ComponentDefinition {
+            id: previewPageDefinition
+            source: "preview.qml"
+        } ,
         ComponentDefinition {
             id: preparePageDefinition
             source: "prepare.qml"
@@ -31,7 +35,9 @@ NavigationPane {
     ]    
 
     onCreationCompleted: {
-        Qt.pageDefinition = pageDefinition;
+        // Make the various page references globally accessible (needed in order to be accessibly by list items)
+        Qt.performPageDefinition = performPageDefinition;
+        Qt.previewPageDefinition = previewPageDefinition;
         Qt.preparePageDefinition = preparePageDefinition;
         Qt.navigationPane = navigationPane;        
         Qt.DISPLAY_DATE_TIME_FORMAT = applicationUIPropertyMap.DISPLAY_DATE_TIME_FORMAT;
@@ -110,7 +116,7 @@ NavigationPane {
                                         // Set the active presentation to be the one that was selected
                                         Qt.navigationPane.activePresentationID = listItemRoot.ListItem.data.id;
 
-                                        var page = Qt.pageDefinition.createObject();
+                                        var page = Qt.performPageDefinition.createObject();
                                         Qt.navigationPane.push(page);
                                     }                                    
                                 }
@@ -121,6 +127,15 @@ NavigationPane {
                                 Button {
                                     id: previewButton
                                     imageSource: "asset:///icons/ic_view_details.png"
+
+                                    onClicked: {
+                                        // Set the active presentation to be the one that was selected
+                                        Qt.navigationPane.activePresentationID = listItemRoot.ListItem.data.id;
+
+                                        // Push the prepare page on to the stack (go to the prepare page)
+                                        var page = Qt.previewPageDefinition.createObject();
+                                        Qt.navigationPane.push(page);
+                                    }
                                 }
                                 Button {
                                     id: editButton
