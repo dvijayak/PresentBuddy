@@ -194,6 +194,7 @@ void Presentation::updateLastModified() {
 }
 
 void Presentation::setPresentation() {
+//	qDebug() << "PRESENTATION CHANGED!!!";
 	emit presentationChanged(this);
 }
 
