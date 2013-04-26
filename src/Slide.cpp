@@ -14,6 +14,8 @@ namespace pbuddy {
 
 /* House Keeping */
 
+static const int MAX_TIME = 59999;
+
 void Slide::initialize() {
 	bool res;
 	res = QObject::connect(this, SIGNAL(titleChanged(QString)), this, SLOT(setSlide()));

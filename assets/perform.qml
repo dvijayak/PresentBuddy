@@ -51,7 +51,7 @@ Page {
             yellow: 60,
             red: 0
         }
-        Qt.whiteToGreen = 0.10; // The time (percentage) spent in the initial transition from white to green        
+        Qt.whiteToGreen = 0.25; // The time (percentage) spent in the initial transition from white to green        
         Qt.slideIndex = 0;
         Qt.elapsedTime = 0; // Total time elapsed in the presentation
         Qt.currentSlide = Qt.activePresentation.slides[Qt.slideIndex];        
@@ -190,7 +190,13 @@ Page {
 
                     // Count down until 0
                     if (Qt.currentTime > 0) {
-                    	countdownTimer.start();
+                        // Update the current time and the elapsed time
+                        Qt.currentTime --;
+                        Qt.elapsedTime ++;
+                        slideTime.text = Qt.appUI.timeToText(Qt.currentTime);
+                        timeElapsed.text = Qt.appUI.timeToText(Qt.elapsedTime) + "/" + Qt.appUI.minSecToText(Qt.activePresentation.totalTime.minutes, Qt.activePresentation.totalTime.seconds);
+
+                        countdownTimer.start();
                     }
                     else {
                         // Switch to the next slide                                                
@@ -203,17 +209,15 @@ Page {
                         }
                         else {
                             countdownTimer.stop();
-                            colorTimer.stop();
+                            colorTimer.stop();                            
                             
+                            // The End
+                            slideIndex.resetText();
+                            slideTitle.resetText();
+                            timeElapsed.resetText();
                             slideTime.text = "LA FIN";
                         }
-                    }
-
-                    // Update the current time and the elapsed time
-                    Qt.currentTime --;
-                    Qt.elapsedTime ++;
-                    slideTime.text = Qt.appUI.timeToText(Qt.currentTime);
-                    timeElapsed.text = Qt.appUI.timeToText(Qt.elapsedTime) + "/" + Qt.appUI.minSecToText(Qt.activePresentation.totalTime.minutes, Qt.activePresentation.totalTime.seconds);
+                    }                    
                 }
             } ,     
             // Timer for animating colour transitions for the visual feedback

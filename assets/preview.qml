@@ -73,7 +73,7 @@ Page {
         } ,
         ActionItem {
             id: createCalendarEventButton
-            title: "Create an Event"
+            title: "Mark on Calendar"
             imageSource: "asset:///icons/ic_pixle_subway_add_calendar_event.png"
             
             onTriggered: {                                
@@ -174,7 +174,8 @@ Page {
                                         }
 
                                         verticalAlignment: VerticalAlignment.Fill
-                                        horizontalAlignment: HorizontalAlignment.Fill                                        
+                                        horizontalAlignment: HorizontalAlignment.Fill
+                                        rightMargin: 40.0
                                     }
                                 }
                                 // Slide Data
@@ -182,6 +183,9 @@ Page {
                                     layout: StackLayout {
                                         orientation: LayoutOrientation.TopToBottom
                                     }
+                                    
+                                    verticalAlignment: VerticalAlignment.Center
+                                    
                                     // Slide title
                                     Container {
                                         layout: StackLayout {

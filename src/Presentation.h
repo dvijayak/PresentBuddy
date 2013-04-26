@@ -36,8 +36,9 @@ private:
 	QDateTime _lastModified; // Read-only; by definition, it must modify by itself under the hood
 	SlideList _slides;
 
-	/* House Keeping */
+	static const int MAX_TIME;
 
+	/* House Keeping */
 	void initialize();
 
 public:
@@ -86,6 +87,7 @@ signals:
 public slots:
 	void updateLastModified();
 	void setPresentation();
+	Q_INVOKABLE void consolidateTotalTime();
 };
 
 } /* namespace pbuddy */

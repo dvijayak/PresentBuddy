@@ -216,6 +216,15 @@ NavigationPane {
                                                     onTriggered: {
                                                         deletePresentationDialog.show();
                                                     }
+                                                } ,
+                                                ActionItem {
+                                                    id: createCalendarEventButton
+                                                    title: "Mark on Calendar"
+                                                    imageSource: "asset:///icons/ic_pixle_subway_add_calendar_event.png"
+
+                                                    onTriggered: {
+                                                        Qt.appUI.createCalendarEvent();
+                                                    }
                                                 }
                                             ]
                                         }                                        

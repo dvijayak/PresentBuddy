@@ -18,6 +18,8 @@ namespace pbuddy {
 
 /* House Keeping */
 
+const int Presentation::MAX_TIME = 59999;
+
 void Presentation::initialize() {
 	// Initialize any uninitialized data members
 	_id = QUuid::createUuid().toString(); // Guaranteed to be unique for an entire session
@@ -30,10 +32,14 @@ void Presentation::initialize() {
 	Q_ASSERT(res);
 	res = QObject::connect(this, SIGNAL(slidesChanged(SlideList)), this, SLOT(updateLastModified()));
 	Q_ASSERT(res);
+	res = QObject::connect(this, SIGNAL(slidesChanged(SlideList)), this, SLOT(consolidateTotalTime()));
+	Q_ASSERT(res);
 
 	// Connect the presentation with each of its slides
 	foreach (Slide* slide, _slides) {
 		res = QObject::connect(slide, SIGNAL(slideChanged(Slide*)), this, SLOT(updateLastModified()));
+		Q_ASSERT(res);
+		res = QObject::connect(slide, SIGNAL(slideChanged(Slide*)), this, SLOT(consolidateTotalTime()));
 		Q_ASSERT(res);
 	}
 
@@ -121,7 +127,7 @@ void Presentation::setName(QString name) {
 }
 
 void Presentation::setTotalTime(int time) {
-	if (_totalTime != time) {
+	if (_totalTime != time && _totalTime <= Presentation::MAX_TIME) {
 		qDebug() << QString("%1 != %2, updating presentation total time").arg(_totalTime).arg(time);
 		_totalTime = time;
 		emit totalTimeChanged(time);
@@ -197,6 +203,17 @@ void Presentation::updateLastModified() {
 void Presentation::setPresentation() {
 //	qDebug() << "PRESENTATION CHANGED!!!";
 	emit presentationChanged(this);
+}
+
+/* Adjust the presentation's time to be the sum of the times of its slides */
+void Presentation::consolidateTotalTime() {
+	int consolidatedTime = 0;
+	foreach (Slide* slide, _slides) {
+		consolidatedTime += slide->time();
+	}
+
+	_totalTime = consolidatedTime;
+	emit totalTimeChanged(consolidatedTime);
 }
 
 } /* namespace pbuddy */

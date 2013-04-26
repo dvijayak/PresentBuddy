@@ -27,7 +27,6 @@ private:
 	int _time; // in seconds
 
 	/* House Keeping */
-
 	void initialize();
 
 public:
