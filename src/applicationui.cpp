@@ -48,6 +48,9 @@ ApplicationUI::ApplicationUI(Application *app) : QObject(app)
     // Initialize BBM Social Platform registration
     this->bbmRegistration();
 
+    // Create the invocation manager
+    _invokeManager = new InvokeManager(this);
+
     // Register new meta types
     qRegisterMetaType<Presentation*>();
     qRegisterMetaType<PresentationList>();
@@ -97,6 +100,9 @@ ApplicationUI::ApplicationUI(Application *app) : QObject(app)
 	NavigationPane* mRoot = (NavigationPane*)_root; // Need to create this separately in order to properly connect
 	res = QObject::connect(mRoot, SIGNAL(topChanged(bb::cascades::Page*)), this, SLOT(goToPage(bb::cascades::Page*)));
 	Q_ASSERT(res);
+
+	res = QObject::connect(_invokeManager, SIGNAL(childCardDone(const bb::system::CardDoneMessage &)), this,
+			SLOT(onChildCardDone(const bb::system::CardDoneMessage &)));
 	Q_UNUSED(res);
 
 	// Set created root object as a scene
@@ -412,15 +418,86 @@ void ApplicationUI::updatePresentationDataModel(Presentation* presentation) {
 //void Application::invokeTarget(QString target, QString action, QString uri, QString mimeType, QByteArray data) {
 //
 //}
-//
-///* BB Platform Services */
-//
-///* Create a calendar event for the presentation provided on the date and time specified */
-//void Application::createCalendarEvent(Presentation *presentation) {
-////	QVariantMap data;
-////	data.insert("subject", QString("Presentation"));
-////	data.insert("body")
-//}
+
+/* BB Platform Services */
+
+/* Create a calendar event for the active presentation */
+void ApplicationUI::createCalendarEvent() {
+	this->createCalendarEvent(this->activePresentation());
+}
+
+/* Create a calendar event for the presentation provided on the date and time specified */
+void ApplicationUI::createCalendarEvent(Presentation *presentation) {
+	InvokeRequest cardRequest;
+
+	// Populate the event details
+	QVariantMap data;
+	data["subject"] = "Presentation";
+
+	// Prepare the body text
+	QString slideText;
+	SlideList slides = presentation->slides();
+	foreach (Slide* slide, slides) {
+		slideText.append(slide->title() + " (" + ApplicationUI::timeToText(slide->time()) + ")\n");
+	}
+	QString bodyText = QString(presentation->name() + "\n"
+			+ "Total Time: " + ApplicationUI::timeToText(presentation->totalTime())
+			+ "\n\nSlides:\n"
+			+ slideText);
+	data["body"] = bodyText;
+	qDebug() << "The data is " << data;
+
+	// Prepare the request
+	cardRequest.setTarget("sys.pim.calendar.viewer.eventcreate");
+	cardRequest.setAction("bb.action.CREATE");
+	cardRequest.setMimeType("text/calendar");
+	bool ok;
+
+	// The data must be PPS-encoded
+	QByteArray requestData = bb::PpsObject::encode(data, &ok);
+	qDebug() << "The PPS-encoded data is " << requestData;
+
+	// Set the data to the request card and invoke it
+	cardRequest.setData(requestData);
+	InvokeTargetReply* reply = _invokeManager->invoke(cardRequest);
+
+}
+
+/***
+ * Handle the results of an InvokeRequest
+ *
+ * We are only using this for the viewer.
+ * Currently the card doesn't return any standard control data on
+ * the other cards, so we need to hack something up to check
+ * for nothing.
+ */
+void ApplicationUI::onChildCardDone(const bb::system::CardDoneMessage &message) {
+
+	qDebug() << "+++++++ INVOKE: " << message.data() << endl;
+
+	SystemToast* toast = new SystemToast(this);
+	toast->setBody("A calendar event has been created for this presentation. I hope you do your best!");
+	toast->show();
+
+	//iCalendarData cal = _calendarService->parseICalendarData()
+	//qDebug() << "+++++++ Keys: " << data.keys() << endl;
+	//qDebug() << "+++++++ Event ID: " << data["eventID"] << endl;
+	//qDebug() << "+++++++ Start: " << data["start"] << endl;
+	if (message.data().length() > 0 and message.data() != "string encoded data...") {
+		QVariantMap data;
+		data["accountId"] = 1; // default calendar account id
+		data["icsbytes"] = QString(message.data());
+		data["type"] = "ics";
+		InvokeRequest invokeRequest;
+		invokeRequest.setTarget("sys.pim.calendar.viewer.ics");
+		invokeRequest.setAction("bb.calendar.OPEN");
+		invokeRequest.setMimeType("text/calendar");
+		invokeRequest.setData(bb::PpsObject::encode(data));
+
+		_invokeManager->invoke(invokeRequest);
+	}
+
+}
 
 void ApplicationUI::bbmRegistration() {
     // Every application is required to have its own unique UUID. You should

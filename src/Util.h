@@ -34,7 +34,7 @@ public:
     static const QString DISPLAY_DATE_TIME_FORMAT;
 
     static QVariantMap createTimeQVarMap(int time);
-    static QVariantMap wrapToQVarMap(Presentation* slide);
+    static QVariantMap wrapToQVarMap(Presentation* presentation);
     static QVariantMap wrapToQVarMap(Slide* slide);
     static QVariantList wrapListToQVarList(PresentationList list);
     static QVariantList wrapListToQVarList(SlideList list);

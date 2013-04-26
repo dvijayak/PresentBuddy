@@ -11,6 +11,10 @@
 #include <bb/cascades/AbstractPane>
 #include <bb/cascades/Page>
 #include <bb/cascades/DataModel>
+#include <bb/system/InvokeManager.hpp>
+#include <bb/system/InvokeReply.hpp>
+#include <bb/system/CardDoneMessage>
+#include <bb/PpsObject>
 #include "Presentation.h"
 #include "Util.h"
 
@@ -18,6 +22,7 @@
 #include "RegistrationHandler.hpp"
 
 using namespace bb::cascades;
+using namespace bb::system;
 using namespace javelind::bb::pbuddy;
 
 namespace bb { namespace cascades { class Application; }}
@@ -47,7 +52,8 @@ private:
     QTimer _siideColour;
 
     RegistrationHandler* _registrationHandler; // Used for registering with the BBM Social Platform
-//    InviteToDownload* _inviteToDownload; // Used for inviting BBM contacts to download the app from the app store
+    InvokeManager* _invokeManager; // Manage the invocation of requests (for the Invocation Framework)
+
 
 private slots:
 	void bbmRegistration();
@@ -96,7 +102,9 @@ public:
     void invokeTarget(QString target, QString action, QString uri, QString mimeType, QByteArray data);
 
     /* BB Platform Services */
+    Q_INVOKABLE void createCalendarEvent();
     void createCalendarEvent(Presentation *presentation);
+    Q_SLOT void onChildCardDone(const bb::system::CardDoneMessage &message);
 
 signals:
 	void performInitialized();

@@ -1,9 +1,12 @@
 APP_NAME = PresentBuddy
 
 CONFIG += qt warn_on cascades10
+LIBS += -lbb
 LIBS += -lbbdata
 LIBS += -lbbsystem
 LIBS += -lbbplatformbbm
+LIBS += -lbbpim 
+LIBS += -lscreen
 CONFIG += console
 
 include(config.pri)
