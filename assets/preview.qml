@@ -23,7 +23,8 @@ Page {
             objectName: "editButton"
             
             imageSource: "asset:///icons/ic_edit.png"
-            ActionBar.placement: ActionBarPlacement.OnBar            
+            ActionBar.placement: ActionBarPlacement.OnBar
+            
             onTriggered: {
                 // Push the prepare page on to the stack (go to the prepare page)
                 var page = Qt.preparePageDefinition.createObject();
@@ -35,6 +36,7 @@ Page {
             objectName: "deleteButton"
             
             imageSource: "asset:///icons/ic_delete.png"
+            ActionBar.placement: ActionBarPlacement.OnBar
 
             attachedObjects: [
                 SystemDialog {

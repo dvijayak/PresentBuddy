@@ -222,7 +222,7 @@ DataModel* ApplicationUI::mainDataModel() {
 /* Retrieve the active presentation that is currently being worked on */
 Presentation* ApplicationUI::activePresentation() {
 	// If the id is -1, we create a new presentation
-	if (_root->property("activePresentationID").value<qint64>() == -1) {
+	if (_root->property("activePresentationID").value<int>() == -1) {
 		Presentation *presentation = new Presentation();
 		SlideList slideList;
 		presentation->setSlides(slideList);
@@ -236,7 +236,9 @@ Presentation* ApplicationUI::activePresentation() {
 	else {
 		foreach (Presentation* presentation, _presentations) {
 			// The active presentation is 'selected' in the QML via the "activePresentation" property of the root navigation pane
-			if (presentation->id() == _root->property("activePresentationID").value<qint64>()) {
+			if (presentation->id() == _root->property("activePresentationID").value<QString>()) {
+				qDebug() << presentation->id();
+				qDebug() << _root->property("activePresentationID").value<QString>();
 				return presentation;
 			}
 		}
@@ -251,24 +253,24 @@ void ApplicationUI::deletePresentation() {
 
 /* Delete the specified presentation, both from the raw list as well as from the data model */
 void ApplicationUI::deletePresentation(Presentation* presentation) {
-	qDebug() << QString("Deleting presentation %1...").arg(presentation->name());
+	if (presentation != 0) {
+		qDebug() << QString("Deleting presentation %1...").arg(presentation->name());
 
-	// Find the respective index in the data model
-	GroupDataModel* model = (GroupDataModel*)_dataModel;
-	QVariantList indexPath = this->findInDataModel(presentation, model);
+		// Find the respective index in the data model
+		GroupDataModel* model = (GroupDataModel*)_dataModel;
+		QVariantList indexPath = this->findInDataModel(presentation, model);
 
-	// Delete the presentation from the presentations list
-	_presentations.removeOne(presentation);
-	delete presentation; // Free the memory TODO Probably should do this in the destructor? Or am I even responsible for it
+		// Delete the presentation from the presentations list
+		_presentations.removeOne(presentation);
+		delete presentation; // Free the memory TODO Probably should do this in the destructor? Or am I even responsible for it
 
-	qDebug() << "Deleted presentation.";
+		qDebug() << "Deleted presentation.";
 
-	// Remove from the data model
-	model->removeAt(indexPath);
+		// Remove from the data model
+		model->removeAt(indexPath);
 
-	qDebug() << "Removed from data model.";
-
-
+		qDebug() << "Removed from data model.";
+	}
 }
 
 /* Initialize the Prepare page */
@@ -410,7 +412,7 @@ QVariantList ApplicationUI::findInDataModel(Presentation* presentation, DataMode
 	QList<QVariantMap> modelContents = ((GroupDataModel*)model)->toListOfMaps();
 	for (int i = 0; i < modelContents.size(); ++i) {
 		QVariantMap map = modelContents[i];
-		qint64 mapId = map["id"].value<qint64>();
+		QString mapId = map["id"].value<QString>();
 		if (presentation->id() == mapId) {
 			indexPath << i;
 		}

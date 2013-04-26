@@ -20,7 +20,7 @@ namespace pbuddy {
 
 void Presentation::initialize() {
 	// Initialize any uninitialized data members
-	_id = QDateTime::currentMSecsSinceEpoch(); // Guaranteed to be unique for an entire session
+	_id = QUuid::createUuid().toString(); // Guaranteed to be unique for an entire session
 
 	// Connect signals with slots
 	bool res;
@@ -74,7 +74,7 @@ Presentation::~Presentation() {
 
 /* Accessors */
 
-qint64 Presentation::id() {
+QString Presentation::id() {
 	return _id;
 }
 

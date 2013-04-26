@@ -4,7 +4,7 @@ import bb.system 1.0
 NavigationPane {    
     id: navigationPane    
     
-    property string activePresentationID // Expose the active presentation to C++ via its ID property
+    property variant activePresentationID // Expose the active presentation to C++ via its ID property
 
     // Add the application menu using a MenuDefinition
     Menu.definition: MenuDefinition {
@@ -115,6 +115,7 @@ NavigationPane {
                 onTriggered: {
                     // Set the active presentation to be the one that was selected
                     Qt.navigationPane.activePresentationID = mainDataModel.data(indexPath).id;
+                    console.log(Qt.navigationPane.activePresentationID);
 
                     // Push the prepare page on to the stack (go to the prepare page)
                     var page = Qt.previewPageDefinition.createObject();

@@ -10,6 +10,7 @@
 
 #include <QObject>
 #include <QList>
+#include <QUuid>
 #include <QVariant>
 #include <QDateTime>
 #include <QMetaType>
@@ -29,7 +30,7 @@ class Presentation: public QObject {
 	Q_PROPERTY(QVariantList slides READ slidesQML)
 
 private:
-	qint64 _id; // Read-only unique identifier. Valid only for each session. Used to uniquely identify objects that are grouped in unordered lists
+	QString _id; // Read-only unique identifier. Valid only for each session. Used to uniquely identify objects that are grouped in unordered lists
 	QString _name;
 	int _totalTime;
 	QDateTime _lastModified; // Read-only; by definition, it must modify by itself under the hood
@@ -49,7 +50,7 @@ public:
 
 	/* Accessors */
 
-	qint64 id();
+	QString id();
 	QString name();
 	int totalTime();
 	QDateTime lastModified();
