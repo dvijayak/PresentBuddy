@@ -33,38 +33,6 @@ using namespace bb::system;
 using namespace bb::data;
 using namespace javelind::bb::pbuddy;
 
-//const QString ApplicationUI::DATA_FILE("/pbuddy-data.json");
-//const QString ApplicationUI::READ_DATE_TIME_FORMAT("yyyy-MM-dd hh:mm:ss");
-//const QString ApplicationUI::WRITE_DATE_TIME_FORMAT(ApplicationUI::READ_DATE_TIME_FORMAT);
-//const QString ApplicationUI::DISPLAY_DATE_TIME_FORMAT("MMMM d yyyy h:mm:ss AP"); // A separate format solely for rendering on the device
-
-/* BBM Functions */
-
-void ApplicationUI::bbmRegistration() {
-    // Every application is required to have its own unique UUID. You should
-    // keep using the same UUID when you release a new version of your
-    // application.
-    // Genered from http://www.guidgenerator.com/
-    const QUuid uuid(QLatin1String("53707577-1159-45D7-87AB-C961AE320838"));
-
-    // Register with BBM Social Platform (SP)
-    RegistrationHandler *registrationHandler = new RegistrationHandler(uuid, this);
-    _registrationHandler = registrationHandler;
-    // Expose the registrationHandler to QML in order to facilitate dynamic registration (only when needed)
-    // This entire function MUST be called before the document root is created, etc.
-    _qml->setContextProperty("_registrationHandler", _registrationHandler);
-
-    InviteToDownload *inviteToDownload = new InviteToDownload(registrationHandler->context(), this);
-    // Ditto exposing in order to facilitate dynamic invitation to download the app
-//    _qml->setContextProperty("_inviteToDownload", inviteToDownload);
-
-    // After successful registration, we need to connect to a slot in the application
-    bool res;
-    res = QObject::connect(registrationHandler, SIGNAL(registered()), inviteToDownload, SLOT(sendInvite()));
-    Q_ASSERT(res);
-    Q_UNUSED(res);
-}
-
 /* Constructors & Destructors */
 
 ApplicationUI::ApplicationUI(Application *app) : QObject(app)
@@ -439,6 +407,46 @@ void ApplicationUI::updatePresentationDataModel(Presentation* presentation) {
 	}
 }
 
+/* Invoke Framework Functions */
+
+//void Application::invokeTarget(QString target, QString action, QString uri, QString mimeType, QByteArray data) {
+//
+//}
+//
+///* BB Platform Services */
+//
+///* Create a calendar event for the presentation provided on the date and time specified */
+//void Application::createCalendarEvent(Presentation *presentation) {
+////	QVariantMap data;
+////	data.insert("subject", QString("Presentation"));
+////	data.insert("body")
+//}
+
+void ApplicationUI::bbmRegistration() {
+    // Every application is required to have its own unique UUID. You should
+    // keep using the same UUID when you release a new version of your
+    // application.
+    // Genered from http://www.guidgenerator.com/
+    const QUuid uuid(QLatin1String("53707577-1159-45D7-87AB-C961AE320838"));
+
+    // Register with BBM Social Platform (SP)
+    RegistrationHandler *registrationHandler = new RegistrationHandler(uuid, this);
+    _registrationHandler = registrationHandler;
+    // Expose the registrationHandler to QML in order to facilitate dynamic registration (only when needed)
+    // This entire function MUST be called before the document root is created, etc.
+    _qml->setContextProperty("_registrationHandler", _registrationHandler);
+
+    InviteToDownload *inviteToDownload = new InviteToDownload(registrationHandler->context(), this);
+    // Ditto exposing in order to facilitate dynamic invitation to download the app
+//    _qml->setContextProperty("_inviteToDownload", inviteToDownload);
+
+    // After successful registration, we need to connect to a slot in the application
+    bool res;
+    res = QObject::connect(registrationHandler, SIGNAL(registered()), inviteToDownload, SLOT(sendInvite()));
+    Q_ASSERT(res);
+    Q_UNUSED(res);
+}
+
 /* Slots */
 
 void ApplicationUI::goToPage(bb::cascades::Page* page) {
@@ -625,14 +633,11 @@ void ApplicationUI::bufferSlideTimeChange(int index, float value) {
 
 }
 
-//////////////// Perform Page
-
 
 
 // Memo: One problem with debugging errors is moc errors, since they are not in your code. Usually, you get these errors when not including certain classes explicitly
 
 
 // TODO Implement time slider auto-correction logic for prepare page
-// TODO Maybe convert main page UI to plain list with no buttons. Buttons should be provided at the action bar (same for prepare page)
 // TODO Implement the practise functionality!
 // TODO Need a restore defaults button in setting to restore all data to initial load state

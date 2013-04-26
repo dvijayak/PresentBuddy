@@ -92,6 +92,12 @@ public:
     void initializePerformPage(Page* page);
     void reinitializeMainPage(Page* page);
 
+    /* Invoke Framework Functions */
+    void invokeTarget(QString target, QString action, QString uri, QString mimeType, QByteArray data);
+
+    /* BB Platform Services */
+    void createCalendarEvent(Presentation *presentation);
+
 signals:
 	void performInitialized();
 

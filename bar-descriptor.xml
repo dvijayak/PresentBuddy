@@ -53,6 +53,9 @@
     <!--  Name of author which is used for signing. Must match the developer name of your development certificate. -->
     <author>Daniel V</author>
     <platformVersion>10.0.10.672</platformVersion>
+    <icon>
+       <image>app_icon_480x480.png</image>
+    </icon>
     
     <!--  Unique author ID assigned by signing authority. Required if using debug tokens. -->
     <!-- <authorId>ABC1234YjsnUk235h</authorId> -->
@@ -88,11 +91,7 @@
     </configuration>
     
     <!--  The icon for the application, which should be 86 x 86 -->
-    <icon>
-        <image>icon.png</image>
-    </icon>
 
-    <asset path="icon.png">icon.png</asset>
     <asset path="assets">assets</asset>
     
     <!-- Forcefully use the dark theme -->
@@ -102,6 +101,7 @@
     <asset path="translations" dest="qm">
         <include name="*.qm"/>
     </asset>
+    <asset path="assets/info/app_icon_480x480.png">app_icon_480x480.png</asset>
     
     <!-- Request permission to execute native code.  Required for native applications. -->
     <permission system="true">run_native</permission>

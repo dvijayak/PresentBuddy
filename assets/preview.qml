@@ -57,6 +57,28 @@ Page {
             onTriggered: {
                 deletePresentationDialog.show();
             }
+        } ,
+        InvokeActionItem {
+            id: nfcShareButton
+            title: "Share via NFC"
+            imageSource: "asset:///icons/ic_pixle_subway_nfc_stroke.png"                        
+
+            onTriggered: {                
+            }
+
+            query {                
+                mimeType: "application/vnd.rim.nfc.ndef"
+                invokeActionId: "bb.action.SHARE"
+            }
+        } ,
+        ActionItem {
+            id: createCalendarEventButton
+            title: "Create an Event"
+            imageSource: "asset:///icons/ic_pixle_subway_add_calendar_event.png"
+            
+            onTriggered: {                                
+                Qt.appUI.createCalendarEvent();
+            }            
         }
     ]
 
