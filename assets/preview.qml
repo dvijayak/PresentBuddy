@@ -58,19 +58,19 @@ Page {
                 deletePresentationDialog.show();
             }
         } ,
-        InvokeActionItem {
-            id: nfcShareButton
-            title: "Share via NFC"
-            imageSource: "asset:///icons/ic_pixle_subway_nfc_stroke.png"                        
-
-            onTriggered: {                
-            }
-
-            query {                
-                mimeType: "application/vnd.rim.nfc.ndef"
-                invokeActionId: "bb.action.SHARE"
-            }
-        } ,
+//        InvokeActionItem {
+//            id: nfcShareButton
+//            title: "Share via NFC"
+//            imageSource: "asset:///icons/ic_pixle_subway_nfc_stroke.png"                        
+//
+//            onTriggered: {                
+//            }
+//
+//            query {                
+//                mimeType: "application/vnd.rim.nfc.ndef"
+//                invokeActionId: "bb.action.SHARE"
+//            }
+//        } ,
         ActionItem {
             id: createCalendarEventButton
             title: "Mark on Calendar"
