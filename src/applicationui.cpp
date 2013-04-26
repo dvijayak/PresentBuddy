@@ -103,7 +103,10 @@ ApplicationUI::ApplicationUI(Application *app) : QObject(app)
 
 	res = QObject::connect(_invokeManager, SIGNAL(childCardDone(const bb::system::CardDoneMessage &)), this,
 			SLOT(onChildCardDone(const bb::system::CardDoneMessage &)));
+	Q_ASSERT(res);
 	Q_UNUSED(res);
+
+
 
 	// Set created root object as a scene
     app->setScene(root);
@@ -476,7 +479,7 @@ void ApplicationUI::onChildCardDone(const bb::system::CardDoneMessage &message) 
 	qDebug() << "+++++++ INVOKE: " << message.data() << endl;
 
 	SystemToast* toast = new SystemToast(this);
-	toast->setBody("A calendar event has been created for this presentation. I hope you do your best!");
+	toast->setBody("All the best with your presentation!");
 	toast->show();
 
 	//iCalendarData cal = _calendarService->parseICalendarData()
