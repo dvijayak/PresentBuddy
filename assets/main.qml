@@ -55,10 +55,19 @@ NavigationPane {
         ComponentDefinition {
            id: helpPageDefinition
            source: "help.qml"
+        } ,
+        // Splash screen
+        ComponentDefinition {
+            id: splashSheetDefinition
+            source: "splash.qml"
         }
     ]    
 
     onCreationCompleted: {
+        // Load the splash screen on app startup
+        var splash = splashSheetDefinition.createObject();
+        splash.open();
+        
         // Make the various page references globally accessible (needed in order to be accessibly by list items)
         Qt.performPageDefinition = performPageDefinition;
         Qt.previewPageDefinition = previewPageDefinition;

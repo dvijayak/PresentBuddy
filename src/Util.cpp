@@ -205,8 +205,12 @@ PresentationList Util::getListFromJSON(QString filePath) {
 
 			// Log the error
 			QString errorMessage;
-			if (theError.errorType() == DataAccessErrorType::SourceNotFound)
+			if (theError.errorType() == DataAccessErrorType::SourceNotFound) {
 				errorMessage = "File not found: " + theError.errorMessage();
+				// This could be the user's first time
+				SystemToast* toast = new SystemToast();
+				toast->setBody("Tip: You can long press on list items to access a context menu with additional options.");
+			}
 			else if (theError.errorType() == DataAccessErrorType::ConnectionFailure)
 				errorMessage = "Connection failure: " + theError.errorMessage();
 			else if (theError.errorType() == DataAccessErrorType::OperationFailure)

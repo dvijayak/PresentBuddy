@@ -15,6 +15,13 @@ Page {
         verticalAlignment: VerticalAlignment.Center
         horizontalAlignment: HorizontalAlignment.Center
         
+        ImageView {
+            horizontalAlignment: HorizontalAlignment.Center
+            imageSource: "asset:///info/app_icon_480x480.png"
+            preferredWidth: 288
+            preferredHeight: 288
+        }
+        
         // Welcome
         Divider {}
         
@@ -39,21 +46,21 @@ Page {
 
         Divider {}
 
-        Container {            
-            Label {
-                text: "If you like me, please tell your friends on BBM about me!"
-                multiline: true
-                textStyle {
-                    base: SystemDefaults.TextStyles.BigText
-                    textAlign: TextAlign.Center
-                    fontWeight: FontWeight.Bold
-                    fontSize: FontSize.PointValue
-                    fontSizeValue: 6
-                }
-                horizontalAlignment: HorizontalAlignment.Center
-            }
-            horizontalAlignment: HorizontalAlignment.Center
-        }
+//        Container {            
+//            Label {
+//                text: "If you like me, please tell your friends on BBM about me!"
+//                multiline: true
+//                textStyle {
+//                    base: SystemDefaults.TextStyles.BigText
+//                    textAlign: TextAlign.Center
+//                    fontWeight: FontWeight.Bold
+//                    fontSize: FontSize.PointValue
+//                    fontSizeValue: 6
+//                }
+//                horizontalAlignment: HorizontalAlignment.Center
+//            }
+//            horizontalAlignment: HorizontalAlignment.Center
+//        }
 
         /*// Main Screen
         Container {

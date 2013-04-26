@@ -11,6 +11,7 @@
 #include <bb/cascades/TextField>
 #include <bb/cascades/Label>
 #include <bb/cascades/Slider>
+#include <bb/cascades/Sheet>
 #include <bb/cascades/DataModel>
 #include <bb/cascades/Container>
 #include <bb/cascades/GroupDataModel>
@@ -94,6 +95,8 @@ ApplicationUI::ApplicationUI(Application *app) : QObject(app)
 		QVariantList presentationList = Util::wrapListToQVarList(_presentations);
 		((GroupDataModel*)_dataModel)->insertList(presentationList);
     }
+
+    emit finishedLoadingFromFile();
 
 	// Connect signals with slots
 	bool res;

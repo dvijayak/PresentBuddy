@@ -107,6 +107,7 @@ public:
     Q_SLOT void onChildCardDone(const bb::system::CardDoneMessage &message);
 
 signals:
+	void finishedLoadingFromFile();
 	void performInitialized();
 
 public slots:
