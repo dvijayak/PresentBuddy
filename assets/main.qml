@@ -191,7 +191,7 @@ NavigationPane {
                                                         var page = Qt.preparePageDefinition.createObject();
                                                         Qt.navigationPane.push(page);
                                                     }
-                                                } ,
+                                                } ,                                                
                                                 ActionItem {
                                                     id: deleteButton
                                                     title: "Perish"
@@ -215,6 +215,25 @@ NavigationPane {
 
                                                     onTriggered: {
                                                         deletePresentationDialog.show();
+                                                    }
+                                                }
+                                            ]
+                                        } ,
+                                        ActionSet {
+                                            title: "Share"
+                                            actions: [
+                                                InvokeActionItem {
+                                                    id: nfcShareButton
+                                                    title: "NFC"
+                                                    imageSource: "asset:///icons/ic_pixle_subway_nfc_stroke.png"
+                                                    
+                                                    onTriggered: {
+                                                        
+                                                    }
+                                                    
+                                                    query {
+                                                        mimeType: "application/vnd.rim.nfc.ndef"
+                                                        invokeActionId: "bb.action.SHARE"
                                                     }
                                                 }
                                             ]
