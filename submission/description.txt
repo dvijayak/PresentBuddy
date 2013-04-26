@@ -1,0 +1,6 @@
+Present Buddy
+-----------------
+
+Present Buddy is cool little application that is here to help you improve on your talks and presentations by assisting you in mastering an important skill: keeping good time. You can use it to plot out the timeframe of your presentations and practise them in real-time. It indicates to you how far you are in each slide through visually ambient feedback. You can mark the day you are presenting on the calendar and can even take this with you when giving your talk in front of the live audience. 
+
+Invite your friends to download Present Buddy via BBM!
