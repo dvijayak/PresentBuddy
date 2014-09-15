@@ -75,3 +75,12 @@ Submission
 - Clear folder of unnecessary files
 - Compile a release version
 
+Non-related notes
+------------------
+Transitioning from White to Red
+
+WHITE:		FFFFFF		(1.0, 1.0,    1.0)
+GREEN:	00FF00	(0.0, 1.0,    0.0)
+YELLOW:	FFFF00		(1.0, 1.0,    0.0)
+ORANGE:	FFA500	(1.0, 0.65, 0.0)
+RED:		FF0000	(1.0, 0.0,    0.0)
