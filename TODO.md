@@ -10,6 +10,13 @@ Features
 	- Automatically record time elapsed for each slide and update (to a certain threshold) if different from existing value
 	- (optional) Start from a specific slide
 - (DONE) Implement create new presentation feature
+- Integrae app with Invocation Framework
+	- (DONE) Create a calendar event
+	- (optional) Allow users to manually edit the data file in a text editor or e-mail it to someone
+	- (optional) Share a single presentation with a friend
+	- (optional) Share your list of presentations with a friend
+- Share all your presentations via NFC
+	- (optional) Share a single presentation via NFC
 - (DONE) Integrate app with BBM
 	- Send an invitation to friends to download the app
 	- (Possible through Invocation Framework) Share your list of presentations with a friend
@@ -32,10 +39,12 @@ Features
 - (DONE) (optional) Produce a toast when launching app and reading an empty file OR when file does not exist OR when error opening file
 - (optional) Implement the slide reset and slide swap features
 - (optional) Ability to start from a specific slide if desired
+- (optional) Implement preview page as a Card or Sheet instead of a whole page
 - (ONLY ONE COLOUR SUPPORTED) (optional) Add progress bars (per slide and/or for the whole progress) to perform (and maybe practise)
 
 Bugs
 --------------
+- (DONE) Time at the end of a presentation should change to LA FIN, instead of just a -1
 - (DONE) Delete Presentation functionality is extremely buggy. Problems creep up when deleting presentations that were created using New Presentation.
 - (DONE) App crashes when trying to perform a slideshow of a presentation with no slides
 - After committing changes to a presentation, they won't be visible right away on preview page. You have to go forward and go back (or w/e) to see the changes
